@@ -1,4 +1,4 @@
-// Main Game Engine for JPC Konnichiwa Gen 22
+// Main Game Engine for JPC Konnichiwa Gen 22 (FTU Open World Map)
 class Game {
   constructor() {
     this.canvas = document.getElementById('game-canvas');
@@ -9,12 +9,12 @@ class Game {
     this.currentStageId = 'stage1';
     this.stage = STAGE_DATA['stage1'];
 
-    // Player State
+    // Player State (Starts at Chùa Láng Gate)
     this.player = {
-      x: 4 * 32,
-      y: 7 * 32,
-      speed: 2.6,
-      direction: 'down',
+      x: 10 * 32,
+      y: 34 * 32,
+      speed: 3.2,
+      direction: 'up',
       animFrame: 0,
       animTimer: 0,
       isMoving: false,
@@ -82,23 +82,23 @@ class Game {
 
   startGame() {
     this.isRunning = true;
-    this.loadStage('stage1');
+    this.loadStage('stage1', true);
     if (window.audioManager) {
       window.audioManager.init();
       window.audioManager.playBGM('stage1');
     }
     this.updateHUD();
 
-    // Opening monologue
+    // Opening monologue at Chùa Láng Gate
     setTimeout(() => {
       window.dialogueManager.startDialogue([
         {
-          speaker: 'Người Dẫn Chuyện',
-          text: `Chào mừng ${this.playerName} đến với khuôn viên Trường Đại học Ngoại Thương (FTU)!`
+          speaker: 'Bác Bảo Vệ FTU',
+          text: `Chào tân sinh viên ${this.playerName}! Chào mừng cháu bước qua cổng trường Chùa Láng vào Đại học Ngoại Thương!`
         },
         {
-          speaker: 'Người Dẫn Chuyện',
-          text: 'Trước mắt bạn là Tiền sảnh Nhà A rực rỡ cờ hoa. Hãy đi quanh thu thập 3 mảnh ghép tinh thần FTU & JPC, rồi gửi gắm tâm tư vào Hòm thư tuyển thành viên Gen 22 nhé!'
+          speaker: 'Bác Bảo Vệ FTU',
+          text: 'Hôm nay sảnh Nhà A đang rộn rã cờ hoa tuyển thành viên CLB Tiếng Nhật JPC đấy. Cháu hãy đi theo con đường lớn lên sảnh Nhà A nhé!'
         }
       ]);
     }, 400);
@@ -106,14 +106,16 @@ class Game {
     requestAnimationFrame(this.gameLoop.bind(this));
   }
 
-  loadStage(stageId) {
+  loadStage(stageId, isInitial = false) {
     this.currentStageId = stageId;
     this.stage = STAGE_DATA[stageId];
     if (!this.stage) return;
 
-    this.player.x = this.stage.playerStart.x * 32;
-    this.player.y = this.stage.playerStart.y * 32;
-    this.player.direction = 'down';
+    if (isInitial && this.stage.playerStart) {
+      this.player.x = this.stage.playerStart.x * 32;
+      this.player.y = this.stage.playerStart.y * 32;
+      this.player.direction = 'up';
+    }
 
     // Switch BGM
     if (window.audioManager) {
@@ -131,40 +133,40 @@ class Game {
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Hãy đến trò chuyện cùng các bạn FTUers đang ngồi ở bàn tròn trước mặt nhé!'
+          text: 'Hãy đi theo radar trên bản đồ lên Tòa Nhà B, vào phòng B201 gặp các bạn cùng nhóm nhé!'
         }
       ]);
     } else if (stageId === 'stage3_1') {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Hội Trát 3.1',
-          text: 'Chúc mừng bạn bước vào Vòng Teamwork: Phá Phong tại Dốc Nhà B huyền thoại của FTU!'
+          text: 'Chúc mừng bạn bước vào Vòng Teamwork: Phá Phong!'
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Các bạn cùng nhóm đang nỗ lực hết mình tại bàn dự án. Hãy tới gặp Trưởng Nhóm để cùng bứt phá giới hạn deadline!'
+          text: 'Hãy đi theo radar đến Dốc Nhà B huyền thoại, gặp Trưởng Nhóm để cùng bứt phá giới hạn deadline!'
         }
       ]);
     } else if (stageId === 'stage3_2') {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Hội Trát 3.2',
-          text: 'Chào mừng bạn đến với Không gian Nhật Bản VJCC FTU - Vòng Phỏng Vấn Cá Nhân: Chân Diện.'
+          text: 'Chào mừng bạn đến với Không gian văn hóa VJCC FTU - Vòng Phỏng Vấn Cá Nhân: Chân Diện.'
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Ánh hoàng hôn buông xuống ấm áp qua rèm Shoji. Hãy tiến lại chiếc bàn trà và mở lòng đối thoại cùng Ban Điều Hành.'
+          text: 'Ánh hoàng hôn buông xuống ấm áp qua rèm Shoji. Hãy bước vào Viện VJCC và mở lòng đối thoại cùng Ban Điều Hành.'
         }
       ]);
     } else if (stageId === 'stage_final') {
       window.dialogueManager.startDialogue([
         {
           speaker: 'JPC FTU',
-          text: `Khoảnh khắc vinh quang đã tới! Chào mừng tân FTUer ${this.playerName} đến với Quảng trường Sân Nhà A FTU rợp bóng hoa anh đào!`
+          text: `Khoảnh khắc vinh quang đã tới! Chào mừng tân FTUer ${this.playerName} đến với Quảng trường Sân Nhà A rợp bóng hoa anh đào!`
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Hãy bước qua Cổng Torii rực rỡ, bước trên thảm đỏ hoa anh đào để đón nhận sự chào đón từ đại gia đình JPC!'
+          text: 'Hãy bước tới Cổng Torii trước sảnh Nhà A để đón nhận sự chúc mừng từ 5 Ban và Chủ Nhiệm JPC!'
         }
       ]);
       this.triggerConfetti();
@@ -229,7 +231,7 @@ class Game {
       fw.particles.forEach(pt => {
         pt.x += pt.vx;
         pt.y += pt.vy;
-        pt.vy += 0.03; // gravity
+        pt.vy += 0.03;
       });
       if (fw.life <= 0) {
         this.fireworks.splice(i, 1);
@@ -264,7 +266,7 @@ class Game {
   }
 
   triggerConfetti() {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
       setTimeout(() => {
         this.spawnFirework(
           this.camera.x + 150 + Math.random() * (this.canvas.width - 300),
@@ -295,21 +297,7 @@ class Game {
     this.handleMovement();
     this.updateCamera();
     this.checkInteractions();
-    this.checkAutoTriggers();
     this.updateParticles();
-  }
-
-  // Automatic trigger when walking right onto unlocked portals
-  checkAutoTriggers() {
-    if (this.stage.portal && this.stage.portal.unlocked) {
-      const pX = this.stage.portal.x * 32;
-      const pY = this.stage.portal.y * 32;
-      const dist = Math.hypot(this.player.x - pX, this.player.y - pY);
-      if (dist < 24) {
-        if (window.audioManager) window.audioManager.playFanfare();
-        this.loadStage(this.stage.portal.targetStage);
-      }
-    }
   }
 
   handleMovement() {
@@ -333,14 +321,27 @@ class Game {
       const newX = this.player.x + dx * this.player.speed;
       const newY = this.player.y + dy * this.player.speed;
 
-      // Map boundary check
-      const maxX = (this.stage.width - 1.5) * 32;
-      const maxY = (this.stage.height - 1.5) * 32;
+      const world = window.worldMap;
       const minX = 16;
-      const minY = 32;
+      const maxX = (world ? world.width : 1920) - 32;
+      const minY = 16;
+      const maxY = (world ? world.height : 1280) - 32;
 
-      if (newX >= minX && newX <= maxX) this.player.x = newX;
-      if (newY >= minY && newY <= maxY) this.player.y = newY;
+      // Solid collision check against campus buildings & boundaries
+      const isSolid = (x, y) => world ? world.isSolid(x, y) : false;
+
+      const canMoveX = !isSolid(newX + 6, this.player.y + 20) &&
+                       !isSolid(newX + 22, this.player.y + 20) &&
+                       !isSolid(newX + 6, this.player.y + 28) &&
+                       !isSolid(newX + 22, this.player.y + 28);
+
+      const canMoveY = !isSolid(this.player.x + 6, newY + 20) &&
+                       !isSolid(this.player.x + 22, newY + 20) &&
+                       !isSolid(this.player.x + 6, newY + 28) &&
+                       !isSolid(this.player.x + 22, newY + 28);
+
+      if (canMoveX && newX >= minX && newX <= maxX) this.player.x = newX;
+      if (canMoveY && newY >= minY && newY <= maxY) this.player.y = newY;
 
       // Animate footsteps
       this.player.animTimer++;
@@ -355,25 +356,28 @@ class Game {
   }
 
   updateCamera() {
-    // Center camera on player
+    const world = window.worldMap;
+    const worldW = world ? world.width : 1920;
+    const worldH = world ? world.height : 1280;
+
     const targetX = this.player.x - this.canvas.width / 2;
     const targetY = this.player.y - this.canvas.height / 2;
 
-    const maxCamX = Math.max(0, this.stage.width * 32 - this.canvas.width);
-    const maxCamY = Math.max(0, this.stage.height * 32 - this.canvas.height);
+    const maxCamX = Math.max(0, worldW - this.canvas.width);
+    const maxCamY = Math.max(0, worldH - this.canvas.height);
 
     this.camera.x = Math.max(0, Math.min(maxCamX, targetX));
     this.camera.y = Math.max(0, Math.min(maxCamY, targetY));
   }
 
-  // Check if player is near any item, NPC, prop, or portal
+  // Check if player is near any item, NPC, or prop
   checkInteractions() {
     this.nearbyInteractable = null;
     const px = this.player.x;
     const py = this.player.y;
     const interactRadius = 45;
 
-    // Check items
+    // Check items of current stage
     if (this.stage.items) {
       for (const item of this.stage.items) {
         if (!item.collected) {
@@ -388,7 +392,7 @@ class Game {
       }
     }
 
-    // Check NPCs
+    // Check NPCs of current stage
     if (this.stage.npcs) {
       for (const npc of this.stage.npcs) {
         const nx = npc.x * 32;
@@ -401,7 +405,7 @@ class Game {
       }
     }
 
-    // Check Props (Mailbox, Desk, etc.)
+    // Check Props of current stage
     if (this.stage.props) {
       for (const prop of this.stage.props) {
         const prx = prop.x * 32;
@@ -413,20 +417,9 @@ class Game {
         }
       }
     }
-
-    // Check Portal to next stage
-    if (this.stage.portal) {
-      const pX = this.stage.portal.x * 32;
-      const pY = this.stage.portal.y * 32;
-      const dist = Math.hypot(px - pX, py - pY);
-      if (dist < interactRadius) {
-        this.nearbyInteractable = { type: 'portal', data: this.stage.portal };
-        return;
-      }
-    }
   }
 
-  // User pressed Action button or Space/Enter
+  // User pressed Action button [A] or Space/Enter
   handleAction() {
     if (window.dialogueManager && window.dialogueManager.active) {
       window.dialogueManager.advance();
@@ -444,12 +437,12 @@ class Game {
         this.stageProgress.stage1.itemsCollected++;
         window.dialogueManager.startDialogue([
           {
-            speaker: 'Kỷ Vật',
-            text: `Bạn đã thu thập: ${data.name}! Trái tim bạn đang tràn đầy quyết tâm.`
+            speaker: 'Kỷ Vật FTU',
+            text: `Bạn đã thu thập: ${data.name}! Trái tim bạn đang tràn đầy nhiệt huyết Ngoại Thương.`
           }
         ], () => {
           if (this.stageProgress.stage1.itemsCollected >= 3) {
-            this.stage.questText = 'Đã đủ 3 mảnh ghép! Hãy đến Hòm thư JPC để niêm phong gửi lá đơn!';
+            this.stage.questText = 'Đã đủ 3 mảnh ghép! Hãy đến Hòm thư trước sảnh Nhà A để niêm phong gửi lá đơn!';
             this.updateHUD();
           }
         });
@@ -460,30 +453,24 @@ class Game {
       }
 
       window.dialogueManager.startDialogue(data.dialogues, () => {
-        // Trigger specific stage minigames after talking
+        // Trigger stage minigames after talking
         if (this.currentStageId === 'stage2' && data.id === 'npc_interviewer') {
           window.minigameManager.start('stage2', (success) => {
             this.stageProgress.stage2.completed = true;
-            this.stage.portal.unlocked = true;
             this.addMemory('Hội trát 2: Hòa Nhịp', 'Hòa nhịp trái tim cùng đồng đội tại Giảng đường B201 FTU!', 'Image/Color/Vòng 2 - Color.png');
-            this.stage.questText = 'Đã mở khóa cổng Hội trát tiếp theo! Hãy bước qua cánh cổng để tiến vào Dốc Nhà B!';
-            this.updateHUD();
+            this.loadStage('stage3_1');
           });
         } else if (this.currentStageId === 'stage3_1' && data.id === 'npc_leader') {
           window.minigameManager.start('stage3_1', (success) => {
             this.stageProgress.stage3_1.completed = true;
-            this.stage.portal.unlocked = true;
             this.addMemory('Hội trát 3.1: Phá Phong', 'Cháy hết mình vượt qua deadline tại Dốc Nhà B FTU!', 'Image/Color/Vòng 3.1 - Color.png');
-            this.stage.questText = 'Hoàn thành xuất sắc! Cổng tiến vào Không gian VJCC đã mở!';
-            this.updateHUD();
+            this.loadStage('stage3_2');
           });
         } else if (this.currentStageId === 'stage3_2' && data.id === 'npc_mentor_heart') {
           window.minigameManager.start('stage3_2', (success) => {
             this.stageProgress.stage3_2.completed = true;
-            this.stage.portal.unlocked = true;
             this.addMemory('Hội trát 3.2: Chân Diện', 'Tỏa sáng chân diện tại không gian văn hóa VJCC Ngoại Thương!', 'Image/Color/Vòng 3.2 - Color.png');
-            this.stage.questText = 'Cổng Vinh Quang đã mở! Tiến tới Quảng trường Sân Nhà A FTU!';
-            this.updateHUD();
+            this.loadStage('stage_final');
           });
         } else if (this.currentStageId === 'stage_final' && data.id === 'npc_final_president') {
           this.showCelebrationModal();
@@ -501,10 +488,8 @@ class Game {
         } else {
           window.minigameManager.start('stage1', (success) => {
             this.stageProgress.stage1.completed = true;
-            this.stage.portal.unlocked = true;
             this.addMemory('Hội trát 1: Khai Nhãn', 'Gửi trọn lá đơn tuyển thành viên tại Tiền sảnh Nhà A - Đại học Ngoại Thương!', 'Image/Color/Vòng 1 - Color.png');
-            this.stage.questText = 'Lá đơn đã gửi đi! Cổng Giảng đường B201 đã mở ra ở bên phải!';
-            this.updateHUD();
+            this.loadStage('stage2');
           });
         }
       } else if (data.type === 'prop_desk') {
@@ -522,16 +507,11 @@ class Game {
             text: 'Một ly trà sữa Chùa Láng mát lạnh xua tan căng thẳng deadline! Sinh viên Ngoại Thương ai cũng mê!'
           }
         ]);
-      }
-    } else if (type === 'portal') {
-      if (data.unlocked) {
-        if (window.audioManager) window.audioManager.playFanfare();
-        this.loadStage(data.targetStage);
-      } else {
+      } else if (data.type === 'prop_ftu_sign') {
         window.dialogueManager.startDialogue([
           {
-            speaker: 'Cổng Hội Trát',
-            text: 'Cổng này vẫn đang được phong ấn. Hãy hoàn thành thử thách của chặng hiện tại trước nhé!'
+            speaker: 'Cổng Trường FTU',
+            text: 'Cổng trường Đại học Ngoại Thương - 91 Chùa Láng. Nơi thanh xuân rực rỡ bắt đầu!'
           }
         ]);
       }
@@ -614,45 +594,113 @@ class Game {
     this.triggerConfetti();
   }
 
-  // RENDER PIPELINE
+  // ==========================================================================
+  // RENDER PIPELINE (Big Open World Map + Actors + Radar + Compass)
+  // ==========================================================================
   render() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.ctx.save();
     this.ctx.translate(-Math.round(this.camera.x), -Math.round(this.camera.y));
 
-    this.renderTiles();
+    // 1. Render Big Open FTU World Map (Terrain, Roads, Courts, Buildings)
+    if (window.worldMap) {
+      window.worldMap.render(this.ctx, this.camera);
+    }
+
+    // 2. Render Quest Beacon on the ground
+    this.renderQuestBeacon();
+
+    // 3. Render Props, Items, NPCs
     this.renderProps();
     this.renderItems();
     this.renderNPCs();
+
+    // 4. Render Player
     this.renderPlayer();
-    this.renderPortal();
 
     this.ctx.restore();
 
+    // 5. Render Ambient Lighting & Weather
     this.renderAmbientLighting();
     this.renderParticles();
+
+    // 6. Render Interaction Prompt [A]
     this.renderInteractionPrompt();
+
+    // 7. Render Mini-Map Radar in HUD
+    if (window.worldMap) {
+      window.worldMap.renderMiniMap(this.ctx, this.player.x, this.player.y, this.stage ? this.stage.questSpot : null);
+    }
+
+    // 8. Render Quest Compass Arrow if target is off-screen
+    this.renderQuestCompass();
   }
 
-  renderTiles() {
-    const tileSize = 32;
-    for (let r = 0; r < this.stage.height; r++) {
-      for (let c = 0; c < this.stage.width; c++) {
-        const x = c * tileSize;
-        const y = r * tileSize;
+  renderQuestBeacon() {
+    if (!this.stage || !this.stage.questSpot) return;
+    const qx = this.stage.questSpot.x;
+    const qy = this.stage.questSpot.y;
 
-        // Base floor
-        window.spriteManager.draw(this.ctx, this.stage.floorTile, x, y);
+    const time = Date.now() / 300;
+    const pulse = 18 + Math.sin(time) * 4;
 
-        // Accent borders / carpets
-        if (this.stage.accentTile && (r === 0 || r === this.stage.height - 1 || c === 0 || c === this.stage.width - 1)) {
-          window.spriteManager.draw(this.ctx, 'tile_shoji', x, y);
-        } else if (this.currentStageId === 'stage_final' && (r === 6 || r === 7)) {
-          // Red carpet aisle in finale
-          window.spriteManager.draw(this.ctx, 'tile_carpet', x, y);
-        }
-      }
+    this.ctx.save();
+    // Glowing pulsating aura
+    this.ctx.fillStyle = 'rgba(255, 209, 102, 0.35)';
+    this.ctx.beginPath();
+    this.ctx.arc(qx, qy, pulse, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    this.ctx.strokeStyle = '#ffd166';
+    this.ctx.lineWidth = 2;
+    this.ctx.stroke();
+
+    // Floating Star / Destination flag
+    this.ctx.fillStyle = '#ffd166';
+    this.ctx.font = '14px sans-serif';
+    this.ctx.fillText('⭐', qx - 8, qy - pulse - 6);
+    this.ctx.restore();
+  }
+
+  renderQuestCompass() {
+    if (!this.stage || !this.stage.questSpot) return;
+    const qx = this.stage.questSpot.x;
+    const qy = this.stage.questSpot.y;
+
+    // Check if quest spot is on screen
+    const screenX = qx - this.camera.x;
+    const screenY = qy - this.camera.y;
+
+    const pad = 40;
+    const isOffScreen = screenX < pad || screenX > this.canvas.width - pad ||
+                        screenY < pad || screenY > this.canvas.height - pad;
+
+    if (isOffScreen) {
+      const centerX = this.canvas.width / 2;
+      const centerY = this.canvas.height / 2;
+      const angle = Math.atan2(screenY - centerY, screenX - centerX);
+
+      const compassX = Math.max(pad, Math.min(this.canvas.width - pad, centerX + Math.cos(angle) * (centerX - 60)));
+      const compassY = Math.max(pad + 50, Math.min(this.canvas.height - pad - 60, centerY + Math.sin(angle) * (centerY - 80)));
+
+      this.ctx.save();
+      this.ctx.translate(compassX, compassY);
+      this.ctx.rotate(angle);
+
+      this.ctx.fillStyle = '#e63946';
+      this.ctx.beginPath();
+      this.ctx.moveTo(14, 0);
+      this.ctx.lineTo(-8, -8);
+      this.ctx.lineTo(-4, 0);
+      this.ctx.lineTo(-8, 8);
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.strokeStyle = '#ffd166';
+      this.ctx.lineWidth = 2;
+      this.ctx.stroke();
+
+      this.ctx.restore();
     }
   }
 
@@ -674,7 +722,6 @@ class Game {
         const hoverY = it.y * 32 + Math.sin(time) * 4;
         window.spriteManager.draw(this.ctx, 'prop_scroll', x, hoverY);
 
-        // Sparkle icon
         this.ctx.fillStyle = '#fff';
         this.ctx.font = '12px sans-serif';
         this.ctx.fillText(it.icon, x + 6, hoverY + 16);
@@ -711,36 +758,15 @@ class Game {
     this.ctx.fillText(this.playerName, this.player.x + 22 - tagW / 2, this.player.y - 4);
   }
 
-  renderPortal() {
-    if (!this.stage.portal) return;
-    const px = this.stage.portal.x * 32;
-    const py = this.stage.portal.y * 32;
-    const unlocked = this.stage.portal.unlocked;
-
-    this.ctx.save();
-    if (unlocked) {
-      const pulse = 1 + Math.sin(Date.now() / 200) * 0.15;
-      this.ctx.fillStyle = 'rgba(255, 209, 102, 0.35)';
-      this.ctx.beginPath();
-      this.ctx.arc(px + 16, py + 16, 22 * pulse, 0, Math.PI * 2);
-      this.ctx.fill();
-
-      this.ctx.fillStyle = '#ffd166';
-      this.ctx.font = '16px sans-serif';
-      this.ctx.fillText('⛩️ CỔNG', px + 2, py + 22);
-    } else {
-      this.ctx.fillStyle = 'rgba(100, 100, 100, 0.4)';
-      this.ctx.fillRect(px, py, 32, 32);
-      this.ctx.fillStyle = '#aaa';
-      this.ctx.font = '14px sans-serif';
-      this.ctx.fillText('🔒', px + 8, py + 22);
-    }
-    this.ctx.restore();
-  }
-
   renderAmbientLighting() {
-    if (this.stage.ambientColor) {
-      this.ctx.fillStyle = this.stage.ambientColor;
+    // Soft cinematic outdoor warmth for FTU
+    if (this.currentStageId === 'stage3_2') {
+      // Golden twilight in VJCC
+      this.ctx.fillStyle = 'rgba(255, 140, 80, 0.15)';
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    } else if (this.currentStageId === 'stage1') {
+      // Autumn night at sảnh Nhà A
+      this.ctx.fillStyle = 'rgba(20, 25, 45, 0.18)';
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
   }

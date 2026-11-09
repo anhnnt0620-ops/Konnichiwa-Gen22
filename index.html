@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1d3557">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Konnichiwa Gen 22 - Hành Trình JPC</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- MOBILE PORTRAIT ORIENTATION PROMPT -->
+  <div id="orientation-overlay" class="hidden">
+    <div class="rotate-icon">📱↻</div>
+    <h2>VUI LÒNG XOAY NGANG ĐIỆN THOẠI</h2>
+    <p>Hãy xoay ngang màn hình (Landscape) để có trải nghiệm phiêu lưu tốt nhất cùng JPC nhé!</p>
+  </div>
+
+  <!-- MAIN GAME CONTAINER -->
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- TOP HUD BAR -->
+    <div id="hud-top-bar">
+      <div class="hud-left">
+        <img src="Image/Logo.png" alt="JPC" style="width: 22px; height: 22px; object-fit: contain;">
+        <span class="hud-badge" id="hud-badge">HỘI TRÁT 1</span>
+        <div class="hud-quest-info">
+          <h3 class="hud-stage-name" id="hud-stage-name">HỘI TRÁT 1: KHAI NHÃN</h3>
+          <p class="hud-quest-desc" id="hud-quest-desc">Đang tải...</p>
+        </div>
+      </div>
+      <div class="hud-right">
+        <button class="icon-btn" id="btn-sound" title="Âm thanh">🔊</button>
+        <button class="icon-btn" id="btn-memory" title="Sổ Kỷ Niệm">📖 Sổ Kỷ Niệm</button>
+        <button class="icon-btn" id="btn-fullscreen" title="Toàn màn hình">⛶</button>
+      </div>
+    </div>
+
+    <!-- TOUCH CONTROLLER (MOBILE LANDSCAPE) -->
+    <div id="touch-controls">
+      <!-- D-Pad -->
+      <div class="dpad-container">
+        <div class="dpad-btn" id="btn-up">▲</div>
+        <div class="dpad-btn" id="btn-down">▼</div>
+        <div class="dpad-btn" id="btn-left">◀</div>
+        <div class="dpad-btn" id="btn-right">▶</div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="action-container">
+        <div class="action-btn" id="btn-action">
+          <b>A</b>
+          <span>Tương tác</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIALOGUE BOX -->
+    <div id="dialogue-box" class="hidden">
+      <div class="dialogue-header">
+        <span class="dialogue-speaker" id="dialogue-speaker">JPC</span>
+      </div>
+      <div class="dialogue-body">
+        <div class="dialogue-avatar hidden" id="dialogue-avatar"></div>
+        <div class="dialogue-text" id="dialogue-text">...</div>
+      </div>
+      <div class="dialogue-choices hidden" id="dialogue-choices"></div>
+      <div class="dialogue-continue hidden" id="dialogue-continue">Chạm để tiếp tục ▶</div>
+    </div>
+
+    <!-- TITLE / START SCREEN -->
+    <div id="title-screen" class="modal-overlay">
+      <div class="title-card">
+        <img src="Image/Logo.png" alt="JPC Logo" class="title-logo">
+        <div class="title-badge">JPC - FTU GEN 22</div>
+        <h1>KONNICHIWA GEN 22</h1>
+        <div class="title-sub">🌸 Hành Trình Chạm Đến Ước Mơ 🌸</div>
+
+        <div class="input-group">
+          <label for="input-player-name">Tên của bạn (hoặc Biệt danh):</label>
+          <input type="text" id="input-player-name" class="pixel-input" placeholder="Nhập tên bạn..." maxlength="16" value="Kouhai Gen 22">
+        </div>
+
+        <button class="pixel-btn" id="btn-start-game">BẮT ĐẦU HÀNH TRÌNH</button>
+        <div class="title-hint">💡 Chơi mượt mà trên điện thoại màn hình ngang & máy tính</div>
+      </div>
+    </div>
+
+    <!-- MINIGAME MODAL -->
+    <div id="minigame-modal" class="modal-overlay hidden">
+      <div class="minigame-card" id="minigame-container">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+
+    <!-- MEMORY BOOK MODAL -->
+    <div id="memory-modal" class="modal-overlay hidden">
+      <div class="title-card">
+        <div class="title-badge">KỶ NGUYÊN GEN 22</div>
+        <h2 style="font-family: var(--retro-font); font-size: 14px; color: var(--gold-accent); margin-bottom: 14px;">SỔ HỒI ỨC HÀNH TRÌNH</h2>
+        <div id="memory-list" style="max-height: 220px; overflow-y: auto; margin-bottom: 16px;">
+          <!-- Memories injected dynamically -->
+        </div>
+        <button class="pixel-btn" onclick="document.getElementById('memory-modal').classList.add('hidden')">ĐÓNG</button>
+      </div>
+    </div>
+
+    <!-- FINAL CELEBRATION & CERTIFICATE MODAL -->
+    <div id="celebration-modal" class="modal-overlay hidden">
+      <div class="cert-card">
+        <div class="cert-header">
+          <img src="Image/Logo.png" alt="JPC Logo" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 6px;">
+          <h2>CHỨNG NHẬN THÀNH VIÊN CHÍNH THỨC</h2>
+          <p>CÂU LẠC BỘ TIẾNG NHẬT JPC - TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG</p>
+        </div>
+        <div class="cert-body">
+          <p style="font-size: 11px; color: #475569; margin: 4px 0;">Nhiệt liệt chào đón tân thành viên thế hệ 22:</p>
+          <h1 class="cert-name" id="cert-member-name">KOUHAI GEN 22</h1>
+          
+          <!-- 5 KOKESHI MASCOTS REPRESENTING THE 5 DEPARTMENTS -->
+          <div class="cert-kokeshi-row">
+            <div class="cert-kokeshi-item">
+              <img src="Image/Kokeshi 5 Ban/Ban Chuyên Môn.png" class="cert-kokeshi-img" alt="Chuyên Môn">
+              <span class="cert-kokeshi-label">Chuyên Môn</span>
+            </div>
+            <div class="cert-kokeshi-item">
+              <img src="Image/Kokeshi 5 Ban/Ban Nhân Sự.png" class="cert-kokeshi-img" alt="Nhân Sự">
+              <span class="cert-kokeshi-label">Nhân Sự</span>
+            </div>
+            <div class="cert-kokeshi-item">
+              <img src="Image/Kokeshi 5 Ban/Ban Thông Tin.png" class="cert-kokeshi-img" alt="Thông Tin">
+              <span class="cert-kokeshi-label">Thông Tin</span>
+            </div>
+            <div class="cert-kokeshi-item">
+              <img src="Image/Kokeshi 5 Ban/Ban Tổ Chức.png" class="cert-kokeshi-img" alt="Tổ Chức">
+              <span class="cert-kokeshi-label">Tổ Chức</span>
+            </div>
+            <div class="cert-kokeshi-item">
+              <img src="Image/Kokeshi 5 Ban/Ban Đối Ngoại.png" class="cert-kokeshi-img" alt="Đối Ngoại">
+              <span class="cert-kokeshi-label">Đối Ngoại</span>
+            </div>
+          </div>
+
+          <p>Đã xuất sắc vượt qua trọn vẹn 4 Hội trát thử thách:</p>
+          <p style="color: #c1121f; font-weight: 700; font-size: 11px;">
+            Khai Nhãn ➔ Hòa Nhịp ➔ Phá Phong ➔ Chân Diện
+          </p>
+          <div class="cert-quote">
+            "Từ giây phút này, JPC không chỉ là một câu lạc bộ, mà là gia đình và thanh xuân rực rỡ nhất của bạn. Chào mừng bạn về nhà!"
+          </div>
+        </div>
+        <div class="cert-footer">
+          <button class="pixel-btn" id="btn-replay">CHƠI LẠI</button>
+          <button class="pixel-btn" id="btn-close-celebration" style="background: #2a9d8f;">TIẾP TỤC KHÁM PHÁ</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="js/audio.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/dialogue.js"></script>
+  <script src="js/minigames.js"></script>
+  <script src="js/stages.js"></script>
+  <script src="js/controls.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

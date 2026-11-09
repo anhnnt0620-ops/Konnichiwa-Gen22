@@ -3,15 +3,15 @@ const STAGE_DATA = {
   stage1: {
     id: 'stage1',
     name: 'HỘI TRÁT 1: KHAI NHÃN (01/10 – 20/10)',
-    subtitle: 'Sân Trung Tâm FTU — Ngày Hội FCD (18/10) · Điền Đơn Vòng 1',
+    subtitle: 'Sân Nhà D FTU — Ngày Hội FCD (18/10) · Điền Đơn Vòng 1',
     bgm: 'stage1',
     playerStart: { x: 9, y: 38 }, // Cổng trường Chùa Láng
-    questSpot: { x: 16 * 32, y: 22 * 32 }, // Gian trại JPC màu đỏ tại dãy booth phía Tây Sân Trung Tâm
-    questText: 'Đến Sân Trung Tâm (phía Tây Bia đá FTU), gặp Senpai tại Gian trại JPC màu đỏ để điền đơn Vòng 1!',
+    questSpot: { x: 16 * 32, y: 22 * 32 }, // Gian trại JPC màu đỏ tại dãy booth phía Tây Sân Nhà D
+    questText: 'Đến Sân Nhà D (phía Tây Bia đá FTU), gặp Senpai tại Gian trại JPC màu đỏ để điền đơn Vòng 1!',
     questTitle: 'Hội Trát 1: Khai Nhãn',
     timeline: '01/10 – 20/10/2026 · FTU Club Day: 18/10',
-    objective: 'Đến Sân Trung Tâm FTU (phía Tây Bia Đá FTU), gặp Senpai đứng trước Gian Trại JPC màu đỏ thắm để nhận và niêm phong lá đơn đăng ký gia nhập Gen 22.',
-    location: 'Gian Trại JPC · Dãy Booth Tây Sân Trung Tâm FTU',
+    objective: 'Đến Sân Nhà D (phía Tây Bia Đá FTU), gặp Senpai đứng trước Gian Trại JPC màu đỏ thắm để nhận và niêm phong lá đơn đăng ký gia nhập Gen 22.',
+    location: 'Gian Trại JPC · Dãy Booth Sân Nhà D FTU',
     tip: 'Đi theo vệt hoa anh đào phát sáng dưới chân Kokeshi của bạn để đến thẳng Gian Trại JPC!',
     props: [
       { type: 'prop_ftu_sign', x: 8, y: 37, label: 'Cổng Chùa Láng' },
@@ -42,7 +42,7 @@ const STAGE_DATA = {
         y: 22,
         avatarIcon: '🌸',
         dialogues: [
-          { speaker: 'Senpai JPC', text: 'Konnichiwa! Chào mừng em đến với Gian trại CLB Tiếng Nhật JPC tại Sân Trung Tâm FTU!' },
+          { speaker: 'Senpai JPC', text: 'Konnichiwa! Chào mừng em đến với Gian trại CLB Tiếng Nhật JPC tại Sân Nhà D FTU!' },
           { speaker: 'Senpai JPC', text: 'Hôm nay ngày 18/10 là ngày hội FCD bùng nổ, và Vòng 1 Khai Nhãn (01/10 – 20/10) đang mở đơn chào đón Gen 22. Hãy viết nên ước mơ của em nhé!' }
         ]
       }

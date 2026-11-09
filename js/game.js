@@ -194,23 +194,16 @@ class Game {
     }
     this.updateHUD();
 
-    // Opening: Bác Bảo Vệ greets user at Cổng Chùa Láng
+    // Opening: Bác Bảo Vệ greets user at Cổng Chùa Láng (uses dialogues defined in stage1.npcs)
     setTimeout(() => {
-      window.dialogueManager.startDialogue([
-        {
-          speaker: 'Bác Bảo Vệ FTU',
-          text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương FTU!'
-        },
-        {
-          speaker: 'Bác Bảo Vệ FTU',
-          text: 'Hôm nay ngày 18/10 là ngày hội CLB FTU Club Day (FCD) bùng nổ đó! Vòng 1 Khai Nhãn của JPC mở từ 01/10 đến 20/10.'
-        },
-        {
-          speaker: 'Bác Bảo Vệ FTU',
-          text: 'Cháu đi thẳng vào Sân Trung Tâm, nhìn sang dãy booth bên trái (phía Tây Bia Đá FTU) sẽ thấy Gian Trại JPC màu đỏ thắm rất nổi bật để điền đơn Vòng 1 nhé!'
-        }
-      ]);
-    }, 300);
+      const guardNpc = this.stage?.npcs?.find(n => n.id === 'npc_guard');
+      const openingDialogues = guardNpc?.dialogues || [
+        { speaker: 'Bác Bảo Vệ', text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương!' },
+        { speaker: 'Bác Bảo Vệ', text: 'Hôm nay 18/10, tại FTU có Ngày hội các Câu lạc bộ - FCD đó! Cháu có thể đến sân nhà D để khám phá các CLB của trường mình nhé!' },
+        { speaker: 'Bác Bảo Vệ', text: 'Cháu đi thẳng vào Sân Nhà D, nhìn sang dãy booth bên trái (phía Tây Bia Đá FTU) sẽ thấy Gian Trại JPC màu đỏ thắm rất nổi bật để điền đơn Vòng 1 nhé!' }
+      ];
+      window.dialogueManager.startDialogue(openingDialogues);
+    }, 400);
 
     requestAnimationFrame(this.gameLoop.bind(this));
   }
@@ -380,7 +373,7 @@ class Game {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Hội Trát 2: Hòa Nhịp',
-          text: 'Chúc mừng em đã xuất sắc vượt qua Vòng Đơn! Chào mừng em đến với Vòng 2: Hòa Nhịp (Phỏng Vấn Online 23/10 – 25/10)!'
+          text: 'Chúc mừng em đã xuất sắc vượt qua Vòng Đơn! Chào mừng em đến với Hội trát 2: Hòa Nhịp (Vòng Phỏng Vấn Nhóm 23/10 – 25/10)!'
         },
         {
           speaker: 'Người Dẫn Chuyện',
@@ -692,7 +685,7 @@ class Game {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Senpai JPC',
-          text: `Konnichiwa ${this.playerName}! Chào mừng em đến với Gian Trại của CLB Tiếng Nhật JPC tại FTU Club Day (18/10)!`
+          text: `Konnichiwa ${this.playerName}! Chào mừng em đến với Gian Trại của CLB Tiếng Nhật JPC tại Sân Nhà D (18/10)!`
         },
         {
           speaker: 'Senpai JPC',

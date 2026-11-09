@@ -12,15 +12,31 @@ class Game {
     // Player State (Starts at Chùa Láng Gate)
     this.player = {
       x: 10 * 32,
-      y: 34 * 32,
+      y: 32 * 32,
       speed: 3.4,
       direction: 'up',
       animFrame: 0,
       animTimer: 0,
       isMoving: false,
       width: 24,
-      height: 28
+      height: 28,
+      selectedDept: 'chuyenmon',
+      selectedDeptName: 'Ban Chuyên Môn'
     };
+
+    // Preload 5 Kokeshi Doll Images for 5 Departments
+    this.kokeshiImages = {
+      chuyenmon: new Image(),
+      doingoai: new Image(),
+      tochuc: new Image(),
+      thongtin: new Image(),
+      nhansu: new Image()
+    };
+    this.kokeshiImages.chuyenmon.src = 'Image/Kokeshi 5 Ban/kokeshi-chuyenmon.png';
+    this.kokeshiImages.doingoai.src = 'Image/Kokeshi 5 Ban/kokeshi-doingoai.png';
+    this.kokeshiImages.tochuc.src = 'Image/Kokeshi 5 Ban/kokeshi-tochuc.png';
+    this.kokeshiImages.thongtin.src = 'Image/Kokeshi 5 Ban/kokeshi-thongtin.png';
+    this.kokeshiImages.nhansu.src = 'Image/Kokeshi 5 Ban/kokeshi-nhansu.png';
 
     // Camera
     this.camera = { x: 0, y: 0 };
@@ -71,9 +87,31 @@ class Game {
     const startBtn = document.getElementById('btn-start-game');
     const nameInput = document.getElementById('input-player-name');
     const titleScreen = document.getElementById('title-screen');
+    const kokeshiCards = document.querySelectorAll('.kokeshi-card');
+
+    // Handle Kokeshi Selection for 5 Departments
+    kokeshiCards.forEach(card => {
+      card.addEventListener('click', () => {
+        kokeshiCards.forEach(c => {
+          c.classList.remove('active');
+          const tag = c.querySelector('.kokeshi-tag');
+          if (tag) tag.textContent = 'CHỌN';
+        });
+        card.classList.add('active');
+        const activeTag = card.querySelector('.kokeshi-tag');
+        if (activeTag) activeTag.textContent = 'ĐÃ CHỌN';
+
+        this.player.selectedDept = card.dataset.dept;
+        this.player.selectedDeptName = card.dataset.deptName;
+
+        if (window.audioManager) {
+          window.audioManager.playBlip();
+        }
+      });
+    });
 
     startBtn.addEventListener('click', () => {
-      if (nameInput.value.trim()) {
+      if (nameInput && nameInput.value.trim()) {
         this.playerName = nameInput.value.trim();
       }
       titleScreen.classList.add('hidden');
@@ -156,7 +194,11 @@ class Game {
   openApplicationForm() {
     const appModal = document.getElementById('application-modal');
     const nameInput = document.getElementById('form-fullname');
+    const deptSelect = document.getElementById('form-dept');
     if (nameInput) nameInput.value = this.playerName;
+    if (deptSelect && this.player.selectedDeptName) {
+      deptSelect.value = this.player.selectedDeptName;
+    }
     if (appModal) appModal.classList.remove('hidden');
   }
 
@@ -483,14 +525,15 @@ class Game {
 
     if (type === 'booth_jpc') {
       // Interactive JPC Booth: Trigger dialogue & open application form!
+      const deptName = this.player.selectedDeptName || 'Ban Chuyên Môn';
       window.dialogueManager.startDialogue([
         {
           speaker: 'Senpai JPC',
-          text: 'Konnichiwa! Chào mừng em đến với Booth của CLB Tiếng Nhật JPC tại FTU Club Day!'
+          text: `Konnichiwa ${this.playerName}! Chào mừng em đến với Booth của CLB Tiếng Nhật JPC tại FTU Club Day!`
         },
         {
           speaker: 'Senpai JPC',
-          text: 'Hôm nay JPC mở đơn tuyển thành viên thế hệ 22 — Hội trát 1: Khai Nhãn. Hãy viết nên ước mơ của em nhé!'
+          text: `Thật tuyệt vời khi em hướng tới ${deptName}! Hôm nay JPC chính thức mở đơn tuyển Gen 22 — Hội trát 1: Khai Nhãn. Hãy viết nên ước mơ của em nhé!`
         }
       ], () => {
         this.openApplicationForm();
@@ -785,83 +828,93 @@ class Game {
     });
   }
 
-  // Draw 2D Vector Chibi Character (Smooth, non-pixelated)
+  // Draw Selected Kokeshi Character (5 Departments of JPC)
   renderPlayer() {
     const px = this.player.x;
     const py = this.player.y;
-    const bounce = this.player.isMoving ? Math.sin(this.player.animTimer * 0.8) * 2 : 0;
+    const bounce = this.player.isMoving ? Math.sin(this.player.animTimer * 0.8) * 3 : 0;
+    const wobble = this.player.isMoving ? Math.sin(this.player.animTimer * 0.6) * 0.08 : 0;
+
+    const centerX = px + 16;
+    const feetY = py + 28;
 
     this.ctx.save();
-    this.ctx.translate(px, py + bounce);
 
-    // Soft Shadow
-    this.ctx.fillStyle = 'rgba(11, 4, 3, 0.25)';
+    // 1. Soft Oval Shadow on the ground
+    this.ctx.fillStyle = 'rgba(11, 4, 3, 0.3)';
     this.ctx.beginPath();
-    this.ctx.ellipse(16, 30 - bounce, 12, 5, 0, 0, Math.PI * 2);
+    this.ctx.ellipse(centerX, feetY + 2, 14, 5, 0, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Legs / Shoes
-    this.ctx.fillStyle = '#1d3557'; // Navy shorts
-    this.ctx.fillRect(10, 20, 5, 8);
-    this.ctx.fillRect(17, 20, 5, 8);
-    this.ctx.fillStyle = '#8d6e63'; // Shoes
-    this.ctx.fillRect(9, 27, 6, 4);
-    this.ctx.fillRect(17, 27, 6, 4);
+    // 2. Position and Wobble/Bounce Animation
+    this.ctx.translate(centerX, feetY + bounce);
+    this.ctx.rotate(wobble);
 
-    // Torso / White shirt with red JPC scarf
-    this.ctx.fillStyle = '#fffdf8';
-    this.ctx.beginPath();
-    this.ctx.roundRect(8, 12, 16, 11, 3);
-    this.ctx.fill();
+    // Flip horizontally when moving left
+    if (this.player.direction === 'left') {
+      this.ctx.scale(-1, 1);
+    }
 
-    // Red JPC Scarf / Tie
-    this.ctx.fillStyle = '#b92b45';
-    this.ctx.fillRect(14, 12, 4, 7);
+    // Get selected Kokeshi doll image
+    const deptKey = this.player.selectedDept || 'chuyenmon';
+    const kokeshiImg = this.kokeshiImages ? this.kokeshiImages[deptKey] : null;
 
-    // Head / Face
-    this.ctx.fillStyle = '#ffe0b2'; // Peach skin
-    this.ctx.beginPath();
-    this.ctx.arc(16, 7, 8, 0, Math.PI * 2);
-    this.ctx.fill();
-
-    // Hair (Dark Brown Stylish)
-    this.ctx.fillStyle = '#3e2723';
-    this.ctx.beginPath();
-    this.ctx.arc(16, 5, 8.5, Math.PI, Math.PI * 2);
-    this.ctx.fill();
-    this.ctx.fillRect(8, 4, 16, 4);
-
-    // Eyes
-    if (this.player.direction !== 'up') {
-      this.ctx.fillStyle = '#1b1b1b';
-      if (this.player.direction === 'left') {
-        this.ctx.fillRect(11, 6, 2, 3);
-      } else if (this.player.direction === 'right') {
-        this.ctx.fillRect(19, 6, 2, 3);
-      } else {
-        this.ctx.fillRect(12, 6, 2, 3);
-        this.ctx.fillRect(18, 6, 2, 3);
-      }
+    if (kokeshiImg && kokeshiImg.complete && kokeshiImg.naturalWidth > 0) {
+      // 48x48 Kokeshi Doll, bottom anchored at ground
+      const kw = 48;
+      const kh = 48;
+      this.ctx.drawImage(kokeshiImg, -kw / 2, -kh, kw, kh);
+    } else {
+      // Fallback Kokeshi wooden silhouette while image loads
+      this.ctx.fillStyle = '#b92b45';
+      this.ctx.beginPath();
+      this.ctx.arc(0, -32, 12, 0, Math.PI * 2);
+      this.ctx.fill();
+      this.ctx.fillStyle = '#f8e4b7';
+      this.ctx.fillRect(-8, -20, 16, 20);
     }
 
     this.ctx.restore();
 
-    // Player name tag
-    this.ctx.fillStyle = 'linear-gradient(90deg, #b92b45, #5c1216)';
-    this.ctx.fillStyle = '#b92b45';
-    const tagW = this.playerName.length * 7 + 16;
+    // 3. Name Tag & Department Pill above Kokeshi
+    this.ctx.save();
+    const tagBaseY = py - 26;
+
+    // A. Mini Department Pill Badge
+    const deptName = this.player.selectedDeptName || 'Ban Chuyên Môn';
+    this.ctx.font = 'bold 8.5px "Be Vietnam Pro", sans-serif';
+    const deptW = this.ctx.measureText(deptName).width + 14;
+
+    this.ctx.fillStyle = 'rgba(185, 43, 69, 0.95)';
     this.ctx.beginPath();
-    this.ctx.roundRect(this.player.x + 16 - tagW / 2, this.player.y - 18, tagW, 16, 4);
+    this.ctx.roundRect(centerX - deptW / 2, tagBaseY - 14, deptW, 13, 5);
     this.ctx.fill();
     this.ctx.strokeStyle = '#ffd778';
     this.ctx.lineWidth = 1;
     this.ctx.stroke();
 
     this.ctx.fillStyle = '#ffd778';
-    this.ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText(this.playerName, this.player.x + 16, this.player.y - 6);
+    this.ctx.fillText(`★ ${deptName}`, centerX, tagBaseY - 4);
+
+    // B. Player Name Tag
+    const playerName = this.playerName || 'Kouhai Gen 22';
+    this.ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
+    const nameW = Math.max(64, this.ctx.measureText(playerName).width + 18);
+
+    this.ctx.fillStyle = 'rgba(34, 7, 10, 0.9)';
+    this.ctx.beginPath();
+    this.ctx.roundRect(centerX - nameW / 2, tagBaseY + 2, nameW, 16, 5);
+    this.ctx.fill();
+    this.ctx.strokeStyle = '#ffd778';
+    this.ctx.lineWidth = 1.2;
+    this.ctx.stroke();
+
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.fillText(playerName, centerX, tagBaseY + 14);
     this.ctx.textAlign = 'start';
+
+    this.ctx.restore();
   }
 
   renderAmbientLighting() {
@@ -893,7 +946,7 @@ class Game {
   renderInteractionPrompt() {
     if (!this.nearbyInteractable) return;
     const screenX = this.player.x - this.camera.x + 8;
-    const screenY = this.player.y - this.camera.y - 24;
+    const screenY = this.player.y - this.camera.y - 48;
 
     const bob = Math.sin(Date.now() / 150) * 3;
 

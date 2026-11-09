@@ -72,20 +72,71 @@
       <div class="dialogue-continue hidden" id="dialogue-continue">Chạm để tiếp tục ▶</div>
     </div>
 
-    <!-- TITLE / START SCREEN -->
+    <!-- TITLE / START SCREEN (MÀN HÌNH CHỜ & CHỌN NHÂN VẬT KOKESHI 5 BAN) -->
     <div id="title-screen" class="modal-overlay">
-      <div class="title-card">
-        <img src="Image/Logo.png" alt="JPC Logo" class="title-logo">
-        <div class="title-badge">FTU CLUB DAY · GEN 22</div>
-        <h1>KONNICHIWA GEN 22</h1>
-        <div class="title-sub">🌸 Hành Trình Chạm Đến Ước Mơ Tại JPC FTU 🌸</div>
-
-        <div class="input-group">
-          <label for="input-player-name">Tên của bạn (hoặc Biệt danh):</label>
-          <input type="text" id="input-player-name" class="modern-input" placeholder="Nhập tên của bạn..." maxlength="16" value="Kouhai Gen 22">
+      <div class="title-card welcome-card">
+        <div class="welcome-header">
+          <img src="Image/Logo.png" alt="JPC Logo" class="title-logo">
+          <div class="title-badge">FTU CLUB DAY · GEN 22</div>
+          <h1 class="welcome-heading">Chào mừng em đến với đại gia đình JPC!</h1>
+          <div class="title-sub">🌸 Hãy chọn ban của mình nhé và bước vào hành trình Gen 22 🌸</div>
         </div>
 
-        <button class="gold-btn" id="btn-start-game">BẮT ĐẦU THAM GIA FCD</button>
+        <div class="welcome-input-row">
+          <label for="input-player-name">Tên của em (hoặc Biệt danh):</label>
+          <input type="text" id="input-player-name" class="modern-input" placeholder="Nhập tên của em..." maxlength="20" value="Kouhai Gen 22">
+        </div>
+
+        <!-- 5 KOKESHI CHARACTER SELECTION -->
+        <div class="kokeshi-selection-title">CHỌN NHÂN VẬT KOKESHI ĐẠI DIỆN CHO BAN CỦA EM:</div>
+        <div class="kokeshi-selector-grid" id="kokeshi-selector">
+          <!-- Ban Chuyên Môn -->
+          <div class="kokeshi-card active" data-dept="chuyenmon" data-dept-name="Ban Chuyên Môn">
+            <div class="kokeshi-glow"></div>
+            <img src="Image/Kokeshi 5 Ban/kokeshi-chuyenmon.png" alt="Kokeshi Ban Chuyên Môn" class="kokeshi-img">
+            <div class="kokeshi-name">Ban Chuyên Môn</div>
+            <div class="kokeshi-role">Tiếng Nhật & Học Thuật</div>
+            <div class="kokeshi-tag">ĐÃ CHỌN</div>
+          </div>
+
+          <!-- Ban Đối Ngoại -->
+          <div class="kokeshi-card" data-dept="doingoai" data-dept-name="Ban Đối Ngoại">
+            <div class="kokeshi-glow"></div>
+            <img src="Image/Kokeshi 5 Ban/kokeshi-doingoai.png" alt="Kokeshi Ban Đối Ngoại" class="kokeshi-img">
+            <div class="kokeshi-name">Ban Đối Ngoại</div>
+            <div class="kokeshi-role">Đối Tác & Doanh Nghiệp</div>
+            <div class="kokeshi-tag">CHỌN</div>
+          </div>
+
+          <!-- Ban Tổ Chức -->
+          <div class="kokeshi-card" data-dept="tochuc" data-dept-name="Ban Tổ Chức">
+            <div class="kokeshi-glow"></div>
+            <img src="Image/Kokeshi 5 Ban/kokeshi-tochuc.png" alt="Kokeshi Ban Tổ Chức" class="kokeshi-img">
+            <div class="kokeshi-name">Ban Tổ Chức</div>
+            <div class="kokeshi-role">Sự Kiện Bùng Nổ</div>
+            <div class="kokeshi-tag">CHỌN</div>
+          </div>
+
+          <!-- Ban Thông Tin -->
+          <div class="kokeshi-card" data-dept="thongtin" data-dept-name="Ban Thông Tin">
+            <div class="kokeshi-glow"></div>
+            <img src="Image/Kokeshi 5 Ban/kokeshi-thongtin.png" alt="Kokeshi Ban Thông Tin" class="kokeshi-img">
+            <div class="kokeshi-name">Ban Thông Tin</div>
+            <div class="kokeshi-role">Truyền Thông & Thiết Kế</div>
+            <div class="kokeshi-tag">CHỌN</div>
+          </div>
+
+          <!-- Ban Nhân Sự -->
+          <div class="kokeshi-card" data-dept="nhansu" data-dept-name="Ban Nhân Sự">
+            <div class="kokeshi-glow"></div>
+            <img src="Image/Kokeshi 5 Ban/kokeshi-nhansu.png" alt="Kokeshi Ban Nhân Sự" class="kokeshi-img">
+            <div class="kokeshi-name">Ban Nhân Sự</div>
+            <div class="kokeshi-role">Gắn Kết & Hậu Phương</div>
+            <div class="kokeshi-tag">CHỌN</div>
+          </div>
+        </div>
+
+        <button class="gold-btn btn-launch" id="btn-start-game">BẮT ĐẦU HÀNH TRÌNH CÙNG JPC</button>
         <div class="title-hint">💡 Chơi mượt mà trên điện thoại màn hình ngang & máy tính</div>
       </div>
     </div>

@@ -68,14 +68,14 @@ const STAGE_DATA = {
     npcs: [
       {
         id: 'npc_interviewer',
-        name: 'Senpai Phỏng Vấn Online',
+        name: 'Senpai JPC',
         sprite: 'npc_senpai',
         x: 27,
         y: 17,
-        avatarIcon: '💻',
+        avatarIcon: '🌸',
         dialogues: [
-          { speaker: 'Senpai Phỏng Vấn', text: 'Konnichiwa! Chúc mừng em đã xuất sắc vượt qua Vòng Đơn và bước vào Vòng 2: Hòa Nhịp (23/10 – 25/10)!' },
-          { speaker: 'Senpai Phỏng Vấn', text: 'Vòng 2 năm nay là Phỏng Vấn Online! Em hãy mở máy tính lên để kết nối phòng phỏng vấn trực tuyến và trả lời bộ 5 câu hỏi trắc nghiệm về JPC nhé (cần đạt tối thiểu 4/5 câu để qua vòng)!' }
+          { speaker: 'Senpai JPC', text: 'Konnichiwa! Chúc mừng em đã xuất sắc vượt qua Vòng Đơn và bước vào Vòng 2: Hòa Nhịp (23/10 – 25/10)!' },
+          { speaker: 'Senpai JPC', text: 'Vòng 2 năm nay là Phỏng Vấn Online! Em hãy mở máy tính lên để kết nối phòng phỏng vấn trực tuyến và trả lời bộ 5 câu hỏi trắc nghiệm về JPC nhé (cần đạt tối thiểu 4/5 câu để qua vòng)!' }
         ]
       }
     ]

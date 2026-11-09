@@ -42,8 +42,10 @@ class Game {
     this.senpaiImage = new Image();
     this.senpaiImage.src = 'Image/kokeshi-senpai.png';
 
-    // Camera
+    // Camera & Zoom
     this.camera = { x: 0, y: 0 };
+    this.zoom = 1.65;
+    this.guideAngle = undefined;
 
     // Stage progression state
     this.stageProgress = {
@@ -88,10 +90,10 @@ class Game {
         return;
       }
 
-      // Convert screen coordinates to world coordinates
+      // Convert screen coordinates to world coordinates (with camera zoom)
       const rect = this.canvas.getBoundingClientRect();
-      const screenX = clientX - rect.left;
-      const screenY = clientY - rect.top;
+      const screenX = (clientX - rect.left) / this.zoom;
+      const screenY = (clientY - rect.top) / this.zoom;
       const worldX = screenX + this.camera.x;
       const worldY = screenY + this.camera.y;
 
@@ -139,6 +141,17 @@ class Game {
     }, { passive: true });
   }
 
+  calculateZoom() {
+    const h = this.canvas.height;
+    if (h <= 450) {
+      return 1.45;
+    } else if (h <= 650) {
+      return 1.6;
+    } else {
+      return 1.7;
+    }
+  }
+
   resizeCanvas() {
     const container = document.getElementById('game-container');
     const w = (container && container.clientWidth) ? container.clientWidth : window.innerWidth;
@@ -147,6 +160,7 @@ class Game {
     this.canvas.width = w;
     this.canvas.height = h;
     this.ctx.imageSmoothingEnabled = true;
+    this.zoom = this.calculateZoom();
   }
 
   setupStartScreen() {
@@ -612,11 +626,14 @@ class Game {
     const worldW = world ? world.width : 1920;
     const worldH = world ? world.height : 1280;
 
-    const targetX = this.player.x - this.canvas.width / 2;
-    const targetY = this.player.y - this.canvas.height / 2;
+    const viewW = this.canvas.width / this.zoom;
+    const viewH = this.canvas.height / this.zoom;
 
-    const maxCamX = Math.max(0, worldW - this.canvas.width);
-    const maxCamY = Math.max(0, worldH - this.canvas.height);
+    const targetX = (this.player.x + 12) - viewW / 2;
+    const targetY = (this.player.y + 14) - viewH / 2;
+
+    const maxCamX = Math.max(0, worldW - viewW);
+    const maxCamY = Math.max(0, worldH - viewH);
 
     this.camera.x = Math.max(0, Math.min(maxCamX, targetX));
     this.camera.y = Math.max(0, Math.min(maxCamY, targetY));
@@ -834,6 +851,8 @@ class Game {
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.ctx.save();
+    // Zoom in close to main Kokeshi character
+    this.ctx.scale(this.zoom, this.zoom);
     this.ctx.translate(-Math.round(this.camera.x), -Math.round(this.camera.y));
 
     // 1. Render Big Open FTU World Map (Terrain, Roads, Buildings, FCD Plaza)
@@ -841,10 +860,7 @@ class Game {
       window.worldMap.render(this.ctx, this.camera, this.currentStageId);
     }
 
-    // 2. Render Footstep Trail Guide from player's feet to quest objective!
-    this.renderFootstepTrail();
-
-    // 2.1 Render Quest Beacon on the ground
+    // 2. Render Quest Beacon on the ground
     this.renderQuestBeacon();
 
     // 3. Render Props, Items, NPCs
@@ -852,104 +868,103 @@ class Game {
     this.renderItems();
     this.renderNPCs();
 
-    // 4. Render Player Chibi Vector Character
+    // 4. Render Equipped Directional Guide attached directly to Main Kokeshi
+    this.renderEquippedGuide();
+
+    // 5. Render Player Chibi Vector Character
     this.renderPlayer();
+
+    // 6. Render Interaction Prompt [A] (Rendered in world space above target)
+    this.renderInteractionPrompt();
 
     this.ctx.restore();
 
-    // 5. Render Ambient Lighting & Weather
+    // 7. Render Ambient Lighting & Weather
     this.renderAmbientLighting();
     this.renderParticles();
 
-    // 6. Render Interaction Prompt [A]
-    this.renderInteractionPrompt();
-
-    // 7. Render Mini-Map Radar in HUD Panel (DOM canvas)
+    // 8. Render Mini-Map Radar in HUD Panel (DOM canvas)
     const domMiniMap = document.getElementById('minimap-canvas');
     if (domMiniMap && window.worldMap) {
       window.worldMap.renderMiniMapToCanvas(domMiniMap, this.player.x, this.player.y, this.stage ? this.stage.questSpot : null, this.currentStageId);
     }
 
-    // 8. Render Quest Compass Arrow pointing to destination
+    // 9. Render Quest Compass Arrow pointing to destination (when offscreen)
     this.renderQuestCompass();
   }
 
-  // Animated glowing golden sakura trail leading from under Kokeshi character's feet to quest target
-  renderFootstepTrail() {
+  // Equipped Navigation Guide attached directly to Main Kokeshi's movement/heading
+  renderEquippedGuide() {
     if (!this.stage || !this.stage.questSpot) return;
 
-    const startX = this.player.x + 12;
-    const startY = this.player.y + 24;
-    const endX = this.stage.questSpot.x;
-    const endY = this.stage.questSpot.y;
+    const px = this.player.x + 16;
+    const py = this.player.y + 26;
+    const qx = this.stage.questSpot.x;
+    const qy = this.stage.questSpot.y;
 
-    const totalDist = Math.hypot(endX - startX, endY - startY);
-    if (totalDist < 45) return; // Arrived at target
+    const dist = Math.hypot(qx - px, qy - py);
+    if (dist < 45) return; // Arrived at destination: cleanly hide pointer so no screen clutter!
 
-    // Natural waypoints along FTU avenues
-    const waypoints = [{ x: startX, y: startY }];
-    const westAveX = 9 * 32 + 16;
+    // Calculate heading angle to quest destination
+    const targetAngle = Math.atan2(qy - py, qx - px);
 
-    if (startY > 24 * 32 && Math.abs(startX - westAveX) > 30) {
-      waypoints.push({ x: westAveX, y: startY });
+    // Smoothly turn guide needle towards target
+    if (this.guideAngle === undefined) {
+      this.guideAngle = targetAngle;
+    } else {
+      let diff = targetAngle - this.guideAngle;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      this.guideAngle += diff * 0.18;
     }
 
-    if (this.currentStageId === 'stage1') {
-      waypoints.push({ x: westAveX, y: endY });
-    } else if (this.currentStageId === 'stage2') {
-      waypoints.push({ x: westAveX, y: endY });
-    } else if (this.currentStageId === 'stage3_1') {
-      waypoints.push({ x: westAveX, y: endY });
-    } else if (this.currentStageId === 'stage3_2') {
-      waypoints.push({ x: westAveX, y: endY });
-    } else if (this.currentStageId === 'stage_final') {
-      waypoints.push({ x: 28 * 32, y: 22 * 32 });
-    }
-
-    waypoints.push({ x: endX, y: endY });
-
-    const step = 24;
-    const animOffset = (Date.now() / 30) % step;
+    const time = Date.now() / 200;
 
     this.ctx.save();
+    this.ctx.translate(px, py);
 
-    for (let w = 0; w < waypoints.length - 1; w++) {
-      const p1 = waypoints[w];
-      const p2 = waypoints[w + 1];
-      const segDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-      if (segDist < 5) continue;
+    // 1. Soft glowing aura at Main Kokeshi's feet
+    const auraPulse = 20 + Math.sin(time) * 2;
+    const grad = this.ctx.createRadialGradient(0, 0, 4, 0, 0, auraPulse);
+    grad.addColorStop(0, 'rgba(255, 215, 120, 0.5)');
+    grad.addColorStop(0.7, 'rgba(185, 43, 69, 0.25)');
+    grad.addColorStop(1, 'rgba(185, 43, 69, 0)');
+    this.ctx.fillStyle = grad;
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, auraPulse, 0, Math.PI * 2);
+    this.ctx.fill();
 
-      const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
-      const cosA = Math.cos(angle);
-      const sinA = Math.sin(angle);
+    // 2. Equipped Rotating Directional Arrow pointing towards quest target
+    this.ctx.rotate(this.guideAngle);
 
-      for (let d = animOffset; d < segDist; d += step) {
-        const dx = p1.x + cosA * d;
-        const dy = p1.y + sinA * d;
+    // Hovering distance ahead of Kokeshi (pulses forward with walking rhythm)
+    const arrowDist = 28 + Math.sin(time * 2) * 3;
+    this.ctx.translate(arrowDist, 0);
 
-        // Soft outer sakura aura
-        this.ctx.fillStyle = 'rgba(255, 215, 120, 0.28)';
-        this.ctx.beginPath();
-        this.ctx.arc(dx, dy, 7, 0, Math.PI * 2);
-        this.ctx.fill();
+    // Glow effect
+    this.ctx.shadowColor = 'rgba(255, 215, 120, 0.9)';
+    this.ctx.shadowBlur = 10;
 
-        // Glowing center dot (alternating gold and sakura pink)
-        this.ctx.fillStyle = (d % (step * 2) < step) ? '#ffd778' : '#ffb7c5';
-        this.ctx.beginPath();
-        this.ctx.arc(dx, dy, 3.5, 0, Math.PI * 2);
-        this.ctx.fill();
+    // Draw aerodynamic golden quest chevron arrow
+    this.ctx.fillStyle = '#ffd778';
+    this.ctx.strokeStyle = '#5c1216';
+    this.ctx.lineWidth = 1.5;
 
-        // Forward directional chevron arrow
-        this.ctx.strokeStyle = '#5c1216';
-        this.ctx.lineWidth = 1.2;
-        this.ctx.beginPath();
-        const arrSize = 3;
-        this.ctx.moveTo(dx - cosA * arrSize - sinA * arrSize, dy - sinA * arrSize + cosA * arrSize);
-        this.ctx.lineTo(dx + cosA * arrSize, dy + sinA * arrSize);
-        this.ctx.lineTo(dx - cosA * arrSize + sinA * arrSize, dy - sinA * arrSize - cosA * arrSize);
-        this.ctx.stroke();
-      }
-    }
+    this.ctx.beginPath();
+    this.ctx.moveTo(10, 0);
+    this.ctx.lineTo(-7, -7);
+    this.ctx.lineTo(-3, 0);
+    this.ctx.lineTo(-7, 7);
+    this.ctx.closePath();
+    this.ctx.fill();
+    this.ctx.stroke();
+
+    // Trailing glowing sakura petal dots
+    this.ctx.fillStyle = 'rgba(255, 183, 197, 0.9)';
+    this.ctx.beginPath();
+    this.ctx.arc(-8, 0, 2.5, 0, Math.PI * 2);
+    this.ctx.arc(-15, 0, 1.8, 0, Math.PI * 2);
+    this.ctx.fill();
 
     this.ctx.restore();
   }
@@ -983,8 +998,8 @@ class Game {
     const qx = this.stage.questSpot.x;
     const qy = this.stage.questSpot.y;
 
-    const screenX = qx - this.camera.x;
-    const screenY = qy - this.camera.y;
+    const screenX = (qx - this.camera.x) * this.zoom;
+    const screenY = (qy - this.camera.y) * this.zoom;
 
     const pad = 45;
     const isOffScreen = screenX < pad || screenX > this.canvas.width - pad ||
@@ -1051,7 +1066,7 @@ class Game {
 
       if (npc.sprite === 'npc_senpai' && this.senpaiImage && this.senpaiImage.complete) {
         const bounce = Math.sin(Date.now() / 350) * 1.5;
-        this.ctx.drawImage(this.senpaiImage, x + 2, y - 8 + bounce, 28, 44);
+        this.ctx.drawImage(this.senpaiImage, x - 2, y - 18 + bounce, 36, 54);
       } else {
         window.spriteManager.draw(this.ctx, npc.sprite, x, y);
       }
@@ -1060,7 +1075,7 @@ class Game {
       this.ctx.fillStyle = 'rgba(34, 7, 10, 0.85)';
       const tagW = npc.name.length * 7 + 16;
       this.ctx.beginPath();
-      this.ctx.roundRect(x + 16 - tagW / 2, y - 18, tagW, 16, 4);
+      this.ctx.roundRect(x + 16 - tagW / 2, y - 24, tagW, 16, 4);
       this.ctx.fill();
       this.ctx.strokeStyle = '#ffd778';
       this.ctx.lineWidth = 1;
@@ -1069,12 +1084,12 @@ class Game {
       this.ctx.fillStyle = '#ffd778';
       this.ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
       this.ctx.textAlign = 'center';
-      this.ctx.fillText(npc.name, x + 16, y - 6);
+      this.ctx.fillText(npc.name, x + 16, y - 12);
       this.ctx.textAlign = 'start';
     });
   }
 
-  // Draw Selected Kokeshi Character (5 Departments of JPC)
+  // Draw Selected Kokeshi Character (5 Departments of JPC) - Zoomed & Close-up
   renderPlayer() {
     const px = this.player.x;
     const py = this.player.y;
@@ -1087,9 +1102,9 @@ class Game {
     this.ctx.save();
 
     // 1. Soft Oval Shadow on the ground
-    this.ctx.fillStyle = 'rgba(11, 4, 3, 0.3)';
+    this.ctx.fillStyle = 'rgba(11, 4, 3, 0.35)';
     this.ctx.beginPath();
-    this.ctx.ellipse(centerX, feetY + 2, 14, 5, 0, 0, Math.PI * 2);
+    this.ctx.ellipse(centerX, feetY + 2, 16, 6, 0, 0, Math.PI * 2);
     this.ctx.fill();
 
     // 2. Position and Wobble/Bounce Animation
@@ -1106,25 +1121,25 @@ class Game {
     const kokeshiImg = this.kokeshiImages ? this.kokeshiImages[deptKey] : null;
 
     if (kokeshiImg && kokeshiImg.complete && kokeshiImg.naturalWidth > 0) {
-      // 48x48 Kokeshi Doll, bottom anchored at ground
-      const kw = 48;
-      const kh = 48;
+      // 54x54 Kokeshi Doll, bottom anchored at ground
+      const kw = 54;
+      const kh = 54;
       this.ctx.drawImage(kokeshiImg, -kw / 2, -kh, kw, kh);
     } else {
       // Fallback Kokeshi wooden silhouette while image loads
       this.ctx.fillStyle = '#b92b45';
       this.ctx.beginPath();
-      this.ctx.arc(0, -32, 12, 0, Math.PI * 2);
+      this.ctx.arc(0, -36, 14, 0, Math.PI * 2);
       this.ctx.fill();
       this.ctx.fillStyle = '#f8e4b7';
-      this.ctx.fillRect(-8, -20, 16, 20);
+      this.ctx.fillRect(-10, -22, 20, 22);
     }
 
     this.ctx.restore();
 
     // 3. Name Tag & Department Pill above Kokeshi
     this.ctx.save();
-    const tagBaseY = py - 26;
+    const tagBaseY = py - 34;
 
     // A. Mini Department Pill Badge
     const deptName = this.player.selectedDeptName || 'Ban Chuyên Môn';
@@ -1170,7 +1185,7 @@ class Game {
   }
 
   renderParticles() {
-    // Sakura petals
+    // Sakura petals (screen space)
     this.particles.forEach(p => {
       this.ctx.fillStyle = p.color;
       this.ctx.beginPath();
@@ -1178,12 +1193,12 @@ class Game {
       this.ctx.fill();
     });
 
-    // Fireworks
+    // Fireworks (scaled with camera zoom)
     this.fireworks.forEach(fw => {
       fw.particles.forEach(pt => {
         this.ctx.fillStyle = pt.color;
         this.ctx.beginPath();
-        this.ctx.arc(pt.x - this.camera.x, pt.y - this.camera.y, pt.size, 0, Math.PI * 2);
+        this.ctx.arc((pt.x - this.camera.x) * this.zoom, (pt.y - this.camera.y) * this.zoom, pt.size * this.zoom, 0, Math.PI * 2);
         this.ctx.fill();
       });
     });
@@ -1191,36 +1206,50 @@ class Game {
 
   renderInteractionPrompt() {
     if (!this.nearbyInteractable) return;
-    const centerX = this.player.x - this.camera.x + 16;
-    const topY = this.player.y - this.camera.y - 48;
+
+    let targetX = this.player.x + 16;
+    let targetY = this.player.y - 56;
+
+    // Position neatly above interactable target without colliding with name tags
+    if (this.nearbyInteractable.type === 'npc' && this.nearbyInteractable.data) {
+      targetX = this.nearbyInteractable.data.x * 32 + 16;
+      targetY = this.nearbyInteractable.data.y * 32 - 42;
+    } else if (this.nearbyInteractable.type === 'booth_jpc') {
+      targetX = 16 * 32;
+      targetY = 22 * 32 - 38;
+    } else if (this.nearbyInteractable.type === 'prop' && this.nearbyInteractable.data) {
+      targetX = this.nearbyInteractable.data.x * 32 + 16;
+      targetY = this.nearbyInteractable.data.y * 32 - 34;
+    }
+
     const bob = Math.sin(Date.now() / 150) * 3;
 
     this.ctx.save();
     const promptText = 'Nhấn [A] / Chạm để tương tác';
-    this.ctx.font = 'bold 11px "Be Vietnam Pro", sans-serif';
-    const textW = this.ctx.measureText(promptText).width + 24;
+    this.ctx.font = 'bold 10px "Be Vietnam Pro", sans-serif';
+    const textW = this.ctx.measureText(promptText).width + 22;
 
     // Glowing badge background
     this.ctx.fillStyle = 'rgba(185, 43, 69, 0.95)';
     this.ctx.beginPath();
-    this.ctx.roundRect(centerX - textW / 2, topY + bob - 12, textW, 22, 11);
+    this.ctx.roundRect(targetX - textW / 2, targetY + bob - 12, textW, 21, 10);
     this.ctx.fill();
 
     this.ctx.strokeStyle = '#ffd778';
-    this.ctx.lineWidth = 1.8;
+    this.ctx.lineWidth = 1.6;
     this.ctx.stroke();
 
     // Golden prompt text
     this.ctx.fillStyle = '#ffd778';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText(`★ ${promptText} ★`, centerX, topY + bob + 3);
+    this.ctx.fillText(`★ ${promptText} ★`, targetX, targetY + bob + 3);
 
-    // Little downward arrow pointing to player
-    this.ctx.fillStyle = '#b92b45';
+    // Little downward arrow pointing to interactable
+    this.ctx.fillStyle = '#ffd778';
     this.ctx.beginPath();
-    this.ctx.moveTo(centerX - 5, topY + bob + 10);
-    this.ctx.lineTo(centerX + 5, topY + bob + 10);
-    this.ctx.lineTo(centerX, topY + bob + 15);
+    this.ctx.moveTo(targetX - 5, targetY + bob + 9);
+    this.ctx.lineTo(targetX + 5, targetY + bob + 9);
+    this.ctx.lineTo(targetX, targetY + bob + 14);
     this.ctx.closePath();
     this.ctx.fill();
 

@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#1d3557">
+  <meta name="theme-color" content="#22070a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Konnichiwa Gen 22 - Hành Trình JPC</title>
+  <title>JPC FTU — Hành Trình FCD & Tuyển Gen 22</title>
+  <link rel="icon" type="image/png" href="Image/Logo.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -15,7 +16,7 @@
   <div id="orientation-overlay" class="hidden">
     <div class="rotate-icon">📱↻</div>
     <h2>VUI LÒNG XOAY NGANG ĐIỆN THOẠI</h2>
-    <p>Hãy xoay ngang màn hình (Landscape) để có trải nghiệm phiêu lưu tốt nhất cùng JPC nhé!</p>
+    <p>Hãy xoay ngang màn hình (Landscape) để có trải nghiệm tham gia FTU Club Day (FCD) tuyệt vời nhất cùng JPC nhé!</p>
   </div>
 
   <!-- MAIN GAME CONTAINER -->
@@ -25,11 +26,11 @@
     <!-- TOP HUD BAR -->
     <div id="hud-top-bar">
       <div class="hud-left">
-        <img src="Image/Logo.png" alt="JPC" style="width: 22px; height: 22px; object-fit: contain;">
-        <span class="hud-badge" id="hud-badge">HỘI TRÁT 1</span>
+        <img src="Image/Logo.png" alt="JPC FTU" style="width: 26px; height: 26px; object-fit: contain;">
+        <span class="hud-badge" id="hud-badge">FTU CLUB DAY</span>
         <div class="hud-quest-info">
-          <h3 class="hud-stage-name" id="hud-stage-name">HỘI TRÁT 1: KHAI NHÃN</h3>
-          <p class="hud-quest-desc" id="hud-quest-desc">Đang tải...</p>
+          <h3 class="hud-stage-name" id="hud-stage-name">NGÀY HỘI CLB (FCD)</h3>
+          <p class="hud-quest-desc" id="hud-quest-desc">Đến Sân Nhà D tìm booth của CLB Tiếng Nhật JPC!</p>
         </div>
       </div>
       <div class="hud-right">
@@ -61,10 +62,10 @@
     <!-- DIALOGUE BOX -->
     <div id="dialogue-box" class="hidden">
       <div class="dialogue-header">
-        <span class="dialogue-speaker" id="dialogue-speaker">JPC</span>
+        <span class="dialogue-speaker" id="dialogue-speaker">Bác Bảo Vệ FTU</span>
       </div>
       <div class="dialogue-body">
-        <div class="dialogue-avatar hidden" id="dialogue-avatar"></div>
+        <div class="dialogue-avatar" id="dialogue-avatar">👴</div>
         <div class="dialogue-text" id="dialogue-text">...</div>
       </div>
       <div class="dialogue-choices hidden" id="dialogue-choices"></div>
@@ -75,23 +76,75 @@
     <div id="title-screen" class="modal-overlay">
       <div class="title-card">
         <img src="Image/Logo.png" alt="JPC Logo" class="title-logo">
-        <div class="title-badge">JPC - FTU GEN 22</div>
+        <div class="title-badge">FTU CLUB DAY · GEN 22</div>
         <h1>KONNICHIWA GEN 22</h1>
-        <div class="title-sub">🌸 Hành Trình Chạm Đến Ước Mơ 🌸</div>
+        <div class="title-sub">🌸 Hành Trình Chạm Đến Ước Mơ Tại JPC FTU 🌸</div>
 
         <div class="input-group">
           <label for="input-player-name">Tên của bạn (hoặc Biệt danh):</label>
-          <input type="text" id="input-player-name" class="pixel-input" placeholder="Nhập tên bạn..." maxlength="16" value="Kouhai Gen 22">
+          <input type="text" id="input-player-name" class="modern-input" placeholder="Nhập tên của bạn..." maxlength="16" value="Kouhai Gen 22">
         </div>
 
-        <button class="pixel-btn" id="btn-start-game">BẮT ĐẦU HÀNH TRÌNH</button>
+        <button class="gold-btn" id="btn-start-game">BẮT ĐẦU THAM GIA FCD</button>
         <div class="title-hint">💡 Chơi mượt mà trên điện thoại màn hình ngang & máy tính</div>
+      </div>
+    </div>
+
+    <!-- INTERACTIVE APPLICATION FORM MODAL (VÒNG 1: KHAI NHÃN) -->
+    <div id="application-modal" class="modal-overlay hidden">
+      <div class="form-card">
+        <div class="form-header">
+          <img src="Image/Logo.png" alt="JPC FTU" style="width: 44px; height: 44px; object-fit: contain; margin-bottom: 6px;">
+          <h2>HỘI TRÁT 1: KHAI NHÃN</h2>
+          <p>ĐƠN ĐĂNG KÝ TUYỂN THÀNH VIÊN GEN 22 — CLB TIẾNG NHẬT JPC FTU</p>
+        </div>
+        <form id="jpc-application-form">
+          <div class="form-group">
+            <label for="form-fullname">Họ và tên ứng viên:</label>
+            <input type="text" id="form-fullname" class="form-control" required placeholder="Ví dụ: Nguyễn Minh Anh">
+          </div>
+          <div class="form-group">
+            <label for="form-class">Khoá / Lớp (FTU):</label>
+            <input type="text" id="form-class" class="form-control" placeholder="Ví dụ: K63 Kinh tế Đối ngoại" value="K63 FTU">
+          </div>
+          <div class="form-group">
+            <label for="form-dept">Ban mong muốn ứng tuyển:</label>
+            <select id="form-dept" class="form-control form-select">
+              <option value="Ban Chuyên Môn">Ban Chuyên Môn (Tiếng Nhật & Học thuật)</option>
+              <option value="Ban Nhân Sự">Ban Nhân Sự (Gắn kết & Hậu phương gia đình)</option>
+              <option value="Ban Thông Tin">Ban Thông Tin (Truyền thông & Thiết kế)</option>
+              <option value="Ban Tổ Chức">Ban Tổ Chức (Sự kiện bùng nổ)</option>
+              <option value="Ban Đối Ngoại">Ban Đối Ngoại (Đối tác & Doanh nghiệp Nhật)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="form-reason">Lý do bạn muốn trở thành một phần của JPC:</label>
+            <textarea id="form-reason" class="form-control" rows="3" placeholder="Chia sẻ đam mê tiếng Nhật và lý do bạn muốn về nhà cùng JPC..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="gold-btn">NIÊM PHONG & NỘP ĐƠN VÒNG 1</button>
+            <button type="button" class="icon-btn" id="btn-cancel-form">ĐỂ SAU</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- REWARD MODAL (KHUNG POPUP TUYỂN GEN VÒNG 1) -->
+    <div id="reward-modal" class="modal-overlay hidden">
+      <div class="reward-card">
+        <img src="Image/Khung Popup - Tuyển Gen/Vòng 1 - Popup.png" alt="Khung Popup Vòng 1" class="reward-popup-img">
+        <h2>ĐÃ GỬI LÁ ĐƠN THÀNH CÔNG!</h2>
+        <p>
+          Chúc mừng <b id="reward-applicant-name" style="color: var(--gold-bright);">bạn</b> đã hoàn thành Hội trát 1: Khai Nhãn!<br>
+          Lá đơn chứa chan đam mê đã được trao tận tay các anh chị tại Booth JPC. Hãy tiếp tục hành trình đến với Giảng đường B201 để tham gia Phỏng Vấn Nhóm nhé!
+        </p>
+        <button class="gold-btn" id="btn-close-reward">TIẾP TỤC HÀNH TRÌNH</button>
       </div>
     </div>
 
     <!-- MINIGAME MODAL -->
     <div id="minigame-modal" class="modal-overlay hidden">
-      <div class="minigame-card" id="minigame-container">
+      <div class="form-card" id="minigame-container">
         <!-- Injected dynamically -->
       </div>
     </div>
@@ -100,11 +153,11 @@
     <div id="memory-modal" class="modal-overlay hidden">
       <div class="title-card">
         <div class="title-badge">KỶ NGUYÊN GEN 22</div>
-        <h2 style="font-family: var(--retro-font); font-size: 14px; color: var(--gold-accent); margin-bottom: 14px;">SỔ HỒI ỨC HÀNH TRÌNH</h2>
-        <div id="memory-list" style="max-height: 220px; overflow-y: auto; margin-bottom: 16px;">
+        <h2 style="font-family: var(--font-title); font-size: 18px; color: var(--gold-bright); margin-bottom: 16px;">SỔ HỒI ỨC HÀNH TRÌNH</h2>
+        <div id="memory-list" style="max-height: 240px; overflow-y: auto; margin-bottom: 18px;">
           <!-- Memories injected dynamically -->
         </div>
-        <button class="pixel-btn" onclick="document.getElementById('memory-modal').classList.add('hidden')">ĐÓNG</button>
+        <button class="gold-btn" onclick="document.getElementById('memory-modal').classList.add('hidden')">ĐÓNG</button>
       </div>
     </div>
 
@@ -112,12 +165,12 @@
     <div id="celebration-modal" class="modal-overlay hidden">
       <div class="cert-card">
         <div class="cert-header">
-          <img src="Image/Logo.png" alt="JPC Logo" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 6px;">
+          <img src="Image/Logo.png" alt="JPC Logo" style="width: 52px; height: 52px; object-fit: contain; margin-bottom: 8px;">
           <h2>CHỨNG NHẬN THÀNH VIÊN CHÍNH THỨC</h2>
-          <p>CÂU LẠC BỘ TIẾNG NHẬT JPC - TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG</p>
+          <p style="font-size: 12px; font-weight: 700; color: var(--maroon);">CÂU LẠC BỘ TIẾNG NHẬT JPC — TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG</p>
         </div>
         <div class="cert-body">
-          <p style="font-size: 11px; color: #475569; margin: 4px 0;">Nhiệt liệt chào đón tân thành viên thế hệ 22:</p>
+          <p style="font-size: 13px; color: #475569; margin: 4px 0;">Nhiệt liệt chào đón tân thành viên thế hệ 22:</p>
           <h1 class="cert-name" id="cert-member-name">KOUHAI GEN 22</h1>
           
           <!-- 5 KOKESHI MASCOTS REPRESENTING THE 5 DEPARTMENTS -->
@@ -144,17 +197,17 @@
             </div>
           </div>
 
-          <p>Đã xuất sắc vượt qua trọn vẹn 4 Hội trát thử thách:</p>
-          <p style="color: #c1121f; font-weight: 700; font-size: 11px;">
+          <p style="font-size: 13px; margin: 6px 0;">Đã xuất sắc vượt qua trọn vẹn 4 Hội trát thử thách:</p>
+          <p style="color: var(--red-bright); font-weight: 700; font-size: 12px; font-family: var(--font-title); letter-spacing: 1px;">
             Khai Nhãn ➔ Hòa Nhịp ➔ Phá Phong ➔ Chân Diện
           </p>
           <div class="cert-quote">
-            "Từ giây phút này, JPC không chỉ là một câu lạc bộ, mà là gia đình và thanh xuân rực rỡ nhất của bạn. Chào mừng bạn về nhà!"
+            "Từ giây phút này, JPC không chỉ là một câu lạc bộ, mà là gia đình và thanh xuân rực rỡ nhất của bạn tại Ngoại Thương. Chào mừng bạn về nhà!"
           </div>
         </div>
         <div class="cert-footer">
-          <button class="pixel-btn" id="btn-replay">CHƠI LẠI</button>
-          <button class="pixel-btn" id="btn-close-celebration" style="background: #2a9d8f;">TIẾP TỤC KHÁM PHÁ</button>
+          <button class="gold-btn" id="btn-replay">CHƠI LẠI</button>
+          <button class="icon-btn" id="btn-close-celebration" style="background: var(--red-bright); color: #fff;">TIẾP TỤC KHÁM PHÁ</button>
         </div>
       </div>
     </div>

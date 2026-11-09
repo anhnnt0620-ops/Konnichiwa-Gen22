@@ -1,35 +1,43 @@
-// Stage definitions, map locations, NPC dialogues, and quest triggers on the big FTU Open-World Map
+// Stage definitions and quest locations for FTU Club Day (FCD)
 const STAGE_DATA = {
   stage1: {
     id: 'stage1',
     name: 'HỘI TRÁT 1: KHAI NHÃN',
-    subtitle: 'Tiền sảnh Nhà A - Đêm thu Ngoại Thương rực rỡ cờ hoa',
+    subtitle: 'Sân Nhà D (FTU Club Day) — Điền Đơn Vòng 1',
     bgm: 'stage1',
-    playerStart: { x: 10, y: 34 }, // Cổng trường Chùa Láng
-    questSpot: { x: 24 * 32, y: 26 * 32 },
-    questText: 'Đi từ Cổng Chùa Láng vào Tiền sảnh Nhà A, gom 3 mảnh ghép và nộp đơn tại Hòm thư JPC!',
+    playerStart: { x: 10, y: 34 }, // Cổng trường Chùa Láng cạnh bốt bảo vệ
+    questSpot: { x: 50 * 32, y: 25 * 32 }, // Booth JPC tại Sân Nhà D
+    questText: 'Đến Sân Nhà D, tìm Booth của CLB Tiếng Nhật JPC để điền đơn Vòng 1!',
     props: [
-      { type: 'prop_ftu_sign', x: 10, y: 31, label: 'Biển Cổng FTU' },
-      { type: 'prop_desk', x: 22, y: 26, label: 'Bàn tuyển sinh JPC' },
-      { type: 'prop_mailbox', x: 26, y: 26, label: 'Hòm thư nhận đơn JPC' },
-      { type: 'prop_lantern', x: 20, y: 26, label: 'Đèn lồng' },
-      { type: 'prop_lantern', x: 28, y: 26, label: 'Đèn lồng' }
+      { type: 'prop_ftu_sign', x: 8, y: 31, label: 'Cổng Chùa Láng' },
+      { type: 'prop_boba', x: 47, y: 27, label: 'Trà sữa FCD' },
+      { type: 'prop_lantern', x: 48, y: 24, label: 'Đèn lồng JPC' },
+      { type: 'prop_lantern', x: 52, y: 24, label: 'Đèn lồng JPC' }
     ],
-    items: [
-      { id: 'memory_passion', name: 'Mảnh ghép Bản lĩnh FTU', x: 21, y: 28, collected: false, icon: '🔥' },
-      { id: 'memory_dream', name: 'Mảnh ghép Tình yêu Văn hóa Nhật', x: 27, y: 28, collected: false, icon: '✨' },
-      { id: 'memory_fire', name: 'Mảnh ghép Khát khao Gen 22', x: 24, y: 29, collected: false, icon: '🌟' }
-    ],
+    items: [],
     npcs: [
       {
-        id: 'npc_guide1',
-        name: 'Senpai Sảnh Nhà A',
-        sprite: 'npc_senpai',
-        x: 24,
-        y: 26,
+        id: 'npc_guard',
+        name: 'Bác Bảo Vệ FTU',
+        sprite: 'npc_president',
+        x: 10,
+        y: 33,
+        avatarIcon: '👴',
         dialogues: [
-          { speaker: 'Senpai Nhà A', text: 'Konnichiwa! Chào mừng em đến với Tiền sảnh Nhà A - Trường Đại học Ngoại Thương!' },
-          { speaker: 'Senpai Nhà A', text: 'Đêm nay là hạn chót nộp đơn tuyển thành viên Gen 22 của JPC. Hãy đi quanh sảnh Nhà A gom đủ 3 mảnh ghép cảm xúc, rồi tiến tới Hòm thư JPC để niêm phong gửi lá đơn nhé!' }
+          { speaker: 'Bác Bảo Vệ', text: 'Hôm nay là FCD đó, sẽ có rất nhiều CLB tổ chức booth!' },
+          { speaker: 'Bác Bảo Vệ', text: 'Cháu đi thẳng vào Sân Nhà D, tìm booth của CLB Tiếng Nhật JPC để điền đơn Vòng 1 nhé!' }
+        ]
+      },
+      {
+        id: 'npc_jpc_booth',
+        name: 'Senpai Booth JPC',
+        sprite: 'npc_senpai',
+        x: 50,
+        y: 25,
+        avatarIcon: '🌸',
+        dialogues: [
+          { speaker: 'Senpai JPC', text: 'Konnichiwa! Chào mừng em đến với Booth của CLB Tiếng Nhật JPC tại FTU Club Day!' },
+          { speaker: 'Senpai JPC', text: 'Hôm nay JPC chính thức mở đơn tuyển thành viên thế hệ 22 — Hội trát 1: Khai Nhãn. Hãy viết nên ước mơ của em nhé!' }
         ]
       }
     ]
@@ -38,7 +46,7 @@ const STAGE_DATA = {
   stage2: {
     id: 'stage2',
     name: 'HỘI TRÁT 2: HÒA NHỊP',
-    subtitle: 'Giảng đường B201 FTU - Vòng Phỏng Vấn Nhóm',
+    subtitle: 'Giảng đường B201 FTU — Vòng Phỏng Vấn Nhóm',
     bgm: 'stage2',
     questSpot: { x: 24 * 32, y: 15 * 32 },
     questText: 'Di chuyển lên Tòa Nhà B, vào Giảng đường B201 để tham gia Phỏng Vấn Nhóm!',
@@ -58,8 +66,7 @@ const STAGE_DATA = {
         y: 15,
         talked: false,
         dialogues: [
-          { speaker: 'Minh', text: 'Chào cậu! Cậu học chuyên ngành nào ở FTU thế? Tớ K63 Kinh tế Đối ngoại nè!' },
-          { speaker: 'Minh', text: 'Tớ hồi hộp từ lúc nộp đơn ở sảnh Nhà A tới giờ luôn. Nhưng nhìn các bạn ai cũng nhiệt huyết, tớ tự tin hẳn lên. Cùng cố gắng nhé!' }
+          { speaker: 'Minh', text: 'Chào cậu! Cậu vừa nộp đơn ở booth Sân Nhà D xong đúng không? Nhìn các anh chị JPC nhiệt huyết quá chừng, cùng cố gắng vào vòng trong nhé!' }
         ]
       },
       {
@@ -70,8 +77,7 @@ const STAGE_DATA = {
         y: 15,
         talked: false,
         dialogues: [
-          { speaker: 'Hà', text: 'Konnichiwa! Hồi mới bước chân qua cổng Chùa Láng vào trường Ngoại Thương, tớ đã ước mơ được gia nhập JPC rồi!' },
-          { speaker: 'Hà', text: 'Chúng mình cùng phối hợp thật ăn ý để anh chị giám khảo phải bất ngờ nha!' }
+          { speaker: 'Hà', text: 'Konnichiwa! Hồi mới bước chân qua cổng Chùa Láng vào FCD, tớ đã ước mơ được gia nhập JPC rồi! Chúng mình cùng làm một nhóm thật ăn ý nha!' }
         ]
       },
       {
@@ -82,8 +88,7 @@ const STAGE_DATA = {
         y: 16,
         dialogues: [
           { speaker: 'Senpai Phỏng Vấn', text: 'Chào mừng các tân sinh viên Ngoại Thương đến với Hội trát 2: Hòa Nhịp tại Giảng đường B201!' },
-          { speaker: 'Senpai Phỏng Vấn', text: 'Ở ngôi trường FTU năng động này, JPC là nơi các em không bao giờ phải đi một mình. Khi biết lắng nghe và nâng đỡ nhau, các em sẽ tỏa sáng rực rỡ nhất.' },
-          { speaker: 'Senpai Phỏng Vấn', text: 'Nào, hãy cùng bắt nhịp trái tim đồng đội qua thử thách Hòa Nhịp nhé!' }
+          { speaker: 'Senpai Phỏng Vấn', text: 'Ở ngôi trường FTU năng động này, JPC là nơi các em không bao giờ phải đi một mình. Nào, hãy cùng bắt nhịp trái tim đồng đội nhé!' }
         ]
       }
     ]
@@ -92,7 +97,7 @@ const STAGE_DATA = {
   stage3_1: {
     id: 'stage3_1',
     name: 'HỘI TRÁT 3.1: PHÁ PHONG',
-    subtitle: 'Dốc Nhà B FTU - Vòng Teamwork bứt phá deadline',
+    subtitle: 'Dốc Nhà B FTU — Vòng Teamwork bứt phá deadline',
     bgm: 'stage3_1',
     questSpot: { x: 31 * 32, y: 18 * 32 },
     questText: 'Đến Dốc Nhà B huyền thoại, cùng Trưởng nhóm brainstorm và uống trà sữa Chùa Láng!',
@@ -112,8 +117,7 @@ const STAGE_DATA = {
         y: 18,
         dialogues: [
           { speaker: 'Trưởng Nhóm', text: 'Ngồi ở Dốc Nhà B quen thuộc này, tụi mình cùng nhau chạy deadline dự án giao lưu Gen 22 nhé!' },
-          { speaker: 'Trưởng Nhóm', text: 'Deadline ở Ngoại Thương tuy gắt, nhưng sinh viên FTU chưa bao giờ lùi bước! Khi cả team cùng chung một ý chí, không phong ấn nào không thể phá vỡ!' },
-          { speaker: 'Trưởng Nhóm', text: 'Hãy cùng gom các ý tưởng sáng tạo và những cốc trà sữa Chùa Láng để hoàn thành dự án nào!' }
+          { speaker: 'Trưởng Nhóm', text: 'Sinh viên Ngoại Thương chưa bao giờ lùi bước! Hãy cùng gom ý tưởng sáng tạo và những cốc trà sữa Chùa Láng để bứt phá nào!' }
         ]
       }
     ]
@@ -122,7 +126,7 @@ const STAGE_DATA = {
   stage3_2: {
     id: 'stage3_2',
     name: 'HỘI TRÁT 3.2: CHÂN DIỆN',
-    subtitle: 'Không Gian VJCC FTU - Vòng Phỏng Vấn Cá Nhân',
+    subtitle: 'Không Gian VJCC FTU — Vòng Phỏng Vấn Cá Nhân',
     bgm: 'stage3_2',
     questSpot: { x: 24 * 32, y: 31 * 32 },
     questText: 'Di chuyển sang Viện VJCC, bước vào phòng trà đạo đối thoại cùng Ban Điều Hành!',
@@ -140,9 +144,9 @@ const STAGE_DATA = {
         x: 24,
         y: 31,
         dialogues: [
-          { speaker: 'Ban Điều Hành', text: 'Chào em đến với không gian trà đạo VJCC - góc Nhật Bản tĩnh lặng ngay trong lòng Ngoại Thương.' },
+          { speaker: 'Ban Điều Hành', text: 'Chào em đến với không gian trà đạo VJCC — góc Nhật Bản tĩnh lặng ngay trong lòng Ngoại Thương.' },
           { speaker: 'Ban Điều Hành', text: 'Giữa hàng chục câu lạc bộ sôi động của FTU, điều gì đã thôi thúc trái tim em hướng về JPC?' },
-          { speaker: 'Ban Điều Hành', text: 'Ở chặng "Chân Diện" này, hãy soi rọi vào tấm gương nội tâm và chia sẻ tiếng lòng chân thành nhất cùng chúng mình nhé.' }
+          { speaker: 'Ban Điều Hành', text: 'Hãy soi rọi vào tấm gương nội tâm và chia sẻ tiếng lòng chân thành nhất cùng chúng mình nhé.' }
         ]
       }
     ]
@@ -151,7 +155,7 @@ const STAGE_DATA = {
   stage_final: {
     id: 'stage_final',
     name: 'CÔNG BỐ THÀNH VIÊN CHÍNH THỨC',
-    subtitle: 'Quảng trường Sân Nhà A FTU - Chào mừng bạn về nhà!',
+    subtitle: 'Quảng trường Sân Nhà A FTU — Chào mừng bạn về nhà!',
     bgm: 'stage_final',
     questSpot: { x: 24 * 32, y: 22 * 32 },
     questText: 'Bước đến Cổng Torii Sân Nhà A để nhận Thẻ Thành Viên Chính Thức JPC!',
@@ -159,8 +163,6 @@ const STAGE_DATA = {
       { type: 'prop_torii', x: 24, y: 19, label: 'Cổng Torii Vinh Quang' },
       { type: 'prop_sakura_tree', x: 17, y: 19, label: 'Cây Anh Đào' },
       { type: 'prop_sakura_tree', x: 31, y: 19, label: 'Cây Anh Đào' },
-      { type: 'prop_sakura_tree', x: 17, y: 23, label: 'Cây Anh Đào' },
-      { type: 'prop_sakura_tree', x: 31, y: 23, label: 'Cây Anh Đào' },
       { type: 'prop_lantern', x: 20, y: 19, label: 'Đèn hội' },
       { type: 'prop_lantern', x: 28, y: 19, label: 'Đèn hội' }
     ],
@@ -224,8 +226,7 @@ const STAGE_DATA = {
         y: 22,
         dialogues: [
           { speaker: 'Chủ Nhiệm JPC', text: 'Chào mừng em! Kể từ giây phút này, em đã chính thức là một phần máu thịt của JPC - Câu lạc bộ Tiếng Nhật Trường Đại học Ngoại Thương!' },
-          { speaker: 'Chủ Nhiệm JPC', text: 'Cảm ơn em vì đã dám ước mơ, dám nỗ lực và trọn vẹn với từng chặng đường.' },
-          { speaker: 'Chủ Nhiệm JPC', text: 'Chiếc thẻ thành viên và phong thư chào đón thiêng liêng này xin được trao đến em... Chào mừng em về nhà!' }
+          { speaker: 'Chủ Nhiệm JPC', text: 'Cảm ơn em vì đã dám ước mơ, dám nỗ lực và trọn vẹn với từng chặng đường... Chào mừng em về nhà!' }
         ]
       }
     ]

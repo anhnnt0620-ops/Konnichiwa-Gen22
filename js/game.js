@@ -1,9 +1,9 @@
-// Main Game Engine for JPC Konnichiwa Gen 22 (FTU Open World Map)
+// Main Game Engine for JPC FTU (FTU Club Day - FCD)
 class Game {
   constructor() {
     this.canvas = document.getElementById('game-canvas');
     this.ctx = this.canvas.getContext('2d');
-    this.ctx.imageSmoothingEnabled = false;
+    this.ctx.imageSmoothingEnabled = true;
 
     this.playerName = 'Kouhai Gen 22';
     this.currentStageId = 'stage1';
@@ -13,7 +13,7 @@ class Game {
     this.player = {
       x: 10 * 32,
       y: 34 * 32,
-      speed: 3.2,
+      speed: 3.4,
       direction: 'up',
       animFrame: 0,
       animTimer: 0,
@@ -27,7 +27,7 @@ class Game {
 
     // Stage progression state
     this.stageProgress = {
-      stage1: { itemsCollected: 0, letterSealed: false, completed: false },
+      stage1: { formSubmitted: false, completed: false },
       stage2: { talkedToAll: false, synced: false, completed: false },
       stage3_1: { teamworkDone: false, completed: false },
       stage3_2: { interviewDone: false, completed: false },
@@ -37,7 +37,7 @@ class Game {
     // Unlocked Memories Book
     this.memories = [];
 
-    // Particles (Sakura petals, sparkles, fireworks)
+    // Particles (Sakura petals, fireworks)
     this.particles = [];
     this.fireworks = [];
 
@@ -53,6 +53,7 @@ class Game {
     this.resizeCanvas();
     this.initParticles();
     this.setupStartScreen();
+    this.setupApplicationForm();
     this.setupCelebrationModal();
   }
 
@@ -63,7 +64,7 @@ class Game {
 
     this.canvas.width = w;
     this.canvas.height = h;
-    this.ctx.imageSmoothingEnabled = false;
+    this.ctx.imageSmoothingEnabled = true;
   }
 
   setupStartScreen() {
@@ -89,21 +90,74 @@ class Game {
     }
     this.updateHUD();
 
-    // Opening monologue at Chùa Láng Gate
+    // Opening: Bác Bảo Vệ greets user at Cổng Chùa Láng
     setTimeout(() => {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Bác Bảo Vệ FTU',
-          text: `Chào tân sinh viên ${this.playerName}! Chào mừng cháu bước qua cổng trường Chùa Láng vào Đại học Ngoại Thương!`
+          text: 'Hôm nay là FCD đó, sẽ có rất nhiều CLB tổ chức booth!'
         },
         {
           speaker: 'Bác Bảo Vệ FTU',
-          text: 'Hôm nay sảnh Nhà A đang rộn rã cờ hoa tuyển thành viên CLB Tiếng Nhật JPC đấy. Cháu hãy đi theo con đường lớn lên sảnh Nhà A nhé!'
+          text: 'Cháu đi thẳng vào Sân Nhà D, tìm booth của CLB Tiếng Nhật JPC để điền đơn Vòng 1 nhé!'
         }
       ]);
-    }, 400);
+    }, 300);
 
     requestAnimationFrame(this.gameLoop.bind(this));
+  }
+
+  setupApplicationForm() {
+    const appModal = document.getElementById('application-modal');
+    const appForm = document.getElementById('jpc-application-form');
+    const cancelBtn = document.getElementById('btn-cancel-form');
+    const rewardModal = document.getElementById('reward-modal');
+    const closeRewardBtn = document.getElementById('btn-close-reward');
+    const applicantNameInput = document.getElementById('form-fullname');
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        appModal.classList.add('hidden');
+      });
+    }
+
+    if (appForm) {
+      appForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fullName = applicantNameInput.value.trim() || this.playerName;
+        this.playerName = fullName;
+
+        if (window.audioManager) window.audioManager.playFanfare();
+        appModal.classList.add('hidden');
+
+        // Show Reward Popup with Vòng 1 frame
+        document.getElementById('reward-applicant-name').textContent = fullName;
+        rewardModal.classList.remove('hidden');
+
+        this.stageProgress.stage1.completed = true;
+        this.addMemory(
+          'Hội trát 1: Khai Nhãn',
+          `Đã nộp đơn tại Booth JPC (Sân Nhà D) — Chúc mừng ${fullName} bước vào Vòng 2!`,
+          'Image/Color/Vòng 1 - Color.png'
+        );
+
+        this.triggerConfetti();
+      });
+    }
+
+    if (closeRewardBtn) {
+      closeRewardBtn.addEventListener('click', () => {
+        rewardModal.classList.add('hidden');
+        this.loadStage('stage2');
+      });
+    }
+  }
+
+  openApplicationForm() {
+    const appModal = document.getElementById('application-modal');
+    const nameInput = document.getElementById('form-fullname');
+    if (nameInput) nameInput.value = this.playerName;
+    if (appModal) appModal.classList.remove('hidden');
   }
 
   loadStage(stageId, isInitial = false) {
@@ -129,7 +183,7 @@ class Game {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Hội Trát 2',
-          text: 'Chúc mừng bạn đã vượt qua Vòng Đơn! Chào mừng đến với Giảng đường B201 FTU - Vòng Phỏng Vấn Nhóm: Hòa Nhịp!'
+          text: 'Chúc mừng bạn đã vượt qua Vòng Đơn! Chào mừng đến với Giảng đường B201 FTU — Vòng Phỏng Vấn Nhóm: Hòa Nhịp!'
         },
         {
           speaker: 'Người Dẫn Chuyện',
@@ -151,7 +205,7 @@ class Game {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Hội Trát 3.2',
-          text: 'Chào mừng bạn đến với Không gian văn hóa VJCC FTU - Vòng Phỏng Vấn Cá Nhân: Chân Diện.'
+          text: 'Chào mừng bạn đến với Không gian văn hóa VJCC FTU — Vòng Phỏng Vấn Cá Nhân: Chân Diện.'
         },
         {
           speaker: 'Người Dẫn Chuyện',
@@ -182,13 +236,13 @@ class Game {
     if (questDesc) questDesc.textContent = this.stage.questText;
     if (badge) {
       const stageMap = {
-        stage1: 'HỘI TRÁT 1',
+        stage1: 'FCD · VÒNG 1',
         stage2: 'HỘI TRÁT 2',
         stage3_1: 'HỘI TRÁT 3.1',
         stage3_2: 'HỘI TRÁT 3.2',
         stage_final: 'CHÍNH THỨC'
       };
-      badge.textContent = stageMap[this.currentStageId] || 'JPC';
+      badge.textContent = stageMap[this.currentStageId] || 'JPC FTU';
     }
   }
 
@@ -248,7 +302,7 @@ class Game {
 
   spawnFirework(x, y) {
     if (window.audioManager) window.audioManager.playFirework();
-    const colors = ['#ffd166', '#ff4d6d', '#06d6a0', '#118ab2', '#ff9ebb', '#ffffff'];
+    const colors = ['#ffd778', '#b92b45', '#06d6a0', '#118ab2', '#ff85a1', '#ffffff'];
     const fwParticles = [];
     for (let i = 0; i < 24; i++) {
       const angle = (i / 24) * Math.PI * 2;
@@ -259,7 +313,7 @@ class Game {
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         color: colors[Math.floor(Math.random() * colors.length)],
-        size: 2 + Math.random() * 2
+        size: 2.5 + Math.random() * 2.5
       });
     }
     this.fireworks.push({ particles: fwParticles, life: 1.0 });
@@ -289,8 +343,12 @@ class Game {
   }
 
   update(delta) {
-    // If dialogue or minigame is active, don't move
+    // If dialogue or modal is open, pause movement
     if (window.dialogueManager && window.dialogueManager.active) return;
+    const appModal = document.getElementById('application-modal');
+    if (appModal && !appModal.classList.contains('hidden')) return;
+    const rewardModal = document.getElementById('reward-modal');
+    if (rewardModal && !rewardModal.classList.contains('hidden')) return;
     const minigameModal = document.getElementById('minigame-modal');
     if (minigameModal && !minigameModal.classList.contains('hidden')) return;
 
@@ -310,7 +368,6 @@ class Game {
     if (keys.left) { dx -= 1; this.player.direction = 'left'; }
     if (keys.right) { dx += 1; this.player.direction = 'right'; }
 
-    // Normalize diagonal movement
     if (dx !== 0 && dy !== 0) {
       dx *= 0.7071;
       dy *= 0.7071;
@@ -327,7 +384,6 @@ class Game {
       const minY = 16;
       const maxY = (world ? world.height : 1280) - 32;
 
-      // Solid collision check against campus buildings & boundaries
       const isSolid = (x, y) => world ? world.isSolid(x, y) : false;
 
       const canMoveX = !isSolid(newX + 6, this.player.y + 20) &&
@@ -343,7 +399,6 @@ class Game {
       if (canMoveX && newX >= minX && newX <= maxX) this.player.x = newX;
       if (canMoveY && newY >= minY && newY <= maxY) this.player.y = newY;
 
-      // Animate footsteps
       this.player.animTimer++;
       if (this.player.animTimer > 8) {
         this.player.animFrame = (this.player.animFrame + 1) % 3;
@@ -370,29 +425,14 @@ class Game {
     this.camera.y = Math.max(0, Math.min(maxCamY, targetY));
   }
 
-  // Check if player is near any item, NPC, or prop
+  // Check nearby items, NPCs, or props
   checkInteractions() {
     this.nearbyInteractable = null;
     const px = this.player.x;
     const py = this.player.y;
-    const interactRadius = 45;
+    const interactRadius = 50;
 
-    // Check items of current stage
-    if (this.stage.items) {
-      for (const item of this.stage.items) {
-        if (!item.collected) {
-          const ix = item.x * 32;
-          const iy = item.y * 32;
-          const dist = Math.hypot(px - ix, py - iy);
-          if (dist < interactRadius) {
-            this.nearbyInteractable = { type: 'item', data: item };
-            return;
-          }
-        }
-      }
-    }
-
-    // Check NPCs of current stage
+    // Check NPCs
     if (this.stage.npcs) {
       for (const npc of this.stage.npcs) {
         const nx = npc.x * 32;
@@ -405,7 +445,19 @@ class Game {
       }
     }
 
-    // Check Props of current stage
+    // Check Booth JPC at Sân Nhà D
+    if (this.currentStageId === 'stage1') {
+      const boothDist = Math.hypot(px - 50 * 32, py - 25 * 32);
+      if (boothDist < 60) {
+        this.nearbyInteractable = {
+          type: 'booth_jpc',
+          data: { name: 'Booth CLB Tiếng Nhật JPC' }
+        };
+        return;
+      }
+    }
+
+    // Check Props
     if (this.stage.props) {
       for (const prop of this.stage.props) {
         const prx = prop.x * 32;
@@ -419,7 +471,7 @@ class Game {
     }
   }
 
-  // User pressed Action button [A] or Space/Enter
+  // Action button [A] or Space/Enter pressed
   handleAction() {
     if (window.dialogueManager && window.dialogueManager.active) {
       window.dialogueManager.advance();
@@ -429,31 +481,33 @@ class Game {
     if (!this.nearbyInteractable) return;
     const { type, data } = this.nearbyInteractable;
 
-    if (type === 'item') {
-      data.collected = true;
-      if (window.audioManager) window.audioManager.playCollect();
-
-      if (this.currentStageId === 'stage1') {
-        this.stageProgress.stage1.itemsCollected++;
-        window.dialogueManager.startDialogue([
-          {
-            speaker: 'Kỷ Vật FTU',
-            text: `Bạn đã thu thập: ${data.name}! Trái tim bạn đang tràn đầy nhiệt huyết Ngoại Thương.`
-          }
-        ], () => {
-          if (this.stageProgress.stage1.itemsCollected >= 3) {
-            this.stage.questText = 'Đã đủ 3 mảnh ghép! Hãy đến Hòm thư trước sảnh Nhà A để niêm phong gửi lá đơn!';
-            this.updateHUD();
-          }
-        });
-      }
+    if (type === 'booth_jpc') {
+      // Interactive JPC Booth: Trigger dialogue & open application form!
+      window.dialogueManager.startDialogue([
+        {
+          speaker: 'Senpai JPC',
+          text: 'Konnichiwa! Chào mừng em đến với Booth của CLB Tiếng Nhật JPC tại FTU Club Day!'
+        },
+        {
+          speaker: 'Senpai JPC',
+          text: 'Hôm nay JPC mở đơn tuyển thành viên thế hệ 22 — Hội trát 1: Khai Nhãn. Hãy viết nên ước mơ của em nhé!'
+        }
+      ], () => {
+        this.openApplicationForm();
+      });
     } else if (type === 'npc') {
+      if (this.currentStageId === 'stage1' && data.id === 'npc_jpc_booth') {
+        window.dialogueManager.startDialogue(data.dialogues, () => {
+          this.openApplicationForm();
+        });
+        return;
+      }
+
       if (this.currentStageId === 'stage2' && (data.id === 'npc_app_a' || data.id === 'npc_app_b')) {
         data.talked = true;
       }
 
       window.dialogueManager.startDialogue(data.dialogues, () => {
-        // Trigger stage minigames after talking
         if (this.currentStageId === 'stage2' && data.id === 'npc_interviewer') {
           window.minigameManager.start('stage2', (success) => {
             this.stageProgress.stage2.completed = true;
@@ -477,41 +531,19 @@ class Game {
         }
       });
     } else if (type === 'prop') {
-      if (data.type === 'prop_mailbox' && this.currentStageId === 'stage1') {
-        if (this.stageProgress.stage1.itemsCollected < 3) {
-          window.dialogueManager.startDialogue([
-            {
-              speaker: 'Hòm Thư JPC',
-              text: 'Bạn cần thu thập đủ 3 mảnh ghép cảm xúc trước sảnh Nhà A trước khi niêm phong lá đơn nhé!'
-            }
-          ]);
-        } else {
-          window.minigameManager.start('stage1', (success) => {
-            this.stageProgress.stage1.completed = true;
-            this.addMemory('Hội trát 1: Khai Nhãn', 'Gửi trọn lá đơn tuyển thành viên tại Tiền sảnh Nhà A - Đại học Ngoại Thương!', 'Image/Color/Vòng 1 - Color.png');
-            this.loadStage('stage2');
-          });
-        }
-      } else if (data.type === 'prop_desk') {
-        window.dialogueManager.startDialogue([
-          {
-            speaker: 'Bàn Tuyển Sinh JPC',
-            text: 'Bàn sự kiện Konnichiwa Gen 22 tại FTU, nơi bao ước mơ tuổi trẻ bắt đầu nảy mầm.'
-          }
-        ]);
-      } else if (data.type === 'prop_boba') {
+      if (data.type === 'prop_boba') {
         if (window.audioManager) window.audioManager.playCollect();
         window.dialogueManager.startDialogue([
           {
-            speaker: 'Trà Sữa Chùa Láng',
-            text: 'Một ly trà sữa Chùa Láng mát lạnh xua tan căng thẳng deadline! Sinh viên Ngoại Thương ai cũng mê!'
+            speaker: 'Trà Sữa FCD',
+            text: 'Một ly trà sữa Chùa Láng mát lạnh tiếp thêm năng lượng tham gia ngày hội FCD!'
           }
         ]);
       } else if (data.type === 'prop_ftu_sign') {
         window.dialogueManager.startDialogue([
           {
-            speaker: 'Cổng Trường FTU',
-            text: 'Cổng trường Đại học Ngoại Thương - 91 Chùa Láng. Nơi thanh xuân rực rỡ bắt đầu!'
+            speaker: 'Cổng Chùa Láng FTU',
+            text: 'Cổng trường Đại học Ngoại Thương hôm nay ngập tràn băng rôn FCD chào đón các bạn sinh viên!'
           }
         ]);
       }
@@ -539,11 +571,11 @@ class Game {
     list.innerHTML = '';
 
     if (this.memories.length === 0) {
-      list.innerHTML = '<p class="empty-text">Chưa có hồi ức nào được mở khóa. Hãy tiếp tục hành trình nhé!</p>';
+      list.innerHTML = '<p class="empty-text" style="color:var(--white); font-size:13px;">Chưa có hồi ức nào được mở khóa. Hãy nộp đơn tại Booth JPC để nhận kỷ vật đầu tiên nhé!</p>';
       return;
     }
 
-    this.memories.forEach((mem, idx) => {
+    this.memories.forEach((mem) => {
       const card = document.createElement('div');
       card.className = 'memory-card';
       const iconOrImg = mem.image
@@ -553,8 +585,8 @@ class Game {
       card.innerHTML = `
         ${iconOrImg}
         <div class="memory-card-content">
-          <h4>${mem.title}</h4>
-          <p>${mem.desc}</p>
+          <h4 style="font-family: var(--font-title); font-size: 15px; color: var(--gold-bright); margin: 0 0 4px 0;">${mem.title}</h4>
+          <p style="font-size: 12px; color: var(--white); margin: 0;">${mem.desc}</p>
         </div>
       `;
       list.appendChild(card);
@@ -595,7 +627,7 @@ class Game {
   }
 
   // ==========================================================================
-  // RENDER PIPELINE (Big Open World Map + Actors + Radar + Compass)
+  // RENDER PIPELINE
   // ==========================================================================
   render() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -603,7 +635,7 @@ class Game {
     this.ctx.save();
     this.ctx.translate(-Math.round(this.camera.x), -Math.round(this.camera.y));
 
-    // 1. Render Big Open FTU World Map (Terrain, Roads, Courts, Buildings)
+    // 1. Render Big Open FTU World Map (Terrain, Roads, Buildings, FCD Plaza)
     if (window.worldMap) {
       window.worldMap.render(this.ctx, this.camera);
     }
@@ -616,7 +648,7 @@ class Game {
     this.renderItems();
     this.renderNPCs();
 
-    // 4. Render Player
+    // 4. Render Player Chibi Vector Character
     this.renderPlayer();
 
     this.ctx.restore();
@@ -633,7 +665,7 @@ class Game {
       window.worldMap.renderMiniMap(this.ctx, this.player.x, this.player.y, this.stage ? this.stage.questSpot : null);
     }
 
-    // 8. Render Quest Compass Arrow if target is off-screen
+    // 8. Render Quest Compass Arrow pointing to destination
     this.renderQuestCompass();
   }
 
@@ -643,23 +675,21 @@ class Game {
     const qy = this.stage.questSpot.y;
 
     const time = Date.now() / 300;
-    const pulse = 18 + Math.sin(time) * 4;
+    const pulse = 22 + Math.sin(time) * 5;
 
     this.ctx.save();
-    // Glowing pulsating aura
-    this.ctx.fillStyle = 'rgba(255, 209, 102, 0.35)';
+    this.ctx.fillStyle = 'rgba(230, 57, 70, 0.35)';
     this.ctx.beginPath();
     this.ctx.arc(qx, qy, pulse, 0, Math.PI * 2);
     this.ctx.fill();
 
-    this.ctx.strokeStyle = '#ffd166';
-    this.ctx.lineWidth = 2;
+    this.ctx.strokeStyle = '#ffd778';
+    this.ctx.lineWidth = 2.5;
     this.ctx.stroke();
 
-    // Floating Star / Destination flag
-    this.ctx.fillStyle = '#ffd166';
-    this.ctx.font = '14px sans-serif';
-    this.ctx.fillText('⭐', qx - 8, qy - pulse - 6);
+    this.ctx.fillStyle = '#ffd778';
+    this.ctx.font = 'bold 16px sans-serif';
+    this.ctx.fillText('⭐ BOOTH JPC', qx - 45, qy - pulse - 8);
     this.ctx.restore();
   }
 
@@ -668,11 +698,10 @@ class Game {
     const qx = this.stage.questSpot.x;
     const qy = this.stage.questSpot.y;
 
-    // Check if quest spot is on screen
     const screenX = qx - this.camera.x;
     const screenY = qy - this.camera.y;
 
-    const pad = 40;
+    const pad = 45;
     const isOffScreen = screenX < pad || screenX > this.canvas.width - pad ||
                         screenY < pad || screenY > this.canvas.height - pad;
 
@@ -681,22 +710,22 @@ class Game {
       const centerY = this.canvas.height / 2;
       const angle = Math.atan2(screenY - centerY, screenX - centerX);
 
-      const compassX = Math.max(pad, Math.min(this.canvas.width - pad, centerX + Math.cos(angle) * (centerX - 60)));
-      const compassY = Math.max(pad + 50, Math.min(this.canvas.height - pad - 60, centerY + Math.sin(angle) * (centerY - 80)));
+      const compassX = Math.max(pad, Math.min(this.canvas.width - pad, centerX + Math.cos(angle) * (centerX - 70)));
+      const compassY = Math.max(pad + 60, Math.min(this.canvas.height - pad - 60, centerY + Math.sin(angle) * (centerY - 90)));
 
       this.ctx.save();
       this.ctx.translate(compassX, compassY);
       this.ctx.rotate(angle);
 
-      this.ctx.fillStyle = '#e63946';
+      this.ctx.fillStyle = '#b92b45';
       this.ctx.beginPath();
-      this.ctx.moveTo(14, 0);
-      this.ctx.lineTo(-8, -8);
-      this.ctx.lineTo(-4, 0);
-      this.ctx.lineTo(-8, 8);
+      this.ctx.moveTo(16, 0);
+      this.ctx.lineTo(-10, -9);
+      this.ctx.lineTo(-5, 0);
+      this.ctx.lineTo(-10, 9);
       this.ctx.closePath();
       this.ctx.fill();
-      this.ctx.strokeStyle = '#ffd166';
+      this.ctx.strokeStyle = '#ffd778';
       this.ctx.lineWidth = 2;
       this.ctx.stroke();
 
@@ -736,39 +765,107 @@ class Game {
       const y = npc.y * 32;
       window.spriteManager.draw(this.ctx, npc.sprite, x, y);
 
-      // Name tag above NPC
-      this.ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      this.ctx.fillRect(x - 14, y - 14, npc.name.length * 6 + 10, 14);
-      this.ctx.fillStyle = '#fff';
-      this.ctx.font = '9px "Press Start 2P", monospace, sans-serif';
-      this.ctx.fillText(npc.name, x - 10, y - 4);
+      // Name tag above NPC in Alviona font
+      this.ctx.fillStyle = 'rgba(34, 7, 10, 0.85)';
+      const tagW = npc.name.length * 7 + 16;
+      this.ctx.beginPath();
+      this.ctx.roundRect(x + 16 - tagW / 2, y - 18, tagW, 16, 4);
+      this.ctx.fill();
+      this.ctx.strokeStyle = '#ffd778';
+      this.ctx.lineWidth = 1;
+      this.ctx.stroke();
+
+      this.ctx.fillStyle = '#ffd778';
+      this.ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
+      this.ctx.textAlign = 'center';
+      this.ctx.fillText(npc.name, x + 16, y - 6);
+      this.ctx.textAlign = 'start';
     });
   }
 
+  // Draw 2D Vector Chibi Character (Smooth, non-pixelated)
   renderPlayer() {
-    const spriteName = `player_${this.player.direction}_${this.player.animFrame}`;
-    window.spriteManager.draw(this.ctx, spriteName, this.player.x, this.player.y);
+    const px = this.player.x;
+    const py = this.player.y;
+    const bounce = this.player.isMoving ? Math.sin(this.player.animTimer * 0.8) * 2 : 0;
+
+    this.ctx.save();
+    this.ctx.translate(px, py + bounce);
+
+    // Soft Shadow
+    this.ctx.fillStyle = 'rgba(11, 4, 3, 0.25)';
+    this.ctx.beginPath();
+    this.ctx.ellipse(16, 30 - bounce, 12, 5, 0, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // Legs / Shoes
+    this.ctx.fillStyle = '#1d3557'; // Navy shorts
+    this.ctx.fillRect(10, 20, 5, 8);
+    this.ctx.fillRect(17, 20, 5, 8);
+    this.ctx.fillStyle = '#8d6e63'; // Shoes
+    this.ctx.fillRect(9, 27, 6, 4);
+    this.ctx.fillRect(17, 27, 6, 4);
+
+    // Torso / White shirt with red JPC scarf
+    this.ctx.fillStyle = '#fffdf8';
+    this.ctx.beginPath();
+    this.ctx.roundRect(8, 12, 16, 11, 3);
+    this.ctx.fill();
+
+    // Red JPC Scarf / Tie
+    this.ctx.fillStyle = '#b92b45';
+    this.ctx.fillRect(14, 12, 4, 7);
+
+    // Head / Face
+    this.ctx.fillStyle = '#ffe0b2'; // Peach skin
+    this.ctx.beginPath();
+    this.ctx.arc(16, 7, 8, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // Hair (Dark Brown Stylish)
+    this.ctx.fillStyle = '#3e2723';
+    this.ctx.beginPath();
+    this.ctx.arc(16, 5, 8.5, Math.PI, Math.PI * 2);
+    this.ctx.fill();
+    this.ctx.fillRect(8, 4, 16, 4);
+
+    // Eyes
+    if (this.player.direction !== 'up') {
+      this.ctx.fillStyle = '#1b1b1b';
+      if (this.player.direction === 'left') {
+        this.ctx.fillRect(11, 6, 2, 3);
+      } else if (this.player.direction === 'right') {
+        this.ctx.fillRect(19, 6, 2, 3);
+      } else {
+        this.ctx.fillRect(12, 6, 2, 3);
+        this.ctx.fillRect(18, 6, 2, 3);
+      }
+    }
+
+    this.ctx.restore();
 
     // Player name tag
-    this.ctx.fillStyle = 'rgba(230, 57, 70, 0.85)';
-    const tagW = this.playerName.length * 6 + 12;
-    this.ctx.fillRect(this.player.x + 16 - tagW / 2, this.player.y - 14, tagW, 14);
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = '9px "Press Start 2P", monospace, sans-serif';
-    this.ctx.fillText(this.playerName, this.player.x + 22 - tagW / 2, this.player.y - 4);
+    this.ctx.fillStyle = 'linear-gradient(90deg, #b92b45, #5c1216)';
+    this.ctx.fillStyle = '#b92b45';
+    const tagW = this.playerName.length * 7 + 16;
+    this.ctx.beginPath();
+    this.ctx.roundRect(this.player.x + 16 - tagW / 2, this.player.y - 18, tagW, 16, 4);
+    this.ctx.fill();
+    this.ctx.strokeStyle = '#ffd778';
+    this.ctx.lineWidth = 1;
+    this.ctx.stroke();
+
+    this.ctx.fillStyle = '#ffd778';
+    this.ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText(this.playerName, this.player.x + 16, this.player.y - 6);
+    this.ctx.textAlign = 'start';
   }
 
   renderAmbientLighting() {
-    // Soft cinematic outdoor warmth for FTU
-    if (this.currentStageId === 'stage3_2') {
-      // Golden twilight in VJCC
-      this.ctx.fillStyle = 'rgba(255, 140, 80, 0.15)';
-      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    } else if (this.currentStageId === 'stage1') {
-      // Autumn night at sảnh Nhà A
-      this.ctx.fillStyle = 'rgba(20, 25, 45, 0.18)';
-      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    }
+    // Soft sunny morning warmth for FTU Club Day
+    this.ctx.fillStyle = 'rgba(255, 235, 180, 0.06)';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   renderParticles() {
@@ -784,7 +881,9 @@ class Game {
     this.fireworks.forEach(fw => {
       fw.particles.forEach(pt => {
         this.ctx.fillStyle = pt.color;
-        this.ctx.fillRect(pt.x - this.camera.x, pt.y - this.camera.y, pt.size, pt.size);
+        this.ctx.beginPath();
+        this.ctx.arc(pt.x - this.camera.x, pt.y - this.camera.y, pt.size, 0, Math.PI * 2);
+        this.ctx.fill();
       });
     });
   }
@@ -792,20 +891,21 @@ class Game {
   renderInteractionPrompt() {
     if (!this.nearbyInteractable) return;
     const screenX = this.player.x - this.camera.x + 8;
-    const screenY = this.player.y - this.camera.y - 20;
+    const screenY = this.player.y - this.camera.y - 24;
 
     const bob = Math.sin(Date.now() / 150) * 3;
 
-    this.ctx.fillStyle = '#ffd166';
-    this.ctx.strokeStyle = '#000';
+    this.ctx.fillStyle = 'linear-gradient(135deg, #cf9f3f, #ffd778)';
+    this.ctx.fillStyle = '#ffd778';
+    this.ctx.strokeStyle = '#5c1216';
     this.ctx.lineWidth = 2;
     this.ctx.beginPath();
-    this.ctx.arc(screenX + 8, screenY + bob, 12, 0, Math.PI * 2);
+    this.ctx.arc(screenX + 8, screenY + bob, 14, 0, Math.PI * 2);
     this.ctx.fill();
     this.ctx.stroke();
 
-    this.ctx.fillStyle = '#000';
-    this.ctx.font = 'bold 11px sans-serif';
+    this.ctx.fillStyle = '#5c1216';
+    this.ctx.font = 'bold 12px "Alviona", "Cinzel", serif';
     this.ctx.fillText('A', screenX + 4, screenY + bob + 4);
   }
 }

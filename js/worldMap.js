@@ -1,6 +1,6 @@
 // ==========================================================================
-// FTU OPEN WORLD MAP GENERATOR (60 x 40 Grid)
-// Inspired by hanh-trinh-2010.vercel.app with full Foreign Trade University layout
+// FTU 2D CAMPUS MAP GENERATOR (Bright Warm Tone matching jpc-ftu)
+// Non-pixelated smooth vector 2D styling with FCD festival booths at Sân Nhà D
 // ==========================================================================
 
 const TILE_SIZE = 32;
@@ -11,7 +11,7 @@ const TILE_TYPES = {
   WATER: 0,
   SAND: 1,
   GRASS: 2,
-  GRASS_DARK: 3,
+  GRASS_LUSH: 3,
   PATH: 4,
   PLAZA: 5,
   HEDGE: 6,
@@ -19,7 +19,8 @@ const TILE_TYPES = {
   COURT: 8,
   FLOWERBED: 9,
   LAWN: 10,
-  PARKING: 11
+  PARKING: 11,
+  FESTIVAL_PLAZA: 12
 };
 
 // FTU Buildings Definition
@@ -35,24 +36,24 @@ const FTU_BUILDINGS = [
   { id: "SHOP", name: "FTU Shop", x: 3, y: 28, w: 4, h: 3, style: "red" },
   { id: "B", name: "Nhà B (Giảng Đường)", x: 14, y: 12, w: 20, h: 4, style: "cream" },
   { id: "A", name: "Nhà A (Trung Tâm)", x: 14, y: 24, w: 20, h: 4, style: "cream" },
-  { id: "D", name: "Nhà D", x: 49, y: 22, w: 6, h: 4, style: "rose", door: "bottom" },
+  { id: "D", name: "Nhà D & Sân FCD", x: 49, y: 20, w: 7, h: 4, style: "rose", door: "bottom" },
   { id: "VJCC", name: "Viện VJCC Nhật Bản", x: 18, y: 29, w: 13, h: 4, style: "vjcc", door: "left" },
   { id: "KTX7", name: "KTX 7 tầng", x: 21, y: 34, w: 8, h: 3, style: "peach" },
   { id: "BV", name: "Cổng Chùa Láng", x: 3, y: 33, w: 3, h: 2, style: "booth", small: true }
 ];
 
-// Building Color Themes
+// Warm, bright color palette matching jpc-ftu
 const BUILDING_STYLES = {
-  cream:  { roof: "#f0a582", roofDark: "#d98a6c", wall: "#fff6ee", trim: "#e08060" },
-  mint:   { roof: "#9fdcc8", roofDark: "#7cc4ae", wall: "#f3fffa", trim: "#4fa58b" },
-  sky:    { roof: "#a9cdf2", roofDark: "#86b2e0", wall: "#f5faff", trim: "#5b8fd9" },
-  butter: { roof: "#ffe08f", roofDark: "#f2c868", wall: "#fffbee", trim: "#e0a030" },
-  rose:   { roof: "#FB6F92", roofDark: "#E63E6D", wall: "#fff0f5", trim: "#B5121B" },
-  red:    { roof: "#d8434f", roofDark: "#B5121B", wall: "#fff3f0", trim: "#B5121B" },
-  vjcc:   { roof: "#5f6fb0", roofDark: "#4a5893", wall: "#ffffff", trim: "#E63E6D" },
-  booth:  { roof: "#5b8fd9", roofDark: "#4373bd", wall: "#eef5ff", trim: "#25345e" },
-  lilac:  { roof: "#b8a0d2", roofDark: "#9d82bd", wall: "#fdf8ff", trim: "#7f5fa6" },
-  peach:  { roof: "#f4a261", roofDark: "#e76f51", wall: "#fff4ec", trim: "#d95d39" }
+  cream:  { roof: "#d8434f", roofDark: "#b92b45", wall: "#fffdf8", trim: "#cf9f3f" }, // Nhà A, Nhà B
+  mint:   { roof: "#4fa58b", roofDark: "#397d68", wall: "#fafffd", trim: "#8fd68f" }, // Nhà Thể chất
+  sky:    { roof: "#5b8fd9", roofDark: "#4373bd", wall: "#f8fbff", trim: "#a9cdf2" }, // Nhà E, G
+  butter: { roof: "#e0a030", roofDark: "#c2841f", wall: "#fffdee", trim: "#ffd778" }, // Canteen
+  rose:   { roof: "#b92b45", roofDark: "#8a1c1c", wall: "#fff8fa", trim: "#ffb7c5" }, // Nhà D
+  red:    { roof: "#e63946", roofDark: "#ba1826", wall: "#fff3f3", trim: "#ffd778" }, // FTU Shop
+  vjcc:   { roof: "#5c1216", roofDark: "#3d0c0f", wall: "#ffffff", trim: "#cf9f3f" }, // VJCC Nhật Bản
+  booth:  { roof: "#5c1216", roofDark: "#3d0c0f", wall: "#fffaf0", trim: "#cf9f3f" }, // Bác bảo vệ
+  lilac:  { roof: "#8b6cb0", roofDark: "#6e5291", wall: "#faf7ff", trim: "#d3bdf0" }, // Nhà K, H, F
+  peach:  { roof: "#e76f51", roofDark: "#cc5234", wall: "#fff8f5", trim: "#f4a261" }  // KTX
 };
 
 class WorldMap {
@@ -71,7 +72,6 @@ class WorldMap {
     this.initMap();
   }
 
-  // Check island bounds (soft rounded shape like hanh-trinh-2010)
   isInsideCampus(c, r) {
     if (c < 2 || c > 57 || r < 2 || r > 37) return false;
     const cx = c < 5 ? 5 : c > 54 ? 54 : c;
@@ -86,25 +86,25 @@ class WorldMap {
   }
 
   initMap() {
-    // 1. Initialize Base Terrain
     this.grid = [];
     this.solidGrid = [];
 
+    // 1. Base Bright Green Terrain & Surrounding Water
     for (let r = 0; r < this.rows; r++) {
       this.grid.push([]);
       this.solidGrid.push([]);
       for (let c = 0; c < this.cols; c++) {
         if (this.isInsideCampus(c, r)) {
-          this.grid[r].push(this.pseudoRandom(c, r) < 0.12 ? TILE_TYPES.GRASS_DARK : TILE_TYPES.GRASS);
+          this.grid[r].push(this.pseudoRandom(c, r) < 0.15 ? TILE_TYPES.GRASS_LUSH : TILE_TYPES.GRASS);
           this.solidGrid[r].push(0);
         } else {
           this.grid[r].push(TILE_TYPES.WATER);
-          this.solidGrid[r].push(1); // Water is impassable
+          this.solidGrid[r].push(1);
         }
       }
     }
 
-    // 2. Sand beach borders around water
+    // 2. Sand Beach Borders
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.cols; c++) {
         if (this.grid[r][c] === TILE_TYPES.WATER) continue;
@@ -118,7 +118,6 @@ class WorldMap {
       }
     }
 
-    // Helper to paint rectangle of tiles
     const paint = (startX, startY, w, h, type, isSolid = false) => {
       for (let r = startY; r < startY + h; r++) {
         for (let c = startX; c < startX + w; c++) {
@@ -130,44 +129,38 @@ class WorldMap {
       }
     };
 
-    // 3. Roads & Pathways of FTU
+    // 3. Paved Avenues & Pathways
     paint(10, 8, 2, 24, TILE_TYPES.PATH);
     paint(8, 31, 4, 1, TILE_TYPES.PATH);
     paint(10, 9, 39, 2, TILE_TYPES.PATH);
-    paint(10, 16, 47, 1, TILE_TYPES.PATH); // Middle avenue (Dốc Nhà B)
+    paint(10, 16, 47, 1, TILE_TYPES.PATH); // Avenue to Dốc Nhà B
     paint(10, 20, 47, 1, TILE_TYPES.PATH);
     paint(10, 28, 24, 1, TILE_TYPES.PATH);
     paint(12, 29, 2, 3, TILE_TYPES.PATH);
     paint(15, 33, 41, 1, TILE_TYPES.PATH);
     paint(31, 28, 3, 6, TILE_TYPES.PATH);
     paint(40, 11, 2, 23, TILE_TYPES.PATH);
-    paint(47, 9, 2, 25, TILE_TYPES.PATH);
+    paint(47, 9, 2, 25, TILE_TYPES.PATH); // Path straight to Sân Nhà D
     paint(25, 8, 2, 2, TILE_TYPES.PATH);
 
-    // 4. Special Zones (Courts, Plazas, Lawns, Parking)
-    paint(21, 3, 8, 5, TILE_TYPES.COURT);   // Sân thể chất / Basketball
-    paint(15, 17, 7, 3, TILE_TYPES.LAWN);   // Bãi cỏ xanh Dốc Nhà B
+    // 4. SÂN NHÀ D (FTU CLUB DAY PLAZA)
+    paint(45, 24, 11, 8, TILE_TYPES.FESTIVAL_PLAZA); // Big FCD Plaza in front of Nhà D
+
+    // Special Zones
+    paint(21, 3, 8, 5, TILE_TYPES.COURT);
+    paint(15, 17, 7, 3, TILE_TYPES.LAWN);
     paint(26, 17, 7, 3, TILE_TYPES.LAWN);
-    paint(22, 17, 4, 3, TILE_TYPES.PLAZA);  // Sân trung tâm nối A-B
-    paint(5, 33, 9, 4, TILE_TYPES.PLAZA);   // Tiền sảnh Cổng Chùa Láng
-    paint(3, 32, 12, 1, TILE_TYPES.FENCE, true); // Hàng rào cổng
+    paint(22, 17, 4, 3, TILE_TYPES.PLAZA);
+    paint(5, 33, 9, 4, TILE_TYPES.PLAZA);
+    paint(3, 32, 12, 1, TILE_TYPES.FENCE, true);
     paint(14, 32, 1, 5, TILE_TYPES.FENCE, true);
-    paint(8, 32, 2, 1, TILE_TYPES.PLAZA);   // Lối qua cổng
-    paint(35, 22, 4, 9, TILE_TYPES.PARKING); // Bãi gửi xe cạnh Nhà A
-    paint(49, 14, 8, 6, TILE_TYPES.PARKING); // Bãi xe phụ
+    paint(8, 32, 2, 1, TILE_TYPES.PLAZA);
+    paint(35, 22, 4, 9, TILE_TYPES.PARKING);
 
-    // Plazas around buildings
-    paint(40, 8, 4, 3, TILE_TYPES.PLAZA);
-    paint(50, 26, 4, 3, TILE_TYPES.PLAZA);
-    paint(28, 21, 5, 3, TILE_TYPES.PLAZA);  // Sân trước Nhà A
-    paint(15, 30, 3, 2, TILE_TYPES.PLAZA);  // Sân VJCC
-
-    // 5. Hedges & Flowerbeds
+    // Hedges & Flowerbeds
     paint(34, 21, 1, 11, TILE_TYPES.HEDGE, true);
     paint(39, 21, 1, 11, TILE_TYPES.HEDGE, true);
     paint(35, 31, 4, 1, TILE_TYPES.HEDGE, true);
-    paint(27, 21, 1, 3, TILE_TYPES.HEDGE, true);
-    paint(33, 21, 1, 3, TILE_TYPES.HEDGE, true);
 
     const flowerBeds = [
       [12, 18], [12, 19], [33, 18], [34, 18], [36, 18], [37, 18],
@@ -181,12 +174,11 @@ class WorldMap {
       }
     });
 
-    // 6. Register Building Solids (Player cannot walk through building walls)
+    // 5. Register Building Collisions
     FTU_BUILDINGS.forEach(b => {
       for (let r = b.y; r < b.y + b.h; r++) {
         for (let c = b.x; c < b.x + b.w; c++) {
           if (r >= 0 && r < this.rows && c >= 0 && c < this.cols) {
-            // Keep front door open
             const isDoor = (r === b.y + b.h - 1) && Math.abs(c - (b.x + Math.floor(b.w / 2))) <= 0;
             if (!isDoor) {
               this.solidGrid[r][c] = 1;
@@ -196,7 +188,6 @@ class WorldMap {
       }
     });
 
-    // 7. Pre-render Entire World Map to Offscreen Canvas for Max Performance
     this.buildPreRenderedCanvas();
     this.buildMiniMap();
   }
@@ -213,9 +204,9 @@ class WorldMap {
     c.width = this.width;
     c.height = this.height;
     const ctx = c.getContext('2d');
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = true;
 
-    // A. Render Tiles
+    // A. Render Smooth 2D Vector Tiles
     for (let r = 0; r < this.rows; r++) {
       for (let col = 0; col < this.cols; col++) {
         const type = this.grid[r][col];
@@ -224,95 +215,106 @@ class WorldMap {
 
         switch (type) {
           case TILE_TYPES.WATER:
-            ctx.fillStyle = '#64b5f6';
+            ctx.fillStyle = '#6ec1e4';
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
-            ctx.fillStyle = '#42a5f5';
-            ctx.fillRect(x + 4, y + 8, 12, 2);
-            ctx.fillRect(x + 16, y + 20, 10, 2);
+            ctx.fillStyle = '#59b2d8';
+            ctx.beginPath();
+            ctx.ellipse(x + 12, y + 16, 8, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
             break;
 
           case TILE_TYPES.SAND:
-            ctx.fillStyle = '#ffe082';
+            ctx.fillStyle = '#f8e4b7';
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
-            ctx.fillStyle = '#ffd54f';
-            ctx.fillRect(x + 2, y + 2, 4, 4);
             break;
 
           case TILE_TYPES.GRASS:
-            ctx.fillStyle = '#81c784';
+            ctx.fillStyle = '#8fd68f';
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
-            ctx.fillStyle = '#66bb6a';
-            ctx.fillRect(x + 6, y + 10, 2, 4);
-            ctx.fillRect(x + 8, y + 8, 2, 6);
             break;
 
-          case TILE_TYPES.GRASS_DARK:
-            ctx.fillStyle = '#66bb6a';
+          case TILE_TYPES.GRASS_LUSH:
+            ctx.fillStyle = '#7bc87c';
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
-            ctx.fillStyle = '#4caf50';
-            ctx.fillRect(x + 12, y + 14, 2, 5);
+            ctx.fillStyle = '#ffccd5';
+            ctx.beginPath();
+            ctx.arc(x + 14, y + 14, 2, 0, Math.PI * 2);
+            ctx.fill();
             break;
 
           case TILE_TYPES.PATH:
-            ctx.fillStyle = '#e0e0e0';
+            ctx.fillStyle = '#f4ecd8'; // Warm ivory path
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
-            ctx.strokeStyle = '#bdbdbd';
+            ctx.strokeStyle = '#e2d5bc';
             ctx.lineWidth = 1;
             ctx.strokeRect(x, y, this.tileSize, this.tileSize);
             break;
 
           case TILE_TYPES.PLAZA:
-            ctx.fillStyle = '#ffcc80'; // Warm stone plaza
+            ctx.fillStyle = '#ffe0b2';
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
-            ctx.strokeStyle = '#ffa726';
+            ctx.strokeStyle = '#ffcc80';
             ctx.lineWidth = 1;
+            ctx.strokeRect(x + 1, y + 1, this.tileSize - 2, this.tileSize - 2);
+            break;
+
+          case TILE_TYPES.FESTIVAL_PLAZA:
+            // Sân Nhà D FCD with warm festive stone pavers
+            ctx.fillStyle = '#ffecd2';
+            ctx.fillRect(x, y, this.tileSize, this.tileSize);
+            ctx.strokeStyle = '#f8cfad';
+            ctx.lineWidth = 1.5;
             ctx.strokeRect(x + 2, y + 2, this.tileSize - 4, this.tileSize - 4);
             break;
 
           case TILE_TYPES.HEDGE:
-            ctx.fillStyle = '#2e7d32';
-            ctx.fillRect(x, y, this.tileSize, this.tileSize);
-            ctx.fillStyle = '#1b5e20';
-            ctx.fillRect(x + 2, y + 2, this.tileSize - 4, this.tileSize - 4);
+            ctx.fillStyle = '#388e3c';
+            ctx.beginPath();
+            ctx.roundRect(x + 2, y + 2, this.tileSize - 4, this.tileSize - 4, 6);
+            ctx.fill();
             break;
 
           case TILE_TYPES.FENCE:
-            ctx.fillStyle = '#8d6e63';
-            ctx.fillRect(x, y + 10, this.tileSize, 12);
-            ctx.fillStyle = '#5d4037';
-            ctx.fillRect(x + 4, y + 4, 6, 24);
-            ctx.fillRect(x + 20, y + 4, 6, 24);
+            ctx.fillStyle = '#a1887f';
+            ctx.fillRect(x, y + 10, this.tileSize, 8);
+            ctx.fillStyle = '#6d4c41';
+            ctx.fillRect(x + 4, y + 2, 6, 26);
+            ctx.fillRect(x + 20, y + 2, 6, 26);
             break;
 
           case TILE_TYPES.COURT:
-            ctx.fillStyle = '#4db6ac'; // Green/Blue athletic court
+            ctx.fillStyle = '#80cbc4';
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
             ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 2;
             ctx.strokeRect(x, y, this.tileSize, this.tileSize);
             break;
 
           case TILE_TYPES.FLOWERBED:
-            ctx.fillStyle = '#5d4037';
+            ctx.fillStyle = '#6d4c41';
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
+            // Sakura & gold flowers
             ctx.fillStyle = '#ff80ab';
-            ctx.fillRect(x + 4, y + 6, 6, 6);
-            ctx.fillStyle = '#ff4081';
-            ctx.fillRect(x + 18, y + 14, 6, 6);
-            ctx.fillStyle = '#ffd54f';
-            ctx.fillRect(x + 12, y + 8, 4, 4);
+            ctx.beginPath();
+            ctx.arc(x + 8, y + 10, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffd778';
+            ctx.beginPath();
+            ctx.arc(x + 22, y + 18, 4, 0, Math.PI * 2);
+            ctx.fill();
             break;
 
           case TILE_TYPES.LAWN:
             ctx.fillStyle = '#aed581';
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
-            ctx.fillStyle = '#ffccd5'; // Sakura petals on lawn
-            ctx.fillRect(x + 6, y + 6, 4, 3);
-            ctx.fillRect(x + 20, y + 18, 3, 3);
+            ctx.fillStyle = '#ffccd5';
+            ctx.beginPath();
+            ctx.ellipse(x + 8, y + 12, 3, 2, 0.4, 0, Math.PI * 2);
+            ctx.fill();
             break;
 
           case TILE_TYPES.PARKING:
-            ctx.fillStyle = '#9e9e9e';
+            ctx.fillStyle = '#b0bec5';
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 1;
@@ -322,97 +324,262 @@ class WorldMap {
       }
     }
 
-    // B. Render All FTU Buildings
+    // B. Draw FTU Buildings with Smooth Modern 2D Vector Styling
     FTU_BUILDINGS.forEach(b => {
-      this.drawBuilding(ctx, b);
+      this.drawModernBuilding(ctx, b);
     });
+
+    // C. Draw FCD Festival Elements at Sân Nhà D
+    this.drawFCDPlaza(ctx);
+
+    // D. Draw Cổng Chùa Láng FCD Welcome Arch
+    this.drawEntranceArch(ctx);
 
     this.preRenderedCanvas = c;
   }
 
-  // Draw authentic pixel building with 3D roof, windows, door, and signage
-  drawBuilding(ctx, b) {
+  // Draw modern 2D building with soft shadows, gradient roofs, and Alviona signage
+  drawModernBuilding(ctx, b) {
     const x = b.x * this.tileSize;
     const y = b.y * this.tileSize;
     const w = b.w * this.tileSize;
     const h = b.h * this.tileSize;
     const style = BUILDING_STYLES[b.style] || BUILDING_STYLES.cream;
 
-    const roofHeight = Math.round(h * 0.55);
+    const roofHeight = Math.round(h * 0.52);
     const wallHeight = h - roofHeight;
 
     // 1. Soft Shadow
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
-    ctx.fillRect(x - 4, y + roofHeight, w + 8, wallHeight + 6);
+    ctx.fillStyle = 'rgba(11, 4, 3, 0.2)';
+    ctx.beginPath();
+    ctx.roundRect(x - 4, y + roofHeight, w + 8, wallHeight + 6, 8);
+    ctx.fill();
 
-    // 2. Main Wall
+    // 2. Wall
     ctx.fillStyle = style.wall;
-    ctx.fillRect(x, y + roofHeight, w, wallHeight);
+    ctx.beginPath();
+    ctx.roundRect(x, y + roofHeight - 2, w, wallHeight + 2, 6);
+    ctx.fill();
 
     // Wall Trim base
     ctx.fillStyle = style.trim;
     ctx.fillRect(x, y + h - 4, w, 4);
 
-    // 3. Roof (3D Gable Roof)
-    ctx.fillStyle = style.roof;
-    ctx.fillRect(x, y, w, roofHeight);
+    // 3. Smooth Curved Roof with Gradient
+    const roofGrad = ctx.createLinearGradient(x, y, x, y + roofHeight);
+    roofGrad.addColorStop(0, style.roof);
+    roofGrad.addColorStop(1, style.roofDark);
 
-    // Roof Texture / Slanted ridge lines
-    ctx.fillStyle = style.roofDark;
-    for (let py = y + 4; py < y + roofHeight - 4; py += 6) {
-      ctx.fillRect(x + 2, py, w - 4, 2);
-    }
-    // Roof Border & Eaves
+    ctx.fillStyle = roofGrad;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, roofHeight, [8, 8, 2, 2]);
+    ctx.fill();
+
+    // Eaves trim
+    ctx.fillStyle = '#cf9f3f'; // Gold edge
     ctx.fillRect(x, y + roofHeight - 3, w, 3);
-    ctx.fillRect(x, y, 3, roofHeight);
-    ctx.fillRect(x + w - 3, y, 3, roofHeight);
 
     // 4. Windows
-    const windowY = y + roofHeight + 6;
-    const windowW = 14;
-    const windowH = Math.max(8, wallHeight - 16);
+    const windowY = y + roofHeight + 8;
+    const windowW = 16;
+    const windowH = Math.max(10, wallHeight - 18);
 
-    for (let wx = x + 10; wx + windowW <= x + w - 10; wx += windowW + 12) {
-      // Don't draw window over central door
+    for (let wx = x + 12; wx + windowW <= x + w - 12; wx += windowW + 14) {
       if (Math.abs(wx + windowW / 2 - (x + w / 2)) > 16) {
-        ctx.fillStyle = '#90caf9'; // Glass
-        ctx.fillRect(wx, windowY, windowW, windowH);
-        ctx.fillStyle = '#ffffff'; // White frame
-        ctx.strokeRect(wx, windowY, windowW, windowH);
-        ctx.fillRect(wx + Math.floor(windowW / 2), windowY, 1, windowH);
+        ctx.fillStyle = '#b3e5fc';
+        ctx.beginPath();
+        ctx.roundRect(wx, windowY, windowW, windowH, 3);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
       }
     }
 
-    // 5. Central Entrance Door
-    const doorW = 16;
+    // 5. Entrance Door
+    const doorW = 18;
     const doorH = wallHeight - 4;
     const doorX = x + Math.floor(w / 2) - doorW / 2;
     const doorY = y + h - doorH;
 
-    ctx.fillStyle = '#5d4037'; // Door frame
-    ctx.fillRect(doorX - 2, doorY - 2, doorW + 4, doorH + 2);
-    ctx.fillStyle = '#8d6e63'; // Wooden door
+    ctx.fillStyle = '#5c1216'; // Crimson frame
+    ctx.beginPath();
+    ctx.roundRect(doorX - 2, doorY - 2, doorW + 4, doorH + 2, [4, 4, 0, 0]);
+    ctx.fill();
+
+    ctx.fillStyle = '#fffdf8';
     ctx.fillRect(doorX, doorY, doorW, doorH);
-    ctx.fillStyle = '#ffd54f'; // Golden handle
-    ctx.fillRect(doorX + doorW - 4, doorY + doorH / 2, 2, 3);
 
-    // 6. Building Name Signboard
-    const textW = b.name.length * 6 + 14;
+    ctx.fillStyle = '#cf9f3f'; // Gold handle
+    ctx.beginPath();
+    ctx.arc(doorX + doorW - 4, doorY + doorH / 2, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 6. Signboard with 'Alviona' Font
+    const textW = b.name.length * 7 + 18;
     const signX = x + Math.floor(w / 2) - textW / 2;
-    const signY = y + roofHeight - 14;
+    const signY = y + roofHeight - 16;
 
-    ctx.fillStyle = style.roofDark;
-    ctx.fillRect(signX - 2, signY - 2, textW + 4, 16);
-    ctx.strokeStyle = '#ffd166';
+    ctx.fillStyle = 'rgba(34, 7, 10, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(signX, signY, textW, 18, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
     ctx.lineWidth = 1;
-    ctx.strokeRect(signX - 2, signY - 2, textW + 4, 16);
+    ctx.stroke();
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 9px sans-serif';
-    ctx.fillText(b.name, signX + 4, signY + 10);
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 11px "Alviona", "Cinzel", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(b.name, signX + textW / 2, signY + 13);
+    ctx.textAlign = 'start';
   }
 
-  // Pre-render a radar mini-map (120 x 80 px)
+  // Draw FCD Festival Elements at Sân Nhà D (Other club booths & the prominent JPC Booth)
+  drawFCDPlaza(ctx) {
+    const px = 45 * this.tileSize;
+    const py = 24 * this.tileSize;
+
+    // Festival fairy lights hanging across plaza
+    ctx.strokeStyle = 'rgba(255, 215, 120, 0.8)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(px, py + 10);
+    ctx.quadraticCurveTo(px + 100, py + 40, px + 200, py + 10);
+    ctx.stroke();
+
+    // Little glowing bulbs
+    const bulbColors = ['#ff85a1', '#ffd778', '#64b5f6', '#81c784'];
+    for (let i = 0; i < 8; i++) {
+      const t = (i + 1) / 9;
+      const bx = px + t * 200;
+      const by = py + 10 + Math.sin(t * Math.PI) * 20;
+      ctx.fillStyle = bulbColors[i % bulbColors.length];
+      ctx.beginPath();
+      ctx.arc(bx, by, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Other Club Booths (Music, Dance, Debate)
+    const otherBooths = [
+      { name: "CLB Âm Nhạc", x: 46 * this.tileSize, y: 25 * this.tileSize, color: "#5b8fd9" },
+      { name: "CLB Nhảy", x: 46 * this.tileSize, y: 29 * this.tileSize, color: "#8b6cb0" },
+      { name: "CLB Tình Nguyện", x: 53 * this.tileSize, y: 29 * this.tileSize, color: "#e76f51" }
+    ];
+
+    otherBooths.forEach(b => {
+      // Canopy
+      ctx.fillStyle = b.color;
+      ctx.beginPath();
+      ctx.roundRect(b.x, b.y, 60, 40, 4);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(b.x + 4, b.y + 36, 52, 4);
+
+      // Label
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 8px "Be Vietnam Pro", sans-serif';
+      ctx.fillText(b.name, b.x + 6, b.y + 22);
+    });
+
+    // ========================================================================
+    // ★ GRAND JPC BOOTH AT SÂN NHÀ D (x: 50, y: 24)
+    // Decorated with Torii gate, cherry blossoms, red lanterns & big banner!
+    // ========================================================================
+    const jpcX = 49 * this.tileSize;
+    const jpcY = 24 * this.tileSize;
+    const jpcW = 120;
+    const jpcH = 75;
+
+    // Soft glow under booth
+    ctx.fillStyle = 'rgba(230, 57, 70, 0.25)';
+    ctx.beginPath();
+    ctx.ellipse(jpcX + jpcW / 2, jpcY + jpcH - 5, jpcW / 1.6, 20, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Crimson & Gold Royal Canopy
+    const canopyGrad = ctx.createLinearGradient(jpcX, jpcY, jpcX, jpcY + 36);
+    canopyGrad.addColorStop(0, '#e63946');
+    canopyGrad.addColorStop(1, '#5c1216');
+
+    ctx.fillStyle = canopyGrad;
+    ctx.beginPath();
+    ctx.roundRect(jpcX, jpcY, jpcW, 40, [8, 8, 0, 0]);
+    ctx.fill();
+
+    // Gold trim
+    ctx.fillStyle = '#ffd778';
+    ctx.fillRect(jpcX, jpcY + 37, jpcW, 4);
+
+    // Front Table / Reception Desk
+    ctx.fillStyle = '#fffdf8';
+    ctx.beginPath();
+    ctx.roundRect(jpcX + 10, jpcY + 41, jpcW - 20, 28, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#cf9f3f';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Big Banner: "CLB TIẾNG NHẬT JPC — GEN 22"
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 11px "Alviona", "Cinzel", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('★ JPC FTU — GEN 22 ★', jpcX + jpcW / 2, jpcY + 24);
+    ctx.textAlign = 'start';
+
+    // Hanging Red Lanterns (Chōchin)
+    const drawLantern = (lx, ly) => {
+      ctx.fillStyle = '#222';
+      ctx.fillRect(lx - 1, ly - 4, 2, 4);
+      ctx.fillStyle = '#e63946';
+      ctx.beginPath();
+      ctx.ellipse(lx, ly + 6, 6, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffd778';
+      ctx.fillRect(lx - 4, ly + 4, 8, 4);
+    };
+    drawLantern(jpcX + 8, jpcY + 40);
+    drawLantern(jpcX + jpcW - 8, jpcY + 40);
+
+    // Torii Gate on the side of JPC Booth
+    const toriiX = jpcX - 34;
+    const toriiY = jpcY + 10;
+    ctx.fillStyle = '#c1121f';
+    ctx.fillRect(toriiX, toriiY, 30, 4); // top beam
+    ctx.fillRect(toriiX + 2, toriiY + 6, 26, 3);
+    ctx.fillRect(toriiX + 5, toriiY + 4, 4, 42); // pillars
+    ctx.fillRect(toriiX + 21, toriiY + 4, 4, 42);
+  }
+
+  // Draw Welcome Arch at Cổng Chùa Láng
+  drawEntranceArch(ctx) {
+    const ax = 7 * this.tileSize;
+    const ay = 32 * this.tileSize;
+    const aw = 96;
+    const ah = 44;
+
+    ctx.fillStyle = '#5c1216';
+    ctx.fillRect(ax + 4, ay, 8, ah);
+    ctx.fillRect(ax + aw - 12, ay, 8, ah);
+
+    // Top Welcome Sign
+    ctx.fillStyle = 'linear-gradient(90deg, #b92b45, #5c1216)';
+    ctx.fillStyle = '#b92b45';
+    ctx.beginPath();
+    ctx.roundRect(ax, ay - 8, aw, 22, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 9px "Alviona", "Cinzel", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('FTU CLUB DAY (FCD)', ax + aw / 2, ay + 6);
+    ctx.textAlign = 'start';
+  }
+
+  // Pre-render a sleek Radar Mini-map (120 x 80 px)
   buildMiniMap() {
     const c = document.createElement('canvas');
     c.width = 120;
@@ -422,12 +589,15 @@ class WorldMap {
     const scaleX = 120 / this.width;
     const scaleY = 80 / this.height;
 
-    // Draw campus base
-    ctx.fillStyle = '#1e293b';
+    // Dark crimson velvet card base
+    ctx.fillStyle = '#22070a';
     ctx.fillRect(0, 0, 120, 80);
 
-    ctx.fillStyle = '#81c784';
-    ctx.fillRect(8, 6, 104, 68);
+    // Campus grass shape
+    ctx.fillStyle = '#7bc87c';
+    ctx.beginPath();
+    ctx.roundRect(8, 6, 104, 68, 6);
+    ctx.fill();
 
     // Draw buildings in mini-map
     FTU_BUILDINGS.forEach(b => {
@@ -435,9 +605,15 @@ class WorldMap {
       const by = b.y * this.tileSize * scaleY;
       const bw = b.w * this.tileSize * scaleX;
       const bh = b.h * this.tileSize * scaleY;
-      ctx.fillStyle = b.id === 'A' || b.id === 'VJCC' ? '#e63946' : '#f59e0b';
+      ctx.fillStyle = (b.id === 'D' || b.id === 'A') ? '#e63946' : '#ffd778';
       ctx.fillRect(bx, by, Math.max(3, bw), Math.max(3, bh));
     });
+
+    // Highlight Sân Nhà D FCD
+    ctx.fillStyle = '#ff85a1';
+    ctx.beginPath();
+    ctx.arc(49 * this.tileSize * scaleX + 8, 25 * this.tileSize * scaleY + 6, 6, 0, Math.PI * 2);
+    ctx.fill();
 
     this.miniMapCanvas = c;
   }
@@ -452,46 +628,50 @@ class WorldMap {
     if (!this.miniMapCanvas) return;
     const mmW = 110;
     const mmH = 74;
-    const posX = 12;
-    const posY = 56;
+    const posX = 16;
+    const posY = 64;
 
-    // Frame
     ctx.save();
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-    ctx.fillRect(posX - 3, posY - 3, mmW + 6, mmH + 6);
-    ctx.strokeStyle = '#ffd166';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(posX - 3, posY - 3, mmW + 6, mmH + 6);
+    ctx.fillStyle = 'rgba(34, 7, 10, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(posX - 4, posY - 4, mmW + 8, mmH + 8, 8);
+    ctx.fill();
+    ctx.strokeStyle = '#cf9f3f';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
 
     ctx.drawImage(this.miniMapCanvas, posX, posY, mmW, mmH);
 
     const scaleX = mmW / this.width;
     const scaleY = mmH / this.height;
 
-    // Draw Quest Target marker (Pulsing star)
+    // Quest Target marker (Pulsing Red Heart/Star)
     if (questSpot) {
       const qx = posX + questSpot.x * scaleX;
       const qy = posY + questSpot.y * scaleY;
-      ctx.fillStyle = '#ff0055';
+      ctx.fillStyle = '#e63946';
       ctx.beginPath();
-      ctx.arc(qx, qy, 4, 0, Math.PI * 2);
+      ctx.arc(qx, qy, 4.5, 0, Math.PI * 2);
       ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
     }
 
-    // Draw Player Blip (Bright Yellow Dot)
+    // Player Blip (Bright Gold Dot)
     const px = posX + playerX * scaleX;
     const py = posY + playerY * scaleY;
-    ctx.fillStyle = '#ffd166';
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1;
+    ctx.fillStyle = '#ffd778';
+    ctx.strokeStyle = '#0b0403';
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+    ctx.arc(px, py, 4, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = '#fff';
-    ctx.font = '8px sans-serif';
-    ctx.fillText('BẢN ĐỒ FTU', posX + 4, posY + mmH - 4);
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 8px "Alviona", "Cinzel", serif';
+    ctx.fillText('BẢN ĐỒ FTU', posX + 6, posY + mmH - 4);
 
     ctx.restore();
   }

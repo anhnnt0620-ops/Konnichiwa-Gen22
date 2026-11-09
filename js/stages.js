@@ -197,7 +197,7 @@ const STAGE_DATA = {
       {
         id: 'npc_bcm',
         name: 'Ban Chuyên Môn',
-        sprite: 'npc_senpai',
+        sprite: 'kokeshi_bcm',
         x: 8,
         y: 4,
         dialogues: [
@@ -207,7 +207,7 @@ const STAGE_DATA = {
       {
         id: 'npc_bns',
         name: 'Ban Nhân Sự',
-        sprite: 'npc_applicant_b',
+        sprite: 'kokeshi_bns',
         x: 12,
         y: 4,
         dialogues: [
@@ -217,7 +217,7 @@ const STAGE_DATA = {
       {
         id: 'npc_btt',
         name: 'Ban Thông Tin',
-        sprite: 'npc_applicant_a',
+        sprite: 'kokeshi_btt',
         x: 8,
         y: 10,
         dialogues: [
@@ -227,7 +227,7 @@ const STAGE_DATA = {
       {
         id: 'npc_btc',
         name: 'Ban Tổ Chức',
-        sprite: 'npc_leader',
+        sprite: 'kokeshi_btc',
         x: 12,
         y: 10,
         dialogues: [
@@ -237,7 +237,7 @@ const STAGE_DATA = {
       {
         id: 'npc_bdn',
         name: 'Ban Đối Ngoại',
-        sprite: 'npc_senpai',
+        sprite: 'kokeshi_bdn',
         x: 15,
         y: 4,
         dialogues: [

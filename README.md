@@ -77,3 +77,4 @@ npx serve .
 2. Vào GitHub Repository `anhnnt0620-ops/Konnichiwa-Gen22` -> **Settings** -> **Pages**.
 3. Tại mục **Branch**, chọn `main` và thư mục `/ (root)` rồi bấm **Save**.
 4. Sau 1-2 phút, game sẽ có đường link trực tiếp trên web để các bạn Gen 22 có thể mở chơi ngay trên điện thoại!
+

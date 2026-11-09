@@ -1,0 +1,19 @@
+{
+  "name": "konnichiwa-gen22-game",
+  "version": "1.0.0",
+  "description": "Mini pixel-art RPG game for JPC Konnichiwa Gen 22",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node -c js/game.js"
+  },
+  "keywords": [
+    "jpc",
+    "gen22",
+    "pixel-game",
+    "html5-game"
+  ],
+  "author": "JPC FTU",
+  "license": "MIT"
+}

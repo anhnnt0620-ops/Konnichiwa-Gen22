@@ -2,6 +2,7 @@
 class SpriteManager {
   constructor() {
     this.cache = {};
+    this.images = {};
     this.tileSize = 32; // base tile size
   }
 
@@ -10,6 +11,25 @@ class SpriteManager {
     this.generateNPCSprites();
     this.generateTiles();
     this.generateProps();
+    this.loadExternalAssets();
+  }
+
+  loadExternalAssets() {
+    const assetList = {
+      kokeshi_bcm: 'Image/Kokeshi 5 Ban/Ban Chuyên Môn.png',
+      kokeshi_bns: 'Image/Kokeshi 5 Ban/Ban Nhân Sự.png',
+      kokeshi_btt: 'Image/Kokeshi 5 Ban/Ban Thông Tin.png',
+      kokeshi_btc: 'Image/Kokeshi 5 Ban/Ban Tổ Chức.png',
+      kokeshi_bdn: 'Image/Kokeshi 5 Ban/Ban Đối Ngoại.png'
+    };
+
+    for (const [key, src] of Object.entries(assetList)) {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        this.images[key] = img;
+      };
+    }
   }
 
   // Helper to create an offscreen canvas
@@ -455,6 +475,15 @@ class SpriteManager {
 
   // Draw cached sprite helper
   draw(ctx, name, x, y, w = null, h = null) {
+    // If it's an external loaded image
+    if (this.images && this.images[name]) {
+      const img = this.images[name];
+      const targetW = w || 32;
+      const targetH = h || 44;
+      ctx.drawImage(img, Math.round(x), Math.round(y) - (targetH - 32), targetW, targetH);
+      return;
+    }
+
     const s = this.cache[name];
     if (s) {
       if (w && h) {
@@ -468,3 +497,4 @@ class SpriteManager {
 
 window.spriteManager = new SpriteManager();
 window.spriteManager.init();
+

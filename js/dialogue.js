@@ -144,3 +144,4 @@ class DialogueManager {
 }
 
 window.dialogueManager = new DialogueManager();
+

@@ -204,3 +204,4 @@ class AudioManager {
 }
 
 window.audioManager = new AudioManager();
+

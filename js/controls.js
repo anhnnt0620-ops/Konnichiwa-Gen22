@@ -137,3 +137,4 @@ class ControlsManager {
 }
 
 window.controlsManager = new ControlsManager();
+

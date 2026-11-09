@@ -6,7 +6,7 @@ const STAGE_DATA = {
     subtitle: 'Sân Nhà D FTU — Ngày Hội FCD (18/10) · Điền Đơn Vòng 1',
     bgm: 'stage1',
     playerStart: { x: 9, y: 38 }, // Cổng trường Chùa Láng
-    questSpot: { x: 16 * 32, y: 22 * 32 }, // Gian trại JPC màu đỏ tại dãy booth phía Tây Sân Nhà D
+    questSpot: { x: 17 * 32, y: 22.5 * 32 }, // Trước Gian trại JPC Sân Nhà D
     questText: 'Đến Sân Nhà D (phía Tây Bia đá FTU), gặp Senpai tại Gian trại JPC màu đỏ để điền đơn Vòng 1!',
     questTitle: 'Hội Trát 1: Khai Nhãn',
     timeline: '01/10 – 20/10/2026 · FTU Club Day: 18/10',
@@ -15,9 +15,7 @@ const STAGE_DATA = {
     tip: 'Đi theo vệt hoa anh đào phát sáng dưới chân Kokeshi của bạn để đến thẳng Gian Trại JPC!',
     props: [
       { type: 'prop_ftu_sign', x: 8, y: 37, label: 'Cổng Chùa Láng' },
-      { type: 'prop_boba', x: 18, y: 22, label: 'Trà sữa FCD' },
-      { type: 'prop_lantern', x: 15, y: 20, label: 'Đèn lồng JPC' },
-      { type: 'prop_lantern', x: 15, y: 24, label: 'Đèn lồng JPC' }
+      { type: 'prop_boba', x: 19, y: 22, label: 'Trà sữa FCD' }
     ],
     items: [],
     npcs: [
@@ -36,10 +34,10 @@ const STAGE_DATA = {
       },
       {
         id: 'npc_jpc_booth',
-        name: 'Senpai Gian Trại JPC',
+        name: 'Senpai JPC',
         sprite: 'npc_senpai',
-        x: 16,
-        y: 22,
+        x: 17,
+        y: 22.5,
         avatarIcon: '🌸',
         dialogues: [
           { speaker: 'Senpai JPC', text: 'Konnichiwa! Chào mừng em đến với Gian trại CLB Tiếng Nhật JPC tại Sân Nhà D FTU!' },

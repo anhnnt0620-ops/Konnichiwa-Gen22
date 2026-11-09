@@ -974,22 +974,23 @@ class Game {
     const qx = this.stage.questSpot.x;
     const qy = this.stage.questSpot.y;
 
+    // Hide beacon when player is already close (< 70px) to prevent visual clutter
+    const dist = Math.hypot(qx - (this.player.x + 12), qy - (this.player.y + 20));
+    if (dist < 70) return;
+
     const time = Date.now() / 300;
-    const pulse = 22 + Math.sin(time) * 5;
+    const pulse = 18 + Math.sin(time) * 4;
 
     this.ctx.save();
-    this.ctx.fillStyle = 'rgba(230, 57, 70, 0.35)';
+    this.ctx.fillStyle = 'rgba(255, 215, 120, 0.16)';
     this.ctx.beginPath();
     this.ctx.arc(qx, qy, pulse, 0, Math.PI * 2);
     this.ctx.fill();
 
     this.ctx.strokeStyle = '#ffd778';
-    this.ctx.lineWidth = 2.5;
+    this.ctx.lineWidth = 1.4;
     this.ctx.stroke();
 
-    this.ctx.fillStyle = '#ffd778';
-    this.ctx.font = 'bold 16px sans-serif';
-    this.ctx.fillText('⭐ BOOTH JPC', qx - 45, qy - pulse - 8);
     this.ctx.restore();
   }
 
@@ -1071,21 +1072,23 @@ class Game {
         window.spriteManager.draw(this.ctx, npc.sprite, x, y);
       }
 
-      // Name tag above NPC in Alviona font
-      this.ctx.fillStyle = 'rgba(34, 7, 10, 0.85)';
-      const tagW = npc.name.length * 7 + 16;
+      // Name tag above NPC (Compact, neat pill)
+      this.ctx.save();
+      this.ctx.font = 'bold 9px "Alviona", "Cinzel", serif';
+      const nameW = this.ctx.measureText(npc.name).width + 12;
+
+      this.ctx.fillStyle = 'rgba(34, 7, 10, 0.9)';
       this.ctx.beginPath();
-      this.ctx.roundRect(x + 16 - tagW / 2, y - 24, tagW, 16, 4);
+      this.ctx.roundRect(x + 16 - nameW / 2, y - 28, nameW, 14, 4);
       this.ctx.fill();
       this.ctx.strokeStyle = '#ffd778';
       this.ctx.lineWidth = 1;
       this.ctx.stroke();
 
       this.ctx.fillStyle = '#ffd778';
-      this.ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
       this.ctx.textAlign = 'center';
-      this.ctx.fillText(npc.name, x + 16, y - 12);
-      this.ctx.textAlign = 'start';
+      this.ctx.fillText(npc.name, x + 16, y - 17);
+      this.ctx.restore();
     });
   }
 
@@ -1213,30 +1216,30 @@ class Game {
     // Position neatly above interactable target without colliding with name tags
     if (this.nearbyInteractable.type === 'npc' && this.nearbyInteractable.data) {
       targetX = this.nearbyInteractable.data.x * 32 + 16;
-      targetY = this.nearbyInteractable.data.y * 32 - 42;
+      targetY = this.nearbyInteractable.data.y * 32 - 48;
     } else if (this.nearbyInteractable.type === 'booth_jpc') {
-      targetX = 16 * 32;
-      targetY = 22 * 32 - 38;
+      targetX = 17 * 32;
+      targetY = 22.5 * 32 - 48;
     } else if (this.nearbyInteractable.type === 'prop' && this.nearbyInteractable.data) {
       targetX = this.nearbyInteractable.data.x * 32 + 16;
-      targetY = this.nearbyInteractable.data.y * 32 - 34;
+      targetY = this.nearbyInteractable.data.y * 32 - 40;
     }
 
     const bob = Math.sin(Date.now() / 150) * 3;
 
     this.ctx.save();
     const promptText = 'Nhấn [A] / Chạm để tương tác';
-    this.ctx.font = 'bold 10px "Be Vietnam Pro", sans-serif';
-    const textW = this.ctx.measureText(promptText).width + 22;
+    this.ctx.font = 'bold 9.5px "Be Vietnam Pro", sans-serif';
+    const textW = this.ctx.measureText(promptText).width + 20;
 
     // Glowing badge background
     this.ctx.fillStyle = 'rgba(185, 43, 69, 0.95)';
     this.ctx.beginPath();
-    this.ctx.roundRect(targetX - textW / 2, targetY + bob - 12, textW, 21, 10);
+    this.ctx.roundRect(targetX - textW / 2, targetY + bob - 11, textW, 20, 10);
     this.ctx.fill();
 
     this.ctx.strokeStyle = '#ffd778';
-    this.ctx.lineWidth = 1.6;
+    this.ctx.lineWidth = 1.4;
     this.ctx.stroke();
 
     // Golden prompt text
@@ -1247,9 +1250,9 @@ class Game {
     // Little downward arrow pointing to interactable
     this.ctx.fillStyle = '#ffd778';
     this.ctx.beginPath();
-    this.ctx.moveTo(targetX - 5, targetY + bob + 9);
-    this.ctx.lineTo(targetX + 5, targetY + bob + 9);
-    this.ctx.lineTo(targetX, targetY + bob + 14);
+    this.ctx.moveTo(targetX - 4, targetY + bob + 9);
+    this.ctx.lineTo(targetX + 4, targetY + bob + 9);
+    this.ctx.lineTo(targetX, targetY + bob + 13);
     this.ctx.closePath();
     this.ctx.fill();
 

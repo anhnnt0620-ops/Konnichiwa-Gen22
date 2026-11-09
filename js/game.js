@@ -38,6 +38,10 @@ class Game {
     this.kokeshiImages.thongtin.src = 'Image/Kokeshi 5 Ban/kokeshi-thongtin.png';
     this.kokeshiImages.nhansu.src = 'Image/Kokeshi 5 Ban/kokeshi-nhansu.png';
 
+    // Preload Kokeshi Senpai Doll Image
+    this.senpaiImage = new Image();
+    this.senpaiImage.src = 'Image/kokeshi-senpai.png';
+
     // Camera
     this.camera = { x: 0, y: 0 };
 
@@ -841,7 +845,7 @@ class Game {
 
     // 1. Render Big Open FTU World Map (Terrain, Roads, Buildings, FCD Plaza)
     if (window.worldMap) {
-      window.worldMap.render(this.ctx, this.camera);
+      window.worldMap.render(this.ctx, this.camera, this.currentStageId);
     }
 
     // 2. Render Footstep Trail Guide from player's feet to quest objective!
@@ -870,7 +874,7 @@ class Game {
     // 7. Render Mini-Map Radar in HUD Panel (DOM canvas)
     const domMiniMap = document.getElementById('minimap-canvas');
     if (domMiniMap && window.worldMap) {
-      window.worldMap.renderMiniMapToCanvas(domMiniMap, this.player.x, this.player.y, this.stage ? this.stage.questSpot : null);
+      window.worldMap.renderMiniMapToCanvas(domMiniMap, this.player.x, this.player.y, this.stage ? this.stage.questSpot : null, this.currentStageId);
     }
 
     // 8. Render Quest Compass Arrow pointing to destination
@@ -1051,7 +1055,13 @@ class Game {
     this.stage.npcs.forEach(npc => {
       const x = npc.x * 32;
       const y = npc.y * 32;
-      window.spriteManager.draw(this.ctx, npc.sprite, x, y);
+
+      if (npc.sprite === 'npc_senpai' && this.senpaiImage && this.senpaiImage.complete) {
+        const bounce = Math.sin(Date.now() / 350) * 1.5;
+        this.ctx.drawImage(this.senpaiImage, x + 2, y - 8 + bounce, 28, 44);
+      } else {
+        window.spriteManager.draw(this.ctx, npc.sprite, x, y);
+      }
 
       // Name tag above NPC in Alviona font
       this.ctx.fillStyle = 'rgba(34, 7, 10, 0.85)';

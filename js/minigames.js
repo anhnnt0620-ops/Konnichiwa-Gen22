@@ -162,121 +162,177 @@ class MinigameManager {
     const qScreen = document.getElementById('quiz-question-screen');
     const cScreen = document.getElementById('quiz-complete-screen');
     const qBadge = document.getElementById('quiz-step-badge');
-    const qPrompt = document.getElementById('quiz-prompt');
+    const qPromptContainer = document.getElementById('quiz-prompt-container');
     const qChoices = document.getElementById('quiz-choices');
-    const qStatus = document.getElementById('quiz-status-msg');
-    const finishBtn = document.getElementById('btn-pass-interview');
+    const expBox = document.getElementById('quiz-explanation-box');
+    const expTitle = document.getElementById('quiz-explanation-title');
+    const expReason = document.getElementById('quiz-explanation-reason');
+    const nextBtn = document.getElementById('btn-quiz-next');
 
-    if (qScreen) qScreen.classList.remove('hidden');
-    if (cScreen) cScreen.classList.add('hidden');
-    if (qStatus) {
-      qStatus.className = 'quiz-status-msg hidden';
-      qStatus.textContent = '';
-    }
+    const resultBadge = document.getElementById('quiz-result-badge');
+    const resultTitle = document.getElementById('quiz-result-title');
+    const resultScore = document.getElementById('quiz-result-score');
+    const resultFeedback = document.getElementById('quiz-result-feedback');
+    const passBtn = document.getElementById('btn-pass-interview');
+    const retryBtn = document.getElementById('btn-retry-interview');
 
+    // 5 câu hỏi chuẩn theo yêu cầu người dùng
     const questions = [
       {
-        prompt: 'Tên đầy đủ và chính thức của CLB Tiếng Nhật JPC tại Trường ĐH Ngoại Thương là gì?',
+        prompt: 'JPC là viết tắt của:',
         choices: [
-          'A. Japanese Club — CLB Tiếng Nhật Trường ĐH Ngoại Thương',
-          'B. Japan Passion Club FTU',
-          'C. Japan Culture Club FTU',
-          'D. Foreign Trade Japanese Youth Club'
+          'A. (FTU) Japanese Club',
+          'B. Jumpscare PY Corp.',
+          'C. Just Personal Computer',
+          'D. Journal of Physical Chemistry'
         ],
         correct: 0,
-        feedback: 'Chính xác! JPC là viết tắt của Japanese Club — CLB Tiếng Nhật Trường ĐH Ngoại Thương! 🌸'
+        explanation: 'JPC chính là viết tắt của (FTU) Japanese Club — Câu lạc bộ Tiếng Nhật Trường Đại học Ngoại Thương!'
       },
       {
-        prompt: 'Năm 2026, CLB Tiếng Nhật JPC đang mở đơn tuyển quân chào đón thế hệ thành viên thứ mấy?',
+        prompt: 'Slogan của JPC là:',
         choices: [
-          'A. Thế hệ Gen 20',
-          'B. Thế hệ Gen 21',
-          'C. Thế hệ Gen 22',
-          'D. Thế hệ Gen 23'
+          'A. Dame dame, dame yo, dame na no yo',
+          'B. Baby watch it burn send death to isolation',
+          'C. Ichigo Ichie - Nhất kỳ nhất hội (một đời một kiếp một bọn người)',
+          'D. "Vui lòng quay video selfie để chứng minh bạn là người thật"'
         ],
         correct: 2,
-        feedback: 'Chính xác! Tuyển quân mùa thu 2026 chính là mùa tuyển Gen 22 bùng nổ của JPC! ✨'
+        explanation: 'Slogan của JPC là "Ichigo Ichie - Nhất kỳ nhất hội (một đời một kiếp một bọn người)" — biểu trưng cho sự trân quý từng cơ duyên gặp gỡ trong đời!'
       },
       {
-        prompt: 'CLB Tiếng Nhật JPC gồm bao nhiêu ban chức năng đồng hành cùng 5 biểu tượng búp bê Kokeshi truyền thống?',
+        prompt: 'Chiếc áo khoác siêu ngầu như ảnh bên cạnh gọi là gì?',
+        image: 'Image/happi-jpc.jpg',
         choices: [
-          'A. 3 ban (Học Thuật, Hậu Cần, Tài Chính)',
-          'B. 4 ban (Nội Dung, Truyền Thông, Sự Kiện, Quản Lý)',
-          'C. 5 ban: Chuyên Môn, Đối Ngoại, Tổ Chức, Thông Tin, Nhân Sự',
-          'D. 6 ban chuyên môn riêng biệt'
-        ],
-        correct: 2,
-        feedback: 'Chính xác! 5 Ban: Chuyên Môn, Đối Ngoại, Tổ Chức, Thông Tin và Nhân Sự tạo nên ngôi nhà JPC! 🏮'
-      },
-      {
-        prompt: 'Ngày hội các Câu Lạc Bộ bùng nổ FTU Club Day (FCD) — nơi đặt Gian Trại JPC diễn ra vào ngày nào?',
-        choices: [
-          'A. Ngày 01/10',
-          'B. Ngày 18/10',
-          'C. Ngày 23/10',
-          'D. Ngày 08/11'
+          'A. Happy',
+          'B. Happi',
+          'C. Hapi',
+          'D. Heppi'
         ],
         correct: 1,
-        feedback: 'Chính xác! Ngày hội FTU Club Day (FCD) rực rỡ sắc màu diễn ra vào ngày 18/10! 🎉'
+        explanation: 'Happi (法被) là trang phục truyền thống của Nhật Bản thường mặc trong lễ hội, và là chiếc áo đồng phục siêu ngầu mang đậm bản sắc của các thế hệ JPC!'
+      },
+      {
+        prompt: 'JPC có thích chiikawa không?',
+        choices: [
+          'A. Ú na?',
+          'B. Eee~~ e-etou',
+          'C. Uwawa Uwa',
+          'D. Đáp án trên đều đúng'
+        ],
+        correct: 3,
+        explanation: 'Tất cả các thành viên JPC đều cực kỳ đam mê và yêu thích những giai điệu đáng yêu của Chiikawa!'
+      },
+      {
+        prompt: 'Vị trí tương đối của bàn trực của JPC nằm ở đâu trong văn phòng CLB?',
+        choices: [
+          'A. Gần cầu thang lên tầng 2 cuối tòa B, đối diện nhà thể chất, kẹp giữa CFE và CFAA',
+          'B. Gần cầu thang lên tầng 2 tòa D, mặt hướng sân nhà D, kẹp giữa KDC và FGC',
+          'C. Đi thằng rẽ phải',
+          'D. Cho em đáp án đúng rồi em nhớ luôn!'
+        ],
+        correct: 0,
+        explanation: 'Bàn trực của JPC nằm gần cầu thang lên tầng 2 cuối Tòa B, đối diện Nhà Thể Chất, kẹp giữa CFE và CFAA nhé!'
       }
     ];
 
     let currentQ = 0;
-    let isProcessing = false;
+    let score = 0;
+    let answered = false;
+
+    const startQuiz = () => {
+      currentQ = 0;
+      score = 0;
+      if (qScreen) qScreen.classList.remove('hidden');
+      if (cScreen) cScreen.classList.add('hidden');
+      renderQuestion();
+    };
 
     const renderQuestion = () => {
-      isProcessing = false;
+      answered = false;
       const q = questions[currentQ];
+
       if (qBadge) qBadge.textContent = `CÂU HỎI ${currentQ + 1} / ${questions.length}`;
-      if (qPrompt) qPrompt.textContent = q.prompt;
-      if (qStatus) {
-        qStatus.className = 'quiz-status-msg hidden';
-        qStatus.textContent = '';
+
+      if (qPromptContainer) {
+        if (q.image) {
+          qPromptContainer.innerHTML = `
+            <div class="quiz-media-prompt">
+              <img src="${q.image}" alt="Áo Happi JPC" class="quiz-happi-img">
+              <div class="quiz-prompt-text">${q.prompt}</div>
+            </div>
+          `;
+        } else {
+          qPromptContainer.innerHTML = `<h3 class="quiz-prompt">${q.prompt}</h3>`;
+        }
+      }
+
+      if (expBox) {
+        expBox.className = 'quiz-explanation-box hidden';
+      }
+      if (nextBtn) {
+        nextBtn.classList.add('hidden');
       }
 
       if (qChoices) {
         qChoices.innerHTML = '';
+        const allBtns = [];
+
         q.choices.forEach((choiceText, index) => {
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'quiz-choice-btn';
           btn.textContent = choiceText;
+          allBtns.push(btn);
 
           btn.addEventListener('click', () => {
-            if (isProcessing) return;
+            if (answered) return;
+            answered = true;
+
+            // Disable all choice buttons for this question
+            allBtns.forEach(b => b.classList.add('disabled'));
 
             if (index === q.correct) {
-              isProcessing = true;
+              score++;
               btn.classList.add('correct');
               if (window.audioManager) window.audioManager.playHit(true);
 
-              if (qStatus) {
-                qStatus.className = 'quiz-status-msg success';
-                qStatus.textContent = q.feedback;
-              }
-
-              setTimeout(() => {
-                currentQ++;
-                if (currentQ < questions.length) {
-                  renderQuestion();
-                } else {
-                  // Show completed screen
-                  if (qScreen) qScreen.classList.add('hidden');
-                  if (cScreen) cScreen.classList.remove('hidden');
-                  if (window.audioManager) window.audioManager.playFanfare();
+              if (expBox) {
+                expBox.className = 'quiz-explanation-box success';
+                if (expTitle) {
+                  expTitle.className = 'quiz-explanation-title success';
+                  expTitle.textContent = '🎉 CHÍNH XÁC!';
                 }
-              }, 900);
+                if (expReason) {
+                  expReason.textContent = q.explanation;
+                }
+                expBox.classList.remove('hidden');
+              }
             } else {
+              // Bôi đỏ đáp án đã chọn và đồng thời bôi xanh đáp án đúng
               btn.classList.add('wrong');
+              if (allBtns[q.correct]) {
+                allBtns[q.correct].classList.add('correct');
+              }
               if (window.audioManager) window.audioManager.playHit(false);
 
-              if (qStatus) {
-                qStatus.className = 'quiz-status-msg error';
-                qStatus.textContent = 'Chưa chính xác rồi! Em hãy suy nghĩ và chọn lại nhé 💡';
+              if (expBox) {
+                expBox.className = 'quiz-explanation-box error';
+                if (expTitle) {
+                  expTitle.className = 'quiz-explanation-title error';
+                  expTitle.textContent = `✗ CHƯA CHÍNH XÁC! (Đáp án đúng: ${q.choices[q.correct]})`;
+                }
+                if (expReason) {
+                  expReason.textContent = q.explanation;
+                }
+                expBox.classList.remove('hidden');
               }
-              setTimeout(() => {
-                btn.classList.remove('wrong');
-              }, 600);
+            }
+
+            // Show Next Button
+            if (nextBtn) {
+              nextBtn.textContent = (currentQ < questions.length - 1) ? 'CÂU TIẾP THEO ▶' : 'XEM KẾT QUẢ PHỎNG VẤN ▶';
+              nextBtn.classList.remove('hidden');
             }
           });
 
@@ -285,14 +341,67 @@ class MinigameManager {
       }
     };
 
-    renderQuestion();
+    if (nextBtn) {
+      nextBtn.onclick = () => {
+        if (currentQ < questions.length - 1) {
+          currentQ++;
+          renderQuestion();
+        } else {
+          // All 5 questions completed -> Show results
+          showResults();
+        }
+      };
+    }
 
-    if (finishBtn) {
-      finishBtn.onclick = () => {
+    const showResults = () => {
+      if (qScreen) qScreen.classList.add('hidden');
+      if (cScreen) cScreen.classList.remove('hidden');
+
+      const passed = score >= 4;
+
+      if (passed) {
+        if (resultBadge) {
+          resultBadge.className = 'complete-badge';
+          resultBadge.textContent = `🎉 XUẤT SẮC VƯỢT QUA (${score}/5 CÂU)`;
+        }
+        if (resultTitle) resultTitle.textContent = 'PHỎNG VẤN TRỰC TUYẾN THÀNH CÔNG!';
+        if (resultScore) resultScore.textContent = `ĐIỂM SỐ: ${score} / 5`;
+        if (resultFeedback) {
+          resultFeedback.textContent = '"Em đã xuất sắc thể hiện sự thấu hiểu tuyệt vời về JPC và tinh thần Ngoại Thương rực rỡ! Chào mừng em tiến thẳng vào Hội trát 3.1: Phá Phong!"';
+        }
+        if (passBtn) passBtn.classList.remove('hidden');
+        if (retryBtn) retryBtn.classList.add('hidden');
+        if (window.audioManager) window.audioManager.playFanfare();
+      } else {
+        if (resultBadge) {
+          resultBadge.className = 'complete-badge fail';
+          resultBadge.textContent = `⚠️ CHƯA ĐẠT YÊU CẦU (Đạt ${score}/5 — Cần tối thiểu 4/5 câu)`;
+        }
+        if (resultTitle) resultTitle.textContent = 'KẾT QUẢ PHỎNG VẤN: CHƯA ĐẠT';
+        if (resultScore) resultScore.textContent = `ĐIỂM SỐ: ${score} / 5 (CẦN TỐI THIỂU 4/5)`;
+        if (resultFeedback) {
+          resultFeedback.textContent = '"Rất tiếc! Để vượt qua vòng phỏng vấn online, em cần đạt tối thiểu 4/5 câu trả lời chính xác. Đừng nản lòng, hãy nhấn nút bên dưới để thử lại nhé!"';
+        }
+        if (passBtn) passBtn.classList.add('hidden');
+        if (retryBtn) retryBtn.classList.remove('hidden');
+        if (window.audioManager) window.audioManager.playHit(false);
+      }
+    };
+
+    if (retryBtn) {
+      retryBtn.onclick = () => {
+        startQuiz();
+      };
+    }
+
+    if (passBtn) {
+      passBtn.onclick = () => {
         compModal.classList.add('hidden');
         this.finish(true);
       };
     }
+
+    startQuiz();
   }
 
   // MINIGAME 3.1: PHÁ PHONG - BỨT PHÁ TEAMWORK (Catch Ideas)

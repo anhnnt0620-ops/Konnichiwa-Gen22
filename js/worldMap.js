@@ -82,6 +82,7 @@ class WorldMap {
     this.grid = [];
     this.solidGrid = [];
     this.preRenderedCanvas = null;
+    this.fcdBoothsCanvas = null;
     this.miniMapCanvas = null;
 
     this.initMap();
@@ -213,6 +214,7 @@ class WorldMap {
     });
 
     this.buildPreRenderedCanvas();
+    this.buildFCDBoothsCanvas();
     this.buildMiniMap();
   }
 
@@ -353,13 +355,24 @@ class WorldMap {
       this.drawModernBuilding(ctx, b);
     });
 
-    // C. Draw FCD Festival Elements at Sân Nhà D
-    this.drawFCDPlaza(ctx);
+    // C. Draw Permanent Bia Đá FTU
+    this.drawBiaDaFTU(ctx);
 
-    // D. Draw Cổng Chùa Láng FCD Welcome Arch
+    // D. Draw Cổng Tân Sinh Viên FTU
     this.drawEntranceArch(ctx);
 
     this.preRenderedCanvas = c;
+  }
+
+  // Pre-render temporary FCD Festival Booths (Only for Stage 1 · FCD 18/10)
+  buildFCDBoothsCanvas() {
+    const c = document.createElement('canvas');
+    c.width = this.width;
+    c.height = this.height;
+    const ctx = c.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    this.drawFCDBooths(ctx);
+    this.fcdBoothsCanvas = c;
   }
 
   // Draw modern 2D building with soft shadows, gradient roofs, and Alviona signage
@@ -546,11 +559,8 @@ class WorldMap {
     ctx.textAlign = 'start';
   }
 
-  // Draw FCD Festival Elements at Central Plaza (Theo sơ đồ chi tiết người dùng cung cấp)
-  drawFCDPlaza(ctx) {
-    // ========================================================================
-    // 1. BIA ĐÁ FTU (Tâm điểm Sân trường giữa Tòa B và Nhà A)
-    // ========================================================================
+  // Draw Permanent Bia Đá FTU (Tâm điểm Sân trường giữa Tòa B và Nhà A)
+  drawBiaDaFTU(ctx) {
     const biaX = 28 * this.tileSize;
     const biaY = 22 * this.tileSize;
 
@@ -590,7 +600,10 @@ class WorldMap {
     ctx.font = 'bold 9px "Alviona", "Cinzel", serif';
     ctx.fillText('★ BIA ĐÁ FTU ★', biaX, biaY - 21);
     ctx.textAlign = 'start';
+  }
 
+  // Draw Temporary FCD Festival Booths (Chỉ xuất hiện trong Vòng 1 / FCD 18/10)
+  drawFCDBooths(ctx) {
     // ========================================================================
     // 2. DÃY BOOTH KHỐI CLB CHUYÊN MÔN (Dọc phía Bắc Sân Trung Tâm, dưới Tòa B)
     // ========================================================================
@@ -870,27 +883,22 @@ class WorldMap {
     ctx.arc(28 * this.tileSize * scaleX, 22 * this.tileSize * scaleY, 2.5, 0, Math.PI * 2);
     ctx.fill();
 
-    // Highlight West Strip JPC Booth in Mini-map (Bold Red Star Dot)
-    ctx.fillStyle = '#e63946';
-    ctx.beginPath();
-    ctx.arc(15 * this.tileSize * scaleX, 22 * this.tileSize * scaleY, 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#ffd778';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
     this.miniMapCanvas = c;
     return c;
   }
 
-  render(ctx, camera) {
+  render(ctx, camera, currentStageId = 'stage1') {
     if (this.preRenderedCanvas) {
       // ctx is already camera-translated in game.js, so draw at world origin (0, 0)
       ctx.drawImage(this.preRenderedCanvas, 0, 0);
     }
+    // Only draw FCD festival booths during Stage 1 (FTU Club Day · FCD 18/10)!
+    if (currentStageId === 'stage1' && this.fcdBoothsCanvas) {
+      ctx.drawImage(this.fcdBoothsCanvas, 0, 0);
+    }
   }
 
-  renderMiniMapToCanvas(targetCanvas, playerX, playerY, questSpot) {
+  renderMiniMapToCanvas(targetCanvas, playerX, playerY, questSpot, currentStageId = 'stage1') {
     if (!targetCanvas) return;
     const ctx = targetCanvas.getContext('2d');
     const w = targetCanvas.width;
@@ -905,6 +913,17 @@ class WorldMap {
 
     const scaleX = w / this.width;
     const scaleY = h / this.height;
+
+    // Highlight West Strip JPC Booth in Mini-map ONLY during Stage 1!
+    if (currentStageId === 'stage1') {
+      ctx.fillStyle = '#e63946';
+      ctx.beginPath();
+      ctx.arc(15 * this.tileSize * scaleX, 22 * this.tileSize * scaleY, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffd778';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
 
     // Quest Target marker (Pulsing glowing beacon)
     if (questSpot) {

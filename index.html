@@ -308,7 +308,7 @@
                   <span class="feed-tag">Host · Hội đồng Phỏng vấn JPC</span>
                 </div>
                 <div class="feed-avatar-wrap">
-                  <img src="Image/Kokeshi 5 Ban/kokeshi-chuyenmon.png" alt="Senpai" class="feed-avatar">
+                  <img src="Image/kokeshi-senpai.png" alt="Senpai JPC" class="feed-avatar">
                   <div class="feed-pulse"></div>
                 </div>
                 <div class="feed-name">
@@ -325,28 +325,39 @@
               <div class="quiz-box">
                 <div id="quiz-question-screen">
                   <div class="quiz-step-row">
-                    <span class="quiz-step-badge" id="quiz-step-badge">CÂU HỎI 1 / 4</span>
+                    <span class="quiz-step-badge" id="quiz-step-badge">CÂU HỎI 1 / 5</span>
                     <span class="quiz-topic-badge">PHỎNG VẤN TRỰC TUYẾN</span>
                   </div>
-                  <h3 class="quiz-prompt" id="quiz-prompt">
-                    Tên đầy đủ và chính thức của CLB Tiếng Nhật JPC tại Trường ĐH Ngoại Thương là gì?
-                  </h3>
+                  <div id="quiz-prompt-container">
+                    <h3 class="quiz-prompt" id="quiz-prompt">
+                      JPC là viết tắt của:
+                    </h3>
+                  </div>
                   <div class="quiz-choices-grid" id="quiz-choices">
                     <!-- Populated dynamically via JS -->
                   </div>
-                  <div class="quiz-status-msg hidden" id="quiz-status-msg"></div>
+                  <div class="quiz-explanation-box hidden" id="quiz-explanation-box">
+                    <div class="quiz-explanation-title" id="quiz-explanation-title"></div>
+                    <div class="quiz-explanation-reason" id="quiz-explanation-reason"></div>
+                  </div>
+                  <div class="quiz-action-row">
+                    <button class="quiz-next-btn hidden" id="btn-quiz-next" type="button">CÂU TIẾP THEO ▶</button>
+                  </div>
                 </div>
 
                 <!-- Quiz Completed Screen -->
                 <div id="quiz-complete-screen" class="hidden">
-                  <div class="complete-badge">🎉 XUẤT SẮC VƯỢT QUA</div>
-                  <h2 class="complete-title">PHỎNG VẤN TRỰC TUYẾN THÀNH CÔNG!</h2>
-                  <div class="complete-score">ĐIỂM SỐ: 4 / 4</div>
-                  <p class="complete-feedback">
+                  <div class="complete-badge" id="quiz-result-badge">🎉 XUẤT SẮC VƯỢT QUA</div>
+                  <h2 class="complete-title" id="quiz-result-title">PHỎNG VẤN TRỰC TUYẾN THÀNH CÔNG!</h2>
+                  <div class="complete-score" id="quiz-result-score">ĐIỂM SỐ: 5 / 5</div>
+                  <p class="complete-feedback" id="quiz-result-feedback">
                     "Em đã thể hiện sự thấu hiểu tuyệt vời về JPC và tinh thần Ngoại Thương rực rỡ. Chào mừng em tiến thẳng vào Hội trát 3.1: Phá Phong!"
                   </p>
                   <button class="gold-btn" id="btn-pass-interview" type="button">
                     HOÀN THÀNH VÒNG 2 & TIẾP TỤC HÀNH TRÌNH ▶
+                  </button>
+                  <button class="gold-btn btn-retry-quiz hidden" id="btn-retry-interview" type="button">
+                    🔄 THỬ LẠI PHỎNG VẤN
                   </button>
                 </div>
               </div>

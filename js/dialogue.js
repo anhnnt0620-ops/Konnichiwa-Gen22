@@ -76,8 +76,13 @@ class DialogueManager {
     this.continuePrompt.classList.add('hidden');
 
     // Update avatar if provided
-    if (this.currentDialogue.avatar) {
+    if (this.currentDialogue.speaker && this.currentDialogue.speaker.includes('Senpai')) {
+      this.avatarElem.className = 'dialogue-avatar';
+      this.avatarElem.innerHTML = '<img src="Image/kokeshi-senpai.png" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));">';
+      this.avatarElem.classList.remove('hidden');
+    } else if (this.currentDialogue.avatar) {
       this.avatarElem.className = 'dialogue-avatar ' + this.currentDialogue.avatar;
+      this.avatarElem.innerHTML = '';
       this.avatarElem.classList.remove('hidden');
     } else {
       this.avatarElem.classList.add('hidden');

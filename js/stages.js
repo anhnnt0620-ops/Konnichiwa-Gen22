@@ -58,9 +58,9 @@ const STAGE_DATA = {
     questText: 'Di chuyển lên Tòa B gặp Senpai để mở máy tính tham gia Phỏng Vấn Online (23/10 – 25/10)!',
     questTitle: 'Hội Trát 2: Hòa Nhịp (Phỏng Vấn Online)',
     timeline: '23/10 – 25/10/2026',
-    objective: 'Gặp Senpai tại Tòa B và mở laptop phòng họp trực tuyến để trả lời bộ câu hỏi trắc nghiệm (Multiple Choice) kiểm tra mức độ hiểu biết về JPC.',
+    objective: 'Gặp Senpai tại Tòa B và mở laptop phòng họp trực tuyến để trả lời bộ 5 câu hỏi trắc nghiệm (Multiple Choice) kiểm tra mức độ hiểu biết về JPC (cần đạt tối thiểu 4/5 câu).',
     location: 'Tòa Nhà B · Trường Đại học Ngoại Thương',
-    tip: 'Vòng phỏng vấn online qua máy tính. Hãy trả lời chính xác 4/4 câu hỏi trắc nghiệm về JPC để vượt qua vòng phỏng vấn!',
+    tip: 'Vòng phỏng vấn online qua máy tính. Hãy trả lời chính xác tối thiểu 4/5 câu hỏi trắc nghiệm về JPC để vượt qua vòng phỏng vấn!',
     props: [
       { type: 'prop_blackboard', x: 27, y: 16, label: 'Bảng xanh B201 FTU' },
       { type: 'prop_desk', x: 27, y: 17, label: 'Bàn phỏng vấn online' },
@@ -78,7 +78,7 @@ const STAGE_DATA = {
         avatarIcon: '💻',
         dialogues: [
           { speaker: 'Senpai Phỏng Vấn', text: 'Konnichiwa! Chúc mừng em đã xuất sắc vượt qua Vòng Đơn và bước vào Vòng 2: Hòa Nhịp (23/10 – 25/10)!' },
-          { speaker: 'Senpai Phỏng Vấn', text: 'Vòng 2 năm nay là Phỏng Vấn Online! Em hãy mở máy tính lên để kết nối phòng phỏng vấn trực tuyến và trả lời bộ câu hỏi trắc nghiệm về JPC nhé!' }
+          { speaker: 'Senpai Phỏng Vấn', text: 'Vòng 2 năm nay là Phỏng Vấn Online! Em hãy mở máy tính lên để kết nối phòng phỏng vấn trực tuyến và trả lời bộ 5 câu hỏi trắc nghiệm về JPC nhé (cần đạt tối thiểu 4/5 câu để qua vòng)!' }
         ]
       }
     ]

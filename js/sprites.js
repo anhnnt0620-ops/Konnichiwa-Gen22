@@ -432,7 +432,7 @@ class SpriteManager {
     fCtx.fillStyle = '#e63946';
     fCtx.fillRect(6, 7, 52, 6);
     fCtx.fillStyle = '#fff';
-    fCtx.font = 'bold 9px sans-serif';
+    fCtx.font = 'bold 9px "Montserrat", sans-serif';
     fCtx.fillText('★ FTU - JPC ★', 8, 22);
     this.cache['prop_ftu_sign'] = ftuSign;
 
@@ -446,7 +446,7 @@ class SpriteManager {
     bBoardCtx.fillRect(6, 8, 12, 1);
     bBoardCtx.fillRect(6, 12, 18, 1);
     bBoardCtx.fillStyle = '#ffccd5'; // Pink chalk "JPC"
-    bBoardCtx.font = 'bold 7px sans-serif';
+    bBoardCtx.font = 'bold 7.5px "Montserrat", sans-serif';
     bBoardCtx.fillText('JPC GEN 22', 8, 22);
     this.cache['prop_blackboard'] = board;
 

@@ -142,7 +142,7 @@ class Game {
   }
 
   calculateZoom() {
-    const h = this.canvas.height;
+    const h = this.canvas.height / (this.dpr || 1);
     if (h <= 450) {
       return 1.45;
     } else if (h <= 650) {
@@ -157,9 +157,16 @@ class Game {
     const w = (container && container.clientWidth) ? container.clientWidth : window.innerWidth;
     const h = (container && container.clientHeight) ? container.clientHeight : window.innerHeight;
 
-    this.canvas.width = w;
-    this.canvas.height = h;
+    // High-DPI hardware pixel matching (Retina / 125% - 150% Windows scaling)
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    this.canvas.width = Math.round(w * this.dpr);
+    this.canvas.height = Math.round(h * this.dpr);
+    this.canvas.style.width = w + 'px';
+    this.canvas.style.height = h + 'px';
+
     this.ctx.imageSmoothingEnabled = true;
+    this.ctx.imageSmoothingQuality = 'high';
     this.zoom = this.calculateZoom();
   }
 
@@ -626,8 +633,11 @@ class Game {
     const worldW = world ? world.width : 1920;
     const worldH = world ? world.height : 1280;
 
-    const viewW = this.canvas.width / this.zoom;
-    const viewH = this.canvas.height / this.zoom;
+    const cssW = this.canvas.width / (this.dpr || 1);
+    const cssH = this.canvas.height / (this.dpr || 1);
+
+    const viewW = cssW / this.zoom;
+    const viewH = cssH / this.zoom;
 
     const targetX = (this.player.x + 12) - viewW / 2;
     const targetY = (this.player.y + 14) - viewH / 2;
@@ -846,9 +856,17 @@ class Game {
   // RENDER PIPELINE
   // ==========================================================================
   render() {
+    const dpr = this.dpr || 1;
+    const cssW = this.canvas.width / dpr;
+    const cssH = this.canvas.height / dpr;
+
+    this.ctx.save();
+    // High-DPI scale so all canvas coordinates use CSS pixels while rendering at native device resolution
+    this.ctx.scale(dpr, dpr);
+
     // Fill canvas with soothing water blue matching river surrounding campus
     this.ctx.fillStyle = '#6ec1e4';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillRect(0, 0, cssW, cssH);
 
     this.ctx.save();
     // Zoom in close to main Kokeshi character
@@ -882,6 +900,8 @@ class Game {
     // 7. Render Ambient Lighting & Weather
     this.renderAmbientLighting();
     this.renderParticles();
+
+    this.ctx.restore();
 
     // 8. Render Mini-Map Radar in HUD Panel (DOM canvas)
     const domMiniMap = document.getElementById('minimap-canvas');
@@ -1002,17 +1022,20 @@ class Game {
     const screenX = (qx - this.camera.x) * this.zoom;
     const screenY = (qy - this.camera.y) * this.zoom;
 
+    const cssW = this.canvas.width / (this.dpr || 1);
+    const cssH = this.canvas.height / (this.dpr || 1);
+
     const pad = 45;
-    const isOffScreen = screenX < pad || screenX > this.canvas.width - pad ||
-                        screenY < pad || screenY > this.canvas.height - pad;
+    const isOffScreen = screenX < pad || screenX > cssW - pad ||
+                        screenY < pad || screenY > cssH - pad;
 
     if (isOffScreen) {
-      const centerX = this.canvas.width / 2;
-      const centerY = this.canvas.height / 2;
+      const centerX = cssW / 2;
+      const centerY = cssH / 2;
       const angle = Math.atan2(screenY - centerY, screenX - centerX);
 
-      const compassX = Math.max(pad, Math.min(this.canvas.width - pad, centerX + Math.cos(angle) * (centerX - 70)));
-      const compassY = Math.max(pad + 60, Math.min(this.canvas.height - pad - 60, centerY + Math.sin(angle) * (centerY - 90)));
+      const compassX = Math.max(pad, Math.min(cssW - pad, centerX + Math.cos(angle) * (centerX - 70)));
+      const compassY = Math.max(pad + 60, Math.min(cssH - pad - 60, centerY + Math.sin(angle) * (centerY - 90)));
 
       this.ctx.save();
       this.ctx.translate(compassX, compassY);
@@ -1053,7 +1076,7 @@ class Game {
         window.spriteManager.draw(this.ctx, 'prop_scroll', x, hoverY);
 
         this.ctx.fillStyle = '#fff';
-        this.ctx.font = '12px sans-serif';
+        this.ctx.font = 'bold 12px "Montserrat", sans-serif';
         this.ctx.fillText(it.icon, x + 6, hoverY + 16);
       }
     });
@@ -1072,9 +1095,9 @@ class Game {
         window.spriteManager.draw(this.ctx, npc.sprite, x, y);
       }
 
-      // Name tag above NPC (Compact, neat pill)
+      // Name tag above NPC (Compact, neat pill in Montserrat)
       this.ctx.save();
-      this.ctx.font = 'bold 9px "Alviona", "Cinzel", serif';
+      this.ctx.font = 'bold 9.5px "Montserrat", sans-serif';
       const nameW = this.ctx.measureText(npc.name).width + 12;
 
       this.ctx.fillStyle = 'rgba(34, 7, 10, 0.9)';
@@ -1147,7 +1170,7 @@ class Game {
     const deptName = this.player.selectedDeptName || 'Ban Chuyên Môn';
     const playerName = this.playerName || 'Kouhai Gen 22';
 
-    this.ctx.font = 'bold 9px "Be Vietnam Pro", sans-serif';
+    this.ctx.font = 'bold 9.5px "Montserrat", sans-serif';
     const badgeText = `★ ${deptName} · ${playerName}`;
     const badgeW = this.ctx.measureText(badgeText).width + 16;
 
@@ -1167,8 +1190,10 @@ class Game {
 
   renderAmbientLighting() {
     // Soft sunny morning warmth for FTU Club Day
+    const cssW = this.canvas.width / (this.dpr || 1);
+    const cssH = this.canvas.height / (this.dpr || 1);
     this.ctx.fillStyle = 'rgba(255, 235, 180, 0.06)';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillRect(0, 0, cssW, cssH);
   }
 
   renderParticles() {
@@ -1224,7 +1249,7 @@ class Game {
     const bob = Math.sin(Date.now() / 150) * 2.5;
 
     this.ctx.save();
-    this.ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
+    this.ctx.font = 'bold 9.5px "Montserrat", sans-serif';
     const textWidth = this.ctx.measureText(actionLabel).width;
 
     // Sleek console-style Action Badge: [A] Trò chuyện
@@ -1257,14 +1282,14 @@ class Game {
 
     // 'A' letter inside keycap
     this.ctx.fillStyle = '#5c1216';
-    this.ctx.font = 'bold 9px sans-serif';
+    this.ctx.font = 'bold 9px "Montserrat", sans-serif';
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
     this.ctx.fillText('A', keycapCenterX, keycapCenterY + 0.5);
 
-    // 3. Action Label text
+    // 3. Action Label text (Montserrat)
     this.ctx.fillStyle = '#ffffff';
-    this.ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
+    this.ctx.font = 'bold 9.5px "Montserrat", sans-serif';
     this.ctx.textAlign = 'left';
     this.ctx.textBaseline = 'middle';
     this.ctx.fillText(actionLabel, keycapCenterX + keycapRadius + 5, keycapCenterY);
@@ -1284,8 +1309,13 @@ class Game {
 
 window.addEventListener('DOMContentLoaded', () => {
   const game = new Game();
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(() => {
+  if (document.fonts) {
+    Promise.all([
+      document.fonts.load('bold 12px Alviona'),
+      document.fonts.load('bold 10px Montserrat'),
+      document.fonts.load('14px Montserrat'),
+      document.fonts.ready
+    ]).then(() => {
       if (window.worldMap) {
         window.worldMap.buildPreRenderedCanvas();
         window.worldMap.buildFCDBoothsCanvas();

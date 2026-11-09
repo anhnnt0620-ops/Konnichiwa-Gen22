@@ -354,14 +354,14 @@ class WorldMap {
 
     // B. Draw FTU Buildings with Smooth Modern 2D Vector Styling
     FTU_BUILDINGS.forEach(b => {
-      this.drawModernBuilding(ctx, b);
+      this.drawModernBuilding(ctx, b, false);
     });
 
     // C. Draw Permanent Bia Đá FTU
-    this.drawBiaDaFTU(ctx);
+    this.drawBiaDaFTU(ctx, false);
 
     // D. Draw Cổng Tân Sinh Viên FTU
-    this.drawEntranceArch(ctx);
+    this.drawEntranceArch(ctx, false);
 
     this.preRenderedCanvas = c;
   }
@@ -375,14 +375,14 @@ class WorldMap {
     const ctx = c.getContext('2d');
     ctx.imageSmoothingEnabled = true;
     ctx.scale(scale, scale);
-    this.drawFCDBooths(ctx);
+    this.drawFCDBooths(ctx, false);
     this.fcdBoothsCanvas = c;
   }
 
   // Draw modern 2D building with soft shadows, gradient roofs, and Alviona signage
-  drawModernBuilding(ctx, b) {
+  drawModernBuilding(ctx, b, drawSign = true) {
     if (b.id === 'STAGE_FCD') {
-      this.drawFCDStage(ctx, b);
+      this.drawFCDStage(ctx, b, drawSign);
       return;
     }
 
@@ -461,7 +461,20 @@ class WorldMap {
     ctx.arc(doorX + doorW - 4, doorY + doorH / 2, 2, 0, Math.PI * 2);
     ctx.fill();
 
-    // 6. Signboard with 'Alviona' Font
+    // 6. Signboard with 'Alviona' Font (rendered live in renderSignboards for 100% crisp vector text)
+    if (drawSign) {
+      this.renderBuildingSignboard(ctx, b);
+    }
+  }
+
+  // Live Vector Signboard for Modern Buildings (Razor-sharp, never blurry)
+  renderBuildingSignboard(ctx, b) {
+    const x = b.x * this.tileSize;
+    const y = b.y * this.tileSize;
+    const w = b.w * this.tileSize;
+    const h = b.h * this.tileSize;
+    const roofHeight = Math.round(h * 0.52);
+
     ctx.font = 'bold 12px "Alviona", "Cinzel", serif';
     const textW = Math.max(50, Math.round(ctx.measureText(b.name).width + 18));
     const signX = x + Math.floor(w / 2) - textW / 2;
@@ -482,7 +495,7 @@ class WorldMap {
   }
 
   // Grand Outdoor FCD 18/10 Festival Stage (facing West towards Central Plaza)
-  drawFCDStage(ctx, b) {
+  drawFCDStage(ctx, b, drawSign = true) {
     const x = b.x * this.tileSize;
     const y = b.y * this.tileSize;
     const w = b.w * this.tileSize;
@@ -536,8 +549,23 @@ class WorldMap {
     ctx.fillRect(x - 4, y + 28, 8, h - 40);
     ctx.fillRect(x + w - 4, y + 28, 8, h - 40);
 
-    // 6. Signboard: "★ SÂN KHẤU FCD ★"
-    const textW = 108;
+    // 6. Front stairs leading West into Central Plaza
+    ctx.fillStyle = '#b0bec5';
+    ctx.fillRect(x - 8, y + h / 2 - 16, 8, 32);
+    ctx.fillStyle = '#78909c';
+    ctx.fillRect(x - 8, y + h / 2 - 6, 8, 12);
+
+    if (drawSign) {
+      this.renderFCDStageSignboard(ctx, b);
+    }
+  }
+
+  // Live Vector Signboard for FCD Stage
+  renderFCDStageSignboard(ctx, b) {
+    const x = b.x * this.tileSize;
+    const y = b.y * this.tileSize;
+    const w = b.w * this.tileSize;
+    const textW = 118;
     const signX = x + w / 2 - textW / 2;
     const signY = y + 14;
 
@@ -553,18 +581,11 @@ class WorldMap {
     ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
     ctx.textAlign = 'center';
     ctx.fillText('★ SÂN KHẤU FCD ★', signX + textW / 2, signY + 14);
-
-    // 7. Front stairs leading West into Central Plaza
-    ctx.fillStyle = '#b0bec5';
-    ctx.fillRect(x - 8, y + h / 2 - 16, 8, 32);
-    ctx.fillStyle = '#78909c';
-    ctx.fillRect(x - 8, y + h / 2 - 6, 8, 12);
-
     ctx.textAlign = 'start';
   }
 
   // Draw Permanent Bia Đá FTU (Tâm điểm Sân trường giữa Tòa B và Nhà A)
-  drawBiaDaFTU(ctx) {
+  drawBiaDaFTU(ctx, drawSign = true) {
     const biaX = 28 * this.tileSize;
     const biaY = 22 * this.tileSize;
 
@@ -586,6 +607,16 @@ class WorldMap {
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
+    if (drawSign) {
+      this.renderBiaDaSignboard(ctx);
+    }
+  }
+
+  // Live Vector Signboard & Emblem for Bia Đá FTU
+  renderBiaDaSignboard(ctx) {
+    const biaX = 28 * this.tileSize;
+    const biaY = 22 * this.tileSize;
+
     // FTU Monogram / Crest
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 12px "Alviona", "Cinzel", serif';
@@ -595,7 +626,7 @@ class WorldMap {
     // Label: "BIA ĐÁ FTU"
     ctx.fillStyle = '#22070a';
     ctx.beginPath();
-    ctx.roundRect(biaX - 42, biaY - 32, 84, 16, 4);
+    ctx.roundRect(biaX - 44, biaY - 32, 88, 16, 4);
     ctx.fill();
     ctx.strokeStyle = '#ffd778';
     ctx.lineWidth = 1;
@@ -607,7 +638,7 @@ class WorldMap {
   }
 
   // Draw Temporary FCD Festival Booths (Chỉ xuất hiện trong Vòng 1 / FCD 18/10)
-  drawFCDBooths(ctx) {
+  drawFCDBooths(ctx, drawSign = true) {
     // ========================================================================
     // 2. DÃY BOOTH KHỐI CLB CHUYÊN MÔN (Dọc phía Bắc Sân Trung Tâm, dưới Tòa B)
     // ========================================================================
@@ -627,23 +658,6 @@ class WorldMap {
     // Bàn tư vấn dài
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(cmX + 6, cmY + cmH - 8, cmW - 12, 6);
-
-    // Banner lớn: "BOOTH KHỐI CLB CHUYÊN MÔN"
-    const cmBannerW = 260;
-    const cmBannerX = cmX + cmW / 2 - cmBannerW / 2;
-    ctx.fillStyle = 'rgba(26, 35, 126, 0.9)';
-    ctx.beginPath();
-    ctx.roundRect(cmBannerX, cmY + 4, cmBannerW, 20, 5);
-    ctx.fill();
-    ctx.strokeStyle = '#ffd778';
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('★ BOOTH KHỐI CLB CHUYÊN MÔN ★', cmBannerX + cmBannerW / 2, cmY + 18);
-    ctx.textAlign = 'start';
 
     // ========================================================================
     // 3. DÃY BOOTH DỌC PHÍA TÂY & GIAN TRẠI JPC (MÀU ĐỎ THẮM NỔI BẬT NHẤT SÂN!)
@@ -697,12 +711,6 @@ class WorldMap {
     ctx.fillRect(jpcX + 20, jpcY - 2, 4, 6);
     ctx.fillRect(jpcX + jpcW - 24, jpcY - 2, 4, 6);
 
-    // CHỮ JPC TO TRẮNG TRÊN NỀN ĐỎ — CHỈ DUY NHẤT TÊN JPC!
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 16px "Alviona", "Cinzel", serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('JPC', jpcX + jpcW / 2, jpcY + 24);
-
     // Bàn tiếp đón
     ctx.fillStyle = '#fffdf8';
     ctx.beginPath();
@@ -741,7 +749,6 @@ class WorldMap {
     ctx.stroke();
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(stripX + 4, btmY + 1.8 * this.tileSize - 6, stripW - 8, 4);
-    ctx.textAlign = 'start';
 
     // ========================================================================
     // 4. DÃY BOOTH PHÍA NAM (TRÊN NHÀ A)
@@ -757,10 +764,6 @@ class WorldMap {
     ctx.fill();
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(doanX + 4, southY + 28, doanW - 8, 5);
-    ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Booth Đoàn', doanX + doanW / 2, southY + 20);
 
     // B. Booth HSV (Hội Sinh Viên)
     const hsvX = 21 * this.tileSize + 6;
@@ -771,9 +774,6 @@ class WorldMap {
     ctx.fill();
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(hsvX + 4, southY + 28, hsvW - 8, 5);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
-    ctx.fillText('Booth HSV', hsvX + hsvW / 2, southY + 20);
 
     // C. Booth khối CLB sở thích
     const stX = 24 * this.tileSize + 6;
@@ -785,8 +785,68 @@ class WorldMap {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(stX + 6, southY + 28, stW - 12, 5);
 
+    if (drawSign) {
+      this.renderFCDBoothsSignboards(ctx);
+    }
+  }
+
+  // Live Vector Signboards for FCD Festival Booths (Razor-sharp, never blurry)
+  renderFCDBoothsSignboards(ctx) {
+    // 1. Banner khối CLB chuyên môn (Montserrat)
+    const cmX = 18 * this.tileSize;
+    const cmY = 17 * this.tileSize;
+    const cmW = 29 * this.tileSize;
+    const cmBannerW = 260;
+    const cmBannerX = cmX + cmW / 2 - cmBannerW / 2;
+
+    ctx.fillStyle = 'rgba(26, 35, 126, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(cmBannerX, cmY + 4, cmBannerW, 20, 5);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 10px "Montserrat", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('★ BOOTH KHỐI CLB CHUYÊN MÔN ★', cmBannerX + cmBannerW / 2, cmY + 18);
+
+    // 2. Chữ JPC to trắng trên nền đỏ (Alviona)
+    const stripX = 14 * this.tileSize;
+    const jpcX = stripX - 4;
+    const jpcY = 21 * this.tileSize - 4;
+    const jpcW = 2 * this.tileSize + 8;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 16px "Alviona", "Cinzel", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('JPC', jpcX + jpcW / 2, jpcY + 24);
+
+    // 3. Dãy booth phía Nam: Đoàn, HSV, Sở thích (Montserrat)
+    const southY = 25 * this.tileSize;
+
+    // Booth Đoàn
+    const doanX = 18 * this.tileSize;
+    const doanW = 3 * this.tileSize;
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 9.5px "Montserrat", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Booth Đoàn', doanX + doanW / 2, southY + 20);
+
+    // Booth HSV
+    const hsvX = 21 * this.tileSize + 6;
+    const hsvW = 3 * this.tileSize - 6;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 9.5px "Montserrat", sans-serif';
+    ctx.fillText('Booth HSV', hsvX + hsvW / 2, southY + 20);
+
+    // Booth khối CLB sở thích
+    const stX = 24 * this.tileSize + 6;
+    const stW = 23 * this.tileSize - 6;
     const stBannerW = 240;
     const stBannerX = stX + stW / 2 - stBannerW / 2;
+
     ctx.fillStyle = 'rgba(38, 50, 56, 0.9)';
     ctx.beginPath();
     ctx.roundRect(stBannerX, southY + 4, stBannerW, 20, 5);
@@ -796,13 +856,13 @@ class WorldMap {
     ctx.stroke();
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 10px "Montserrat", sans-serif';
     ctx.fillText('★ BOOTH KHỐI CLB SỞ THÍCH ★', stBannerX + stBannerW / 2, southY + 18);
     ctx.textAlign = 'start';
   }
 
   // Draw Welcome Arch at Cổng Tân Sinh Viên FTU
-  drawEntranceArch(ctx) {
+  drawEntranceArch(ctx, drawSign = true) {
     const ax = 10.5 * this.tileSize;
     const ay = 41 * this.tileSize;
     const aw = 150;
@@ -811,6 +871,17 @@ class WorldMap {
     ctx.fillStyle = '#5c1216';
     ctx.fillRect(ax + 4, ay, 8, ah);
     ctx.fillRect(ax + aw - 12, ay, 8, ah);
+
+    if (drawSign) {
+      this.renderEntranceArchSignboard(ctx);
+    }
+  }
+
+  // Live Vector Signboard for Cổng Tân Sinh Viên
+  renderEntranceArchSignboard(ctx) {
+    const ax = 10.5 * this.tileSize;
+    const ay = 41 * this.tileSize;
+    const aw = 150;
 
     // Top Welcome Sign
     ctx.fillStyle = '#b92b45';
@@ -826,6 +897,29 @@ class WorldMap {
     ctx.textAlign = 'center';
     ctx.fillText('CỔNG CHÀO TÂN SINH VIÊN · FTU', ax + aw / 2, ay + 6);
     ctx.textAlign = 'start';
+  }
+
+  // Render All Vector Signboards Live (Always razor-sharp, DirectWrite vector rendering)
+  renderAllSignboards(ctx, currentStageId = 'stage1') {
+    // 1. Building Name Signboards (Alviona)
+    FTU_BUILDINGS.forEach(b => {
+      if (b.id === 'STAGE_FCD') {
+        this.renderFCDStageSignboard(ctx, b);
+      } else {
+        this.renderBuildingSignboard(ctx, b);
+      }
+    });
+
+    // 2. Bia Đá FTU Signboard (Alviona)
+    this.renderBiaDaSignboard(ctx);
+
+    // 3. Welcome Arch Signboard (Alviona)
+    this.renderEntranceArchSignboard(ctx);
+
+    // 4. Temporary FCD Booths Signboards (Stage 1 only)
+    if (currentStageId === 'stage1') {
+      this.renderFCDBoothsSignboards(ctx);
+    }
   }
 
   // Pre-render a sleek Radar Mini-map
@@ -900,6 +994,10 @@ class WorldMap {
     if (currentStageId === 'stage1' && this.fcdBoothsCanvas) {
       ctx.drawImage(this.fcdBoothsCanvas, 0, 0, this.width, this.height);
     }
+
+    // Live Vector Text Pass for Razor-Sharp Typography (Never Blurry / Never Pixelated!)
+    this.renderAllSignboards(ctx, currentStageId);
+  }
   }
 
   renderMiniMapToCanvas(targetCanvas, playerX, playerY, questSpot, currentStageId = 'stage1') {

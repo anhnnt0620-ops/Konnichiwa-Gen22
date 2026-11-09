@@ -72,6 +72,8 @@ class Game {
     this.setupCanvasInteraction();
     this.setupApplicationForm();
     this.setupCelebrationModal();
+    this.setupQuestDetailModal();
+    this.setupTransitionModal();
   }
 
   setupCanvasInteraction() {
@@ -250,9 +252,94 @@ class Game {
     if (closeRewardBtn) {
       closeRewardBtn.addEventListener('click', () => {
         rewardModal.classList.add('hidden');
-        this.loadStage('stage2');
+        this.showTransitionScreen('stage2');
       });
     }
+  }
+
+  setupQuestDetailModal() {
+    const questCard = document.getElementById('quest-hud-card');
+    const openBtn = document.getElementById('btn-open-quest-detail');
+    const modal = document.getElementById('quest-detail-modal');
+    const closeBtn = document.getElementById('btn-close-quest-detail');
+
+    const openModal = () => {
+      if (!this.stage) return;
+      const bElem = document.getElementById('modal-quest-badge');
+      const tElem = document.getElementById('modal-quest-title');
+      const tlElem = document.getElementById('modal-quest-timeline');
+      const oElem = document.getElementById('modal-quest-objective');
+      const lElem = document.getElementById('modal-quest-location');
+      const tipElem = document.getElementById('modal-quest-tip');
+
+      if (bElem) bElem.textContent = this.stage.questTitle || this.stage.name;
+      if (tElem) tElem.textContent = this.stage.name;
+      if (tlElem) tlElem.textContent = `📅 Thời gian: ${this.stage.timeline || 'Tuyển Gen 22'}`;
+      if (oElem) oElem.textContent = this.stage.objective || this.stage.questText;
+      if (lElem) lElem.textContent = this.stage.location || 'Khuôn viên Trường ĐH Ngoại Thương FTU';
+      if (tipElem) tipElem.textContent = this.stage.tip || 'Đi theo vệt hoa anh đào dưới chân Kokeshi để đến đúng đích!';
+
+      if (modal) modal.classList.remove('hidden');
+      if (window.audioManager) window.audioManager.playBlip();
+    };
+
+    if (questCard) questCard.addEventListener('click', openModal);
+    if (openBtn) {
+      openBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openModal();
+      });
+    }
+
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+      });
+    }
+  }
+
+  setupTransitionModal() {
+    const proceedBtn = document.getElementById('btn-transition-proceed');
+    if (proceedBtn) {
+      proceedBtn.addEventListener('click', () => {
+        const transModal = document.getElementById('transition-modal');
+        if (transModal) transModal.classList.add('hidden');
+        if (this.nextTransitionStage) {
+          const next = this.nextTransitionStage;
+          this.nextTransitionStage = null;
+          this.loadStage(next);
+        }
+      });
+    }
+  }
+
+  showTransitionScreen(targetStageId) {
+    this.nextTransitionStage = targetStageId;
+    const transModal = document.getElementById('transition-modal');
+    if (!transModal) {
+      this.loadStage(targetStageId);
+      return;
+    }
+
+    const titleElem = document.getElementById('transition-title');
+    const subElem = document.getElementById('transition-sub');
+    const descElem = document.getElementById('transition-desc');
+    const proceedBtn = document.getElementById('btn-transition-proceed');
+
+    if (targetStageId === 'stage2') {
+      if (titleElem) titleElem.textContent = 'VÀI NGÀY SAU ĐÓ...';
+      if (subElem) subElem.textContent = 'Ngày 23 tháng 10 năm 2026';
+      if (descElem) {
+        descElem.innerHTML = `
+          Sau những ngày ngóng trông hồi hộp, lá đơn của bạn đã xuất sắc chinh phục được Hội đồng tuyển sinh JPC.<br>
+          Chào mừng <b>${this.playerName}</b> chính thức bước tiếp vào <b>Vòng 2: Hòa Nhịp (Phỏng Vấn Online)</b>!
+        `;
+      }
+      if (proceedBtn) proceedBtn.textContent = 'BƯỚC VÀO PHÒNG PHỎNG VẤN ONLINE ▶';
+    }
+
+    if (window.audioManager) window.audioManager.playFanfare();
+    transModal.classList.remove('hidden');
   }
 
   openApplicationForm() {
@@ -288,45 +375,45 @@ class Game {
     if (stageId === 'stage2') {
       window.dialogueManager.startDialogue([
         {
-          speaker: 'Hội Trát 2',
-          text: 'Chúc mừng bạn đã vượt qua Vòng Đơn! Chào mừng đến với Giảng đường B201 FTU — Vòng Phỏng Vấn Nhóm: Hòa Nhịp!'
+          speaker: 'Hội Trát 2: Hòa Nhịp',
+          text: 'Chúc mừng em đã xuất sắc vượt qua Vòng Đơn! Chào mừng em đến với Vòng 2: Hòa Nhịp (Phỏng Vấn Online 23/10 – 25/10)!'
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Hãy đi theo radar trên bản đồ lên Tòa Nhà B, vào phòng B201 gặp các bạn cùng nhóm nhé!'
+          text: 'Hãy đi theo vệt hoa anh đào chỉ đường dưới chân lên Tòa B, gặp Senpai để mở máy tính tham gia phỏng vấn online nhé!'
         }
       ]);
     } else if (stageId === 'stage3_1') {
       window.dialogueManager.startDialogue([
         {
-          speaker: 'Hội Trát 3.1',
-          text: 'Chúc mừng bạn bước vào Vòng Teamwork: Phá Phong!'
+          speaker: 'Hội Trát 3.1: Phá Phong',
+          text: 'Chúc mừng bạn bước vào Vòng Teamwork: Phá Phong (27/10 – 03/11)!'
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Hãy đi theo radar đến Dốc Nhà B huyền thoại, gặp Trưởng Nhóm để cùng bứt phá giới hạn deadline!'
+          text: 'Hãy đi theo vệt hoa anh đào đến Dốc Nhà B huyền thoại, gặp Trưởng Nhóm để cùng bứt phá giới hạn deadline và chuẩn bị Pitching (04-05/11)!'
         }
       ]);
     } else if (stageId === 'stage3_2') {
       window.dialogueManager.startDialogue([
         {
-          speaker: 'Hội Trát 3.2',
-          text: 'Chào mừng bạn đến với Không gian văn hóa VJCC FTU — Vòng Phỏng Vấn Cá Nhân: Chân Diện.'
+          speaker: 'Hội Trát 3.2: Chân Diện',
+          text: 'Chào mừng bạn đến với Trường VJCBI — Vòng Phỏng Vấn Cá Nhân: Chân Diện (08/11 – 09/11).'
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Ánh hoàng hôn buông xuống ấm áp qua rèm Shoji. Hãy bước vào Viện VJCC và mở lòng đối thoại cùng Ban Điều Hành.'
+          text: 'Ánh hoàng hôn buông xuống ấm áp qua rèm Shoji. Hãy bước vào Viện VJCBI và mở lòng đối thoại cùng Ban Điều Hành.'
         }
       ]);
     } else if (stageId === 'stage_final') {
       window.dialogueManager.startDialogue([
         {
           speaker: 'JPC FTU',
-          text: `Khoảnh khắc vinh quang đã tới! Chào mừng tân FTUer ${this.playerName} đến với Quảng trường Sân Nhà A rợp bóng hoa anh đào!`
+          text: `Khoảnh khắc vinh quang đã tới! Chào mừng tân FTUer ${this.playerName} đến với Sân khấu FCD rợp bóng hoa anh đào!`
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Hãy bước tới Cổng Torii trước sảnh Nhà A để đón nhận sự chúc mừng từ 5 Ban và Chủ Nhiệm JPC!'
+          text: 'Hãy bước tới Sân khấu FCD cạnh Nhà D để đón nhận sự chúc mừng từ 5 Ban và Chủ Nhiệm JPC!'
         }
       ]);
       this.triggerConfetti();
@@ -334,22 +421,29 @@ class Game {
   }
 
   updateHUD() {
-    const stageTitle = document.getElementById('hud-stage-name');
-    const questDesc = document.getElementById('hud-quest-desc');
     const badge = document.getElementById('hud-badge');
+    const playerTag = document.getElementById('hud-player-tag');
+    const questBadge = document.getElementById('quest-badge');
+    const questDate = document.getElementById('quest-date');
+    const questHudName = document.getElementById('quest-hud-name');
 
-    if (stageTitle) stageTitle.textContent = this.stage.name;
-    if (questDesc) questDesc.textContent = this.stage.questText;
-    if (badge) {
-      const stageMap = {
-        stage1: 'VÒNG 1 (01/10-20/10) · FCD 18/10',
-        stage2: 'VÒNG 2 (23/10-25/10)',
-        stage3_1: 'VÒNG 3.1 (27/10-03/11)',
-        stage3_2: 'VÒNG 3.2 (08/11-09/11)',
-        stage_final: 'CHÍNH THỨC GEN 22'
-      };
-      badge.textContent = stageMap[this.currentStageId] || 'JPC FTU';
+    const stageMap = {
+      stage1: { badge: 'FTU CLUB DAY · GEN 22', qBadge: 'VÒNG 1', date: '01/10 – 20/10' },
+      stage2: { badge: 'PHỎNG VẤN ONLINE', qBadge: 'VÒNG 2', date: '23/10 – 25/10' },
+      stage3_1: { badge: 'TEAMWORK & PITCHING', qBadge: 'VÒNG 3.1', date: '27/10 – 03/11' },
+      stage3_2: { badge: 'PHỎNG VẤN CÁ NHÂN', qBadge: 'VÒNG 3.2', date: '08/11 – 09/11' },
+      stage_final: { badge: 'CHÍNH THỨC GEN 22', qBadge: 'KẾT NẠP', date: 'THÀNH VIÊN' }
+    };
+
+    const cur = stageMap[this.currentStageId] || { badge: 'JPC FTU', qBadge: 'NHIỆM VỤ', date: 'GEN 22' };
+    if (badge) badge.textContent = cur.badge;
+    if (playerTag) {
+      const deptShort = this.player.selectedDeptName || 'JPC FTU';
+      playerTag.textContent = `🌸 ${this.playerName} · ${deptShort}`;
     }
+    if (questBadge) questBadge.textContent = cur.qBadge;
+    if (questDate) questDate.textContent = cur.date;
+    if (questHudName) questHudName.textContent = this.stage ? (this.stage.questTitle || this.stage.name) : 'Hành trình JPC';
   }
 
   // Sakura petals particle system
@@ -750,7 +844,10 @@ class Game {
       window.worldMap.render(this.ctx, this.camera);
     }
 
-    // 2. Render Quest Beacon on the ground
+    // 2. Render Footstep Trail Guide from player's feet to quest objective!
+    this.renderFootstepTrail();
+
+    // 2.1 Render Quest Beacon on the ground
     this.renderQuestBeacon();
 
     // 3. Render Props, Items, NPCs
@@ -770,13 +867,94 @@ class Game {
     // 6. Render Interaction Prompt [A]
     this.renderInteractionPrompt();
 
-    // 7. Render Mini-Map Radar in HUD
-    if (window.worldMap) {
-      window.worldMap.renderMiniMap(this.ctx, this.player.x, this.player.y, this.stage ? this.stage.questSpot : null);
+    // 7. Render Mini-Map Radar in HUD Panel (DOM canvas)
+    const domMiniMap = document.getElementById('minimap-canvas');
+    if (domMiniMap && window.worldMap) {
+      window.worldMap.renderMiniMapToCanvas(domMiniMap, this.player.x, this.player.y, this.stage ? this.stage.questSpot : null);
     }
 
     // 8. Render Quest Compass Arrow pointing to destination
     this.renderQuestCompass();
+  }
+
+  // Animated glowing golden sakura trail leading from under Kokeshi character's feet to quest target
+  renderFootstepTrail() {
+    if (!this.stage || !this.stage.questSpot) return;
+
+    const startX = this.player.x + 12;
+    const startY = this.player.y + 24;
+    const endX = this.stage.questSpot.x;
+    const endY = this.stage.questSpot.y;
+
+    const totalDist = Math.hypot(endX - startX, endY - startY);
+    if (totalDist < 45) return; // Arrived at target
+
+    // Natural waypoints along FTU avenues
+    const waypoints = [{ x: startX, y: startY }];
+    const westAveX = 9 * 32 + 16;
+
+    if (startY > 24 * 32 && Math.abs(startX - westAveX) > 30) {
+      waypoints.push({ x: westAveX, y: startY });
+    }
+
+    if (this.currentStageId === 'stage1') {
+      waypoints.push({ x: westAveX, y: endY });
+    } else if (this.currentStageId === 'stage2') {
+      waypoints.push({ x: westAveX, y: endY });
+    } else if (this.currentStageId === 'stage3_1') {
+      waypoints.push({ x: westAveX, y: endY });
+    } else if (this.currentStageId === 'stage3_2') {
+      waypoints.push({ x: westAveX, y: endY });
+    } else if (this.currentStageId === 'stage_final') {
+      waypoints.push({ x: 28 * 32, y: 22 * 32 });
+    }
+
+    waypoints.push({ x: endX, y: endY });
+
+    const step = 24;
+    const animOffset = (Date.now() / 30) % step;
+
+    this.ctx.save();
+
+    for (let w = 0; w < waypoints.length - 1; w++) {
+      const p1 = waypoints[w];
+      const p2 = waypoints[w + 1];
+      const segDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+      if (segDist < 5) continue;
+
+      const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+      const cosA = Math.cos(angle);
+      const sinA = Math.sin(angle);
+
+      for (let d = animOffset; d < segDist; d += step) {
+        const dx = p1.x + cosA * d;
+        const dy = p1.y + sinA * d;
+
+        // Soft outer sakura aura
+        this.ctx.fillStyle = 'rgba(255, 215, 120, 0.28)';
+        this.ctx.beginPath();
+        this.ctx.arc(dx, dy, 7, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // Glowing center dot (alternating gold and sakura pink)
+        this.ctx.fillStyle = (d % (step * 2) < step) ? '#ffd778' : '#ffb7c5';
+        this.ctx.beginPath();
+        this.ctx.arc(dx, dy, 3.5, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // Forward directional chevron arrow
+        this.ctx.strokeStyle = '#5c1216';
+        this.ctx.lineWidth = 1.2;
+        this.ctx.beginPath();
+        const arrSize = 3;
+        this.ctx.moveTo(dx - cosA * arrSize - sinA * arrSize, dy - sinA * arrSize + cosA * arrSize);
+        this.ctx.lineTo(dx + cosA * arrSize, dy + sinA * arrSize);
+        this.ctx.lineTo(dx - cosA * arrSize + sinA * arrSize, dy - sinA * arrSize - cosA * arrSize);
+        this.ctx.stroke();
+      }
+    }
+
+    this.ctx.restore();
   }
 
   renderQuestBeacon() {

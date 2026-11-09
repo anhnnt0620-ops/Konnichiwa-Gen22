@@ -640,11 +640,11 @@ class WorldMap {
     ctx.beginPath();
     ctx.roundRect(stripX, stripY, stripW, 2.5 * this.tileSize, [6, 6, 2, 2]);
     ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1;
+    ctx.stroke();
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 8px "Be Vietnam Pro", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('CLB Âm Nhạc', stripX + stripW / 2, stripY + 28);
-    ctx.fillText('& CLB Nhảy', stripX + stripW / 2, stripY + 44);
+    ctx.fillRect(stripX + 4, stripY + 2.5 * this.tileSize - 6, stripW - 8, 4);
 
     // B. ★ GIAN TRẠI JPC ĐẶC BIỆT (hàng 21-23) — NỔI BẬT VỚI MÀU ĐỎ RỰC RỠ THEO SƠ ĐỒ!
     const jpcX = stripX - 4;
@@ -652,10 +652,10 @@ class WorldMap {
     const jpcW = stripW + 8;
     const jpcH = 68;
 
-    // Ánh hào quang ấm áp dưới gian trại JPC
-    ctx.fillStyle = 'rgba(230, 57, 70, 0.38)';
+    // Thảm chào đón dưới gian trại JPC
+    ctx.fillStyle = 'rgba(230, 57, 70, 0.16)';
     ctx.beginPath();
-    ctx.ellipse(jpcX + jpcW / 2, jpcY + jpcH + 6, 44, 14, 0, 0, Math.PI * 2);
+    ctx.roundRect(jpcX - 2, jpcY + 36, jpcW + 4, 32, 4);
     ctx.fill();
 
     // Mái vòm đỏ thắm viền vàng kim
@@ -680,24 +680,24 @@ class WorldMap {
     ctx.fillRect(jpcX + 20, jpcY - 2, 4, 6);
     ctx.fillRect(jpcX + jpcW - 24, jpcY - 2, 4, 6);
 
-    // CHỮ JPC TO TRẮNG TRÊN NỀN ĐỎ — CHUẨN THEO SƠ ĐỒ NGƯỜI DÙNG!
+    // CHỮ JPC TO TRẮNG TRÊN NỀN ĐỎ — CHỈ DUY NHẤT TÊN JPC!
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 15px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 16px "Alviona", "Cinzel", serif';
     ctx.textAlign = 'center';
-    ctx.fillText('JPC', jpcX + jpcW / 2, jpcY + 23);
+    ctx.fillText('JPC', jpcX + jpcW / 2, jpcY + 24);
 
-    // Bàn tiếp đón nộp đơn Vòng 1
+    // Bàn tiếp đón
     ctx.fillStyle = '#fffdf8';
     ctx.beginPath();
-    ctx.roundRect(jpcX + 4, jpcY + 38, jpcW - 8, 22, 3);
+    ctx.roundRect(jpcX + 4, jpcY + 38, jpcW - 8, 20, 3);
     ctx.fill();
     ctx.strokeStyle = '#cf9f3f';
     ctx.lineWidth = 1.2;
     ctx.stroke();
 
-    ctx.fillStyle = '#5c1216';
-    ctx.font = 'bold 7.5px "Be Vietnam Pro", sans-serif';
-    ctx.fillText('VÒNG 1: KHAI NHÃN', jpcX + jpcW / 2, jpcY + 52);
+    // Khăn trải bàn đỏ trung tâm bàn
+    ctx.fillStyle = '#b92b45';
+    ctx.fillRect(jpcX + jpcW / 2 - 10, jpcY + 38, 20, 20);
 
     // Đèn lồng Chōchin 2 bên
     const drawLantern = (lx, ly) => {
@@ -719,9 +719,11 @@ class WorldMap {
     ctx.beginPath();
     ctx.roundRect(stripX, btmY, stripW, 1.8 * this.tileSize, [2, 2, 6, 6]);
     ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1;
+    ctx.stroke();
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 8px "Be Vietnam Pro", sans-serif';
-    ctx.fillText('CLB Tranh Biện', stripX + stripW / 2, btmY + 24);
+    ctx.fillRect(stripX + 4, btmY + 1.8 * this.tileSize - 6, stripW - 8, 4);
     ctx.textAlign = 'start';
 
     // ========================================================================
@@ -782,11 +784,11 @@ class WorldMap {
     ctx.textAlign = 'start';
   }
 
-  // Draw Welcome Arch at Cổng Chùa Láng
+  // Draw Welcome Arch at Cổng Tân Sinh Viên FTU
   drawEntranceArch(ctx) {
-    const ax = 8 * this.tileSize;
-    const ay = 38 * this.tileSize;
-    const aw = 96;
+    const ax = 11 * this.tileSize;
+    const ay = 41 * this.tileSize;
+    const aw = 120;
     const ah = 44;
 
     ctx.fillStyle = '#5c1216';
@@ -794,7 +796,6 @@ class WorldMap {
     ctx.fillRect(ax + aw - 12, ay, 8, ah);
 
     // Top Welcome Sign
-    ctx.fillStyle = 'linear-gradient(90deg, #b92b45, #5c1216)';
     ctx.fillStyle = '#b92b45';
     ctx.beginPath();
     ctx.roundRect(ax, ay - 8, aw, 22, 6);
@@ -804,31 +805,46 @@ class WorldMap {
     ctx.stroke();
 
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 9px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 8.5px "Alviona", "Cinzel", serif';
     ctx.textAlign = 'center';
-    ctx.fillText('CỔNG CHÙA LÁNG · FTU', ax + aw / 2, ay + 6);
+    ctx.fillText('CỔNG CHÀO TÂN SINH VIÊN · FTU', ax + aw / 2, ay + 6);
     ctx.textAlign = 'start';
   }
 
-  // Pre-render a sleek Radar Mini-map (120 x 85 px)
-  buildMiniMap() {
+  // Pre-render a sleek Radar Mini-map
+  buildMiniMap(w = 140, h = 98) {
     const c = document.createElement('canvas');
-    c.width = 120;
-    c.height = 85;
+    c.width = w;
+    c.height = h;
     const ctx = c.getContext('2d');
 
-    const scaleX = 120 / this.width;
-    const scaleY = 85 / this.height;
+    const scaleX = w / this.width;
+    const scaleY = h / this.height;
 
-    // Dark crimson velvet card base
-    ctx.fillStyle = '#22070a';
-    ctx.fillRect(0, 0, 120, 85);
+    // Deep crimson background
+    ctx.fillStyle = '#1a0508';
+    ctx.fillRect(0, 0, w, h);
 
-    // Campus grass shape
-    ctx.fillStyle = '#7bc87c';
+    // Campus grass base
+    ctx.fillStyle = '#68b872';
     ctx.beginPath();
-    ctx.roundRect(8, 6, 104, 73, 6);
+    ctx.roundRect(3, 3, w - 6, h - 6, 4);
     ctx.fill();
+
+    // Central Sân Trung Tâm Plaza
+    const sqX = 14 * this.tileSize * scaleX;
+    const sqY = 17 * this.tileSize * scaleY;
+    const sqW = 34 * this.tileSize * scaleX;
+    const sqH = 9 * this.tileSize * scaleY;
+    ctx.fillStyle = '#f9e8b2';
+    ctx.fillRect(sqX, sqY, sqW, sqH);
+
+    // Main avenues in mini-map
+    ctx.fillStyle = '#f0e3cc';
+    // West Avenue
+    ctx.fillRect(7 * this.tileSize * scaleX, 4, 3 * this.tileSize * scaleX, h - 8);
+    // South Avenue
+    ctx.fillRect(4, 39 * this.tileSize * scaleY, w - 8, 3 * this.tileSize * scaleY);
 
     // Draw buildings in mini-map
     FTU_BUILDINGS.forEach(b => {
@@ -836,30 +852,35 @@ class WorldMap {
       const by = b.y * this.tileSize * scaleY;
       const bw = b.w * this.tileSize * scaleX;
       const bh = b.h * this.tileSize * scaleY;
-      if (b.id === 'STAGE_FCD') {
-        ctx.fillStyle = '#9c27b0';
+      if (b.id === 'D' || b.id === 'A' || b.id === 'B') {
+        ctx.fillStyle = '#d32f2f'; // Primary buildings: Nhà A, B, D
+      } else if (b.id === 'STAGE_FCD') {
+        ctx.fillStyle = '#8e24aa'; // Sân khấu FCD
+      } else if (b.id === 'VJCBI') {
+        ctx.fillStyle = '#e67e22'; // VJCBI
       } else {
-        ctx.fillStyle = (b.id === 'D' || b.id === 'A' || b.id === 'B') ? '#e63946' : '#ffd778';
+        ctx.fillStyle = '#607d8b'; // Secondary buildings: KTX, Canteen...
       }
-      ctx.fillRect(bx, by, Math.max(3, bw), Math.max(3, bh));
+      ctx.fillRect(bx, by, Math.max(2, bw), Math.max(2, bh));
     });
 
     // Draw Bia Đá FTU in Mini-map
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(28 * this.tileSize * scaleX, 22 * this.tileSize * scaleY, 3, 0, Math.PI * 2);
+    ctx.arc(28 * this.tileSize * scaleX, 22 * this.tileSize * scaleY, 2.5, 0, Math.PI * 2);
     ctx.fill();
 
     // Highlight West Strip JPC Booth in Mini-map (Bold Red Star Dot)
     ctx.fillStyle = '#e63946';
     ctx.beginPath();
-    ctx.arc(15 * this.tileSize * scaleX, 22 * this.tileSize * scaleY, 5, 0, Math.PI * 2);
+    ctx.arc(15 * this.tileSize * scaleX, 22 * this.tileSize * scaleY, 4, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = '#ffd778';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1;
     ctx.stroke();
 
     this.miniMapCanvas = c;
+    return c;
   }
 
   render(ctx, camera) {
@@ -869,56 +890,72 @@ class WorldMap {
     }
   }
 
-  renderMiniMap(ctx, playerX, playerY, questSpot) {
-    if (!this.miniMapCanvas) return;
-    const mmW = 110;
-    const mmH = 74;
-    const posX = 16;
-    const posY = 64;
+  renderMiniMapToCanvas(targetCanvas, playerX, playerY, questSpot) {
+    if (!targetCanvas) return;
+    const ctx = targetCanvas.getContext('2d');
+    const w = targetCanvas.width;
+    const h = targetCanvas.height;
 
-    ctx.save();
-    ctx.fillStyle = 'rgba(34, 7, 10, 0.9)';
-    ctx.beginPath();
-    ctx.roundRect(posX - 4, posY - 4, mmW + 8, mmH + 8, 8);
-    ctx.fill();
-    ctx.strokeStyle = '#cf9f3f';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+    if (!this.miniMapCanvas || this.miniMapCanvas.width !== w || this.miniMapCanvas.height !== h) {
+      this.buildMiniMap(w, h);
+    }
 
-    ctx.drawImage(this.miniMapCanvas, posX, posY, mmW, mmH);
+    // Draw pre-rendered mini map
+    ctx.drawImage(this.miniMapCanvas, 0, 0, w, h);
 
-    const scaleX = mmW / this.width;
-    const scaleY = mmH / this.height;
+    const scaleX = w / this.width;
+    const scaleY = h / this.height;
 
-    // Quest Target marker (Pulsing Red Heart/Star)
+    // Quest Target marker (Pulsing glowing beacon)
     if (questSpot) {
-      const qx = posX + questSpot.x * scaleX;
-      const qy = posY + questSpot.y * scaleY;
+      const qx = questSpot.x * scaleX;
+      const qy = questSpot.y * scaleY;
+      const pulse = 3 + Math.sin(Date.now() / 200) * 2;
+
+      ctx.fillStyle = 'rgba(230, 57, 70, 0.4)';
+      ctx.beginPath();
+      ctx.arc(qx, qy, pulse + 3, 0, Math.PI * 2);
+      ctx.fill();
+
       ctx.fillStyle = '#e63946';
       ctx.beginPath();
-      ctx.arc(qx, qy, 4.5, 0, Math.PI * 2);
+      ctx.arc(qx, qy, 3.8, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1;
       ctx.stroke();
     }
 
-    // Player Blip (Bright Gold Dot)
-    const px = posX + playerX * scaleX;
-    const py = posY + playerY * scaleY;
-    ctx.fillStyle = '#ffd778';
-    ctx.strokeStyle = '#0b0403';
-    ctx.lineWidth = 1.5;
+    // Player Blip (Bright Gold with expanding radar ping)
+    const px = playerX * scaleX;
+    const py = playerY * scaleY;
+
+    // Expanding radar ping
+    const pingRadius = ((Date.now() % 1400) / 1400) * 10;
+    const pingAlpha = Math.max(0, 1 - (pingRadius / 10));
+    ctx.strokeStyle = `rgba(255, 215, 120, ${pingAlpha})`;
+    ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.arc(px, py, 4, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.arc(px, py, pingRadius, 0, Math.PI * 2);
     ctx.stroke();
 
+    // Solid player dot
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 8px "Alviona", "Cinzel", serif';
-    ctx.fillText('BẢN ĐỒ FTU', posX + 6, posY + mmH - 4);
+    ctx.beginPath();
+    ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#22070a';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
 
-    ctx.restore();
+  // Compatibility fallback
+  renderMiniMap(ctx, playerX, playerY, questSpot) {
+    // If a DOM canvas #minimap-canvas exists, renderMiniMapToCanvas handles it!
+    const domMiniMap = document.getElementById('minimap-canvas');
+    if (domMiniMap) {
+      this.renderMiniMapToCanvas(domMiniMap, playerX, playerY, questSpot);
+    }
   }
 }
 

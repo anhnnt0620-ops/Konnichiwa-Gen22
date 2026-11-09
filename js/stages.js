@@ -6,8 +6,13 @@ const STAGE_DATA = {
     subtitle: 'Sân Trung Tâm FTU — Ngày Hội FCD (18/10) · Điền Đơn Vòng 1',
     bgm: 'stage1',
     playerStart: { x: 9, y: 38 }, // Cổng trường Chùa Láng
-    questSpot: { x: 16 * 32 + 16, y: 22 * 32 + 16 }, // Gian trại JPC màu đỏ tại dãy booth phía Tây Sân Trung Tâm
-    questText: 'Đến Sân Trung Tâm (phía Tây Bia đá FTU), tìm Gian trại JPC màu đỏ thắm để điền đơn Vòng 1!',
+    questSpot: { x: 16 * 32, y: 22 * 32 }, // Gian trại JPC màu đỏ tại dãy booth phía Tây Sân Trung Tâm
+    questText: 'Đến Sân Trung Tâm (phía Tây Bia đá FTU), gặp Senpai tại Gian trại JPC màu đỏ để điền đơn Vòng 1!',
+    questTitle: 'Hội Trát 1: Khai Nhãn',
+    timeline: '01/10 – 20/10/2026 · FTU Club Day: 18/10',
+    objective: 'Đến Sân Trung Tâm FTU (phía Tây Bia Đá FTU), gặp Senpai đứng trước Gian Trại JPC màu đỏ thắm để nhận và niêm phong lá đơn đăng ký gia nhập Gen 22.',
+    location: 'Gian Trại JPC · Dãy Booth Tây Sân Trung Tâm FTU',
+    tip: 'Đi theo vệt hoa anh đào phát sáng dưới chân Kokeshi của bạn để đến thẳng Gian Trại JPC!',
     props: [
       { type: 'prop_ftu_sign', x: 8, y: 37, label: 'Cổng Chùa Láng' },
       { type: 'prop_boba', x: 18, y: 22, label: 'Trà sữa FCD' },
@@ -47,49 +52,33 @@ const STAGE_DATA = {
   stage2: {
     id: 'stage2',
     name: 'HỘI TRÁT 2: HÒA NHỊP (23/10 – 25/10)',
-    subtitle: 'Tòa B FTU — Phỏng Vấn Nhóm',
+    subtitle: 'Tòa B FTU — Phỏng Vấn Online Gen 22',
     bgm: 'stage2',
     questSpot: { x: 27 * 32, y: 17 * 32 },
-    questText: 'Di chuyển lên Tòa B (Giảng đường B201) để tham gia Phỏng Vấn Nhóm: Hòa Nhịp (23/10 – 25/10)!',
+    questText: 'Di chuyển lên Tòa B gặp Senpai để mở máy tính tham gia Phỏng Vấn Online (23/10 – 25/10)!',
+    questTitle: 'Hội Trát 2: Hòa Nhịp (Phỏng Vấn Online)',
+    timeline: '23/10 – 25/10/2026',
+    objective: 'Gặp Senpai tại Tòa B và mở laptop phòng họp trực tuyến để trả lời bộ câu hỏi trắc nghiệm (Multiple Choice) kiểm tra mức độ hiểu biết về JPC.',
+    location: 'Tòa Nhà B · Trường Đại học Ngoại Thương',
+    tip: 'Vòng phỏng vấn online qua máy tính. Hãy trả lời chính xác 4/4 câu hỏi trắc nghiệm về JPC để vượt qua vòng phỏng vấn!',
     props: [
       { type: 'prop_blackboard', x: 27, y: 16, label: 'Bảng xanh B201 FTU' },
-      { type: 'prop_desk', x: 27, y: 17, label: 'Bàn thảo luận nhóm' },
+      { type: 'prop_desk', x: 27, y: 17, label: 'Bàn phỏng vấn online' },
       { type: 'prop_lantern', x: 24, y: 17, label: 'Đèn ấm áp' },
       { type: 'prop_lantern', x: 30, y: 17, label: 'Đèn ấm áp' }
     ],
     items: [],
     npcs: [
       {
-        id: 'npc_app_a',
-        name: 'Minh (K63 FTU)',
-        sprite: 'npc_applicant_a',
-        x: 25,
-        y: 17,
-        talked: false,
-        dialogues: [
-          { speaker: 'Minh', text: 'Chào cậu! Cậu vừa nộp đơn ở gian trại JPC cạnh Bia Đá FTU hôm FCD đúng không? Nhìn các anh chị JPC nhiệt huyết quá chừng, cùng cố gắng vào vòng trong nhé!' }
-        ]
-      },
-      {
-        id: 'npc_app_b',
-        name: 'Hà (K63 FTU)',
-        sprite: 'npc_applicant_b',
-        x: 29,
-        y: 17,
-        talked: false,
-        dialogues: [
-          { speaker: 'Hà', text: 'Konnichiwa! Hồi mới bước chân qua cổng Chùa Láng vào FCD, tớ đã ước mơ được gia nhập JPC rồi! Chúng mình cùng làm một nhóm thật ăn ý nha!' }
-        ]
-      },
-      {
         id: 'npc_interviewer',
-        name: 'Senpai Phỏng Vấn',
+        name: 'Senpai Phỏng Vấn Online',
         sprite: 'npc_senpai',
         x: 27,
         y: 17,
+        avatarIcon: '💻',
         dialogues: [
-          { speaker: 'Senpai Phỏng Vấn', text: 'Chào mừng các tân sinh viên Ngoại Thương đến với Hội trát 2: Hòa Nhịp (23/10 – 25/10) tại Giảng đường B201!' },
-          { speaker: 'Senpai Phỏng Vấn', text: 'Ở ngôi trường FTU năng động này, JPC là nơi các em không bao giờ phải đi một mình. Nào, hãy cùng bắt nhịp trái tim đồng đội nhé!' }
+          { speaker: 'Senpai Phỏng Vấn', text: 'Konnichiwa! Chúc mừng em đã xuất sắc vượt qua Vòng Đơn và bước vào Vòng 2: Hòa Nhịp (23/10 – 25/10)!' },
+          { speaker: 'Senpai Phỏng Vấn', text: 'Vòng 2 năm nay là Phỏng Vấn Online! Em hãy mở máy tính lên để kết nối phòng phỏng vấn trực tuyến và trả lời bộ câu hỏi trắc nghiệm về JPC nhé!' }
         ]
       }
     ]
@@ -101,7 +90,12 @@ const STAGE_DATA = {
     subtitle: 'Dốc Nhà B FTU — Vòng Teamwork & Pitching (04-05/11)',
     bgm: 'stage3_1',
     questSpot: { x: 12 * 32, y: 13 * 32 },
-    questText: 'Đến Dốc Nhà B huyền thoại (giữa NHÀ H và Tòa B), cùng Trưởng nhóm vượt qua deadline Teamwork (27/10 – 03/11) & tiến tới Pitching (04 – 05/11)!',
+    questText: 'Đến Dốc Nhà B huyền thoại (giữa NHÀ H và Tòa B), cùng Trưởng nhóm chạy deadline Teamwork (27/10 – 03/11) & Pitching (04 – 05/11)!',
+    questTitle: 'Hội Trát 3.1: Phá Phong',
+    timeline: '27/10 – 03/11/2026 · Pitching: 04 – 05/11',
+    objective: 'Cùng nhóm giải quyết thử thách dự án thực tế tại Dốc Nhà B và tự tin thuyết trình bài Pitching trước Hội đồng đánh giá.',
+    location: 'Dốc Nhà B (giữa Nhà H và Tòa B)',
+    tip: 'Tập trung nhịp điệu và phối hợp ăn ý cùng đồng đội để hoàn thành bài thi trước deadline!',
     props: [
       { type: 'prop_boba', x: 12, y: 14, label: 'Trà sữa Chùa Láng' },
       { type: 'prop_desk', x: 12, y: 12, label: 'Bàn họp Dốc Nhà B' },
@@ -115,6 +109,7 @@ const STAGE_DATA = {
         sprite: 'npc_leader',
         x: 12,
         y: 13,
+        avatarIcon: '⚡',
         dialogues: [
           { speaker: 'Trưởng Nhóm', text: 'Ngồi ở Dốc Nhà B quen thuộc này, tụi mình cùng nhau chạy deadline dự án giao lưu Gen 22 nhé!' },
           { speaker: 'Trưởng Nhóm', text: 'Vòng Teamwork diễn ra từ 27/10 đến 03/11, sau đó chúng ta sẽ bước vào ngày Pitching quyết định (04 – 05/11)! Sinh viên Ngoại Thương chưa bao giờ lùi bước, cùng bứt phá nào!' }
@@ -130,6 +125,11 @@ const STAGE_DATA = {
     bgm: 'stage3_2',
     questSpot: { x: 27 * 32, y: 32 * 32 },
     questText: 'Di chuyển sang Trường VJCBI ngay dưới Nhà A, bước vào phòng trà đạo đối thoại cùng Ban Điều Hành (08/11 – 09/11)!',
+    questTitle: 'Hội Trát 3.2: Chân Diện',
+    timeline: '08/11 – 09/11/2026',
+    objective: 'Gặp gỡ và trò chuyện chân thành, sâu lắng 1-on-1 cùng Ban Điều Hành JPC trong không gian văn hóa trà đạo Nhật Bản tại VJCBI.',
+    location: 'Trường VJCBI (phía Nam Nhà A, trên KTX 7 tầng)',
+    tip: 'Hãy lắng nghe trái tim mình và thể hiện bản sắc chân thật nhất của bạn.',
     props: [
       { type: 'prop_lantern', x: 25, y: 32, label: 'Đèn trà đạo hoàng hôn' },
       { type: 'prop_lantern', x: 29, y: 32, label: 'Đèn trà đạo hoàng hôn' },
@@ -143,6 +143,7 @@ const STAGE_DATA = {
         sprite: 'npc_president',
         x: 27,
         y: 32,
+        avatarIcon: '🍵',
         dialogues: [
           { speaker: 'Ban Điều Hành', text: 'Chào em đến với không gian trà đạo Trường VJCBI — góc Nhật Bản tĩnh lặng ngay trong lòng Ngoại Thương.' },
           { speaker: 'Ban Điều Hành', text: 'Vòng 3.2 Chân Diện (08/11 – 09/11) là nơi chúng mình lắng nghe tiếng lòng chân thành nhất của em sau chặng đường dài.' },
@@ -159,6 +160,11 @@ const STAGE_DATA = {
     bgm: 'stage_final',
     questSpot: { x: 46 * 32, y: 21 * 32 },
     questText: 'Bước đến Sân khấu FCD bên cạnh Nhà D để nhận Thẻ Thành Viên Chính Thức JPC!',
+    questTitle: 'Vinh Quang: Chào Mừng Về Nhà',
+    timeline: 'Tháng 11/2026',
+    objective: 'Tiến tới Sân khấu FCD đón nhận trọn vẹn tình cảm chúc mừng từ 5 Ban và Chủ Nhiệm JPC FTU!',
+    location: 'Sân khấu FCD (cạnh Nhà D)',
+    tip: 'Tận hưởng khoảnh khắc thanh xuân rực rỡ nhất cùng đại gia đình JPC!',
     props: [
       { type: 'prop_torii', x: 46, y: 20, label: 'Cổng Torii Vinh Quang' },
       { type: 'prop_sakura_tree', x: 40, y: 18, label: 'Cây Anh Đào' },

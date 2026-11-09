@@ -17,13 +17,17 @@ class MinigameManager {
   start(gameType, onFinish) {
     this.onFinishCallback = onFinish;
     this.activeGame = gameType;
+
+    if (gameType === 'stage2') {
+      this.runStage2Game();
+      return;
+    }
+
     this.modal.classList.remove('hidden');
     this.container.innerHTML = '';
 
     if (gameType === 'stage1') {
       this.runStage1Game();
-    } else if (gameType === 'stage2') {
-      this.runStage2Game();
     } else if (gameType === 'stage3_1') {
       this.runStage31Game();
     } else if (gameType === 'stage3_2') {
@@ -36,12 +40,16 @@ class MinigameManager {
     if (window.audioManager) {
       window.audioManager.playFanfare();
     }
+
+    const compModal = document.getElementById('computer-interview-modal');
+    if (compModal) compModal.classList.add('hidden');
+
     setTimeout(() => {
       this.modal.classList.add('hidden');
       if (this.onFinishCallback) {
         this.onFinishCallback(success);
       }
-    }, 1200);
+    }, 600);
   }
 
   cleanup() {
@@ -135,69 +143,156 @@ class MinigameManager {
     arena.addEventListener('click', handleTap);
   }
 
-  // MINIGAME 2: HÒA NHỊP - NHỊP ĐẬP KẾT NỐI (Pulse Sync)
+  // MINIGAME 2: HÒA NHỊP — PHỎNG VẤN ONLINE VỚI GIAO DIỆN MÀN HÌNH MÁY TÍNH & MULTIPLE CHOICE
   runStage2Game() {
-    this.container.innerHTML = `
-      <div class="mg-header">
-        <h3>HỘI TRÁT 2: HÒA NHỊP</h3>
-        <p>Bấm khi vòng tròn co lại trùng với nhịp tim để đồng điệu cùng cả nhóm!</p>
-      </div>
-      <div class="mg-stage2-arena">
-        <div class="pulse-center" id="pulse-center">💖</div>
-        <div class="pulse-ring" id="pulse-ring"></div>
-      </div>
-      <div class="mg-score-bar">
-        <span>Đồng điệu: <b id="sync-count">0/4</b> nhịp</span>
-      </div>
-      <button class="pixel-btn mg-tap-btn" id="mg-sync-btn">HÒA NHỊP</button>
-    `;
+    const compModal = document.getElementById('computer-interview-modal');
+    if (!compModal) return;
 
-    let syncCount = 0;
-    const requiredSync = 4;
-    let ringScale = 2.5;
-    let expanding = false;
-    const ring = document.getElementById('pulse-ring');
-    const countElem = document.getElementById('sync-count');
-    const syncBtn = document.getElementById('mg-sync-btn');
-    const center = document.getElementById('pulse-center');
+    compModal.classList.remove('hidden');
 
-    const loop = () => {
-      if (ringScale <= 1.0) {
-        ringScale = 2.4;
-      } else {
-        ringScale -= 0.022;
+    const pipImg = document.getElementById('applicant-pip-img');
+    const pipName = document.getElementById('applicant-pip-name');
+    if (window.gameInstance) {
+      if (pipName) pipName.textContent = window.gameInstance.playerName;
+      if (pipImg && window.gameInstance.player.selectedDept) {
+        pipImg.src = `Image/Kokeshi 5 Ban/kokeshi-${window.gameInstance.player.selectedDept}.png`;
       }
-      if (ring) {
-        ring.style.transform = `translate(-50%, -50%) scale(${ringScale})`;
-        ring.style.opacity = Math.max(0.3, 1 - (ringScale - 1) / 1.5);
+    }
+
+    const qScreen = document.getElementById('quiz-question-screen');
+    const cScreen = document.getElementById('quiz-complete-screen');
+    const qBadge = document.getElementById('quiz-step-badge');
+    const qPrompt = document.getElementById('quiz-prompt');
+    const qChoices = document.getElementById('quiz-choices');
+    const qStatus = document.getElementById('quiz-status-msg');
+    const finishBtn = document.getElementById('btn-pass-interview');
+
+    if (qScreen) qScreen.classList.remove('hidden');
+    if (cScreen) cScreen.classList.add('hidden');
+    if (qStatus) {
+      qStatus.className = 'quiz-status-msg hidden';
+      qStatus.textContent = '';
+    }
+
+    const questions = [
+      {
+        prompt: 'Tên đầy đủ và chính thức của CLB Tiếng Nhật JPC tại Trường ĐH Ngoại Thương là gì?',
+        choices: [
+          'A. Japanese Club — CLB Tiếng Nhật Trường ĐH Ngoại Thương',
+          'B. Japan Passion Club FTU',
+          'C. Japan Culture Club FTU',
+          'D. Foreign Trade Japanese Youth Club'
+        ],
+        correct: 0,
+        feedback: 'Chính xác! JPC là viết tắt của Japanese Club — CLB Tiếng Nhật Trường ĐH Ngoại Thương! 🌸'
+      },
+      {
+        prompt: 'Năm 2026, CLB Tiếng Nhật JPC đang mở đơn tuyển quân chào đón thế hệ thành viên thứ mấy?',
+        choices: [
+          'A. Thế hệ Gen 20',
+          'B. Thế hệ Gen 21',
+          'C. Thế hệ Gen 22',
+          'D. Thế hệ Gen 23'
+        ],
+        correct: 2,
+        feedback: 'Chính xác! Tuyển quân mùa thu 2026 chính là mùa tuyển Gen 22 bùng nổ của JPC! ✨'
+      },
+      {
+        prompt: 'CLB Tiếng Nhật JPC gồm bao nhiêu ban chức năng đồng hành cùng 5 biểu tượng búp bê Kokeshi truyền thống?',
+        choices: [
+          'A. 3 ban (Học Thuật, Hậu Cần, Tài Chính)',
+          'B. 4 ban (Nội Dung, Truyền Thông, Sự Kiện, Quản Lý)',
+          'C. 5 ban: Chuyên Môn, Đối Ngoại, Tổ Chức, Thông Tin, Nhân Sự',
+          'D. 6 ban chuyên môn riêng biệt'
+        ],
+        correct: 2,
+        feedback: 'Chính xác! 5 Ban: Chuyên Môn, Đối Ngoại, Tổ Chức, Thông Tin và Nhân Sự tạo nên ngôi nhà JPC! 🏮'
+      },
+      {
+        prompt: 'Ngày hội các Câu Lạc Bộ bùng nổ FTU Club Day (FCD) — nơi đặt Gian Trại JPC diễn ra vào ngày nào?',
+        choices: [
+          'A. Ngày 01/10',
+          'B. Ngày 18/10',
+          'C. Ngày 23/10',
+          'D. Ngày 08/11'
+        ],
+        correct: 1,
+        feedback: 'Chính xác! Ngày hội FTU Club Day (FCD) rực rỡ sắc màu diễn ra vào ngày 18/10! 🎉'
       }
-      this.animFrame = requestAnimationFrame(loop);
+    ];
+
+    let currentQ = 0;
+    let isProcessing = false;
+
+    const renderQuestion = () => {
+      isProcessing = false;
+      const q = questions[currentQ];
+      if (qBadge) qBadge.textContent = `CÂU HỎI ${currentQ + 1} / ${questions.length}`;
+      if (qPrompt) qPrompt.textContent = q.prompt;
+      if (qStatus) {
+        qStatus.className = 'quiz-status-msg hidden';
+        qStatus.textContent = '';
+      }
+
+      if (qChoices) {
+        qChoices.innerHTML = '';
+        q.choices.forEach((choiceText, index) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'quiz-choice-btn';
+          btn.textContent = choiceText;
+
+          btn.addEventListener('click', () => {
+            if (isProcessing) return;
+
+            if (index === q.correct) {
+              isProcessing = true;
+              btn.classList.add('correct');
+              if (window.audioManager) window.audioManager.playHit(true);
+
+              if (qStatus) {
+                qStatus.className = 'quiz-status-msg success';
+                qStatus.textContent = q.feedback;
+              }
+
+              setTimeout(() => {
+                currentQ++;
+                if (currentQ < questions.length) {
+                  renderQuestion();
+                } else {
+                  // Show completed screen
+                  if (qScreen) qScreen.classList.add('hidden');
+                  if (cScreen) cScreen.classList.remove('hidden');
+                  if (window.audioManager) window.audioManager.playFanfare();
+                }
+              }, 900);
+            } else {
+              btn.classList.add('wrong');
+              if (window.audioManager) window.audioManager.playHit(false);
+
+              if (qStatus) {
+                qStatus.className = 'quiz-status-msg error';
+                qStatus.textContent = 'Chưa chính xác rồi! Em hãy suy nghĩ và chọn lại nhé 💡';
+              }
+              setTimeout(() => {
+                btn.classList.remove('wrong');
+              }, 600);
+            }
+          });
+
+          qChoices.appendChild(btn);
+        });
+      }
     };
-    loop();
 
-    const doSync = () => {
-      // Perfect zone is around ringScale 1.0 to 1.35
-      if (ringScale >= 0.95 && ringScale <= 1.35) {
-        syncCount++;
-        countElem.textContent = `${syncCount}/${requiredSync}`;
-        if (window.audioManager) window.audioManager.playHit(true);
+    renderQuestion();
 
-        center.classList.add('heart-pop');
-        setTimeout(() => center.classList.remove('heart-pop'), 300);
-
-        if (syncCount >= requiredSync) {
-          syncBtn.disabled = true;
-          syncBtn.textContent = 'ĐÃ HÒA NHỊP!';
-          this.container.querySelector('.mg-header p').innerHTML = '<span style="color:#ffb7c5; font-weight:bold;">Cả nhóm cùng nở nụ cười! Mọi khoảng cách đã biến mất!</span>';
-          this.finish(true);
-        }
-      } else {
-        if (window.audioManager) window.audioManager.playHit(false);
-      }
-    };
-
-    syncBtn.addEventListener('click', doSync);
-    this.container.querySelector('.mg-stage2-arena').addEventListener('click', doSync);
+    if (finishBtn) {
+      finishBtn.onclick = () => {
+        compModal.classList.add('hidden');
+        this.finish(true);
+      };
+    }
   }
 
   // MINIGAME 3.1: PHÁ PHONG - BỨT PHÁ TEAMWORK (Catch Ideas)

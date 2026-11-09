@@ -27,16 +27,38 @@
     <div id="hud-top-bar">
       <div class="hud-left">
         <img src="Image/Logo.png" alt="JPC FTU" style="width: 26px; height: 26px; object-fit: contain;">
-        <span class="hud-badge" id="hud-badge">FTU CLUB DAY</span>
-        <div class="hud-quest-info">
-          <h3 class="hud-stage-name" id="hud-stage-name">VÒNG 1: KHAI NHÃN (01/10 – 20/10)</h3>
-          <p class="hud-quest-desc" id="hud-quest-desc">Đến Sân Trung Tâm tìm Gian Trại JPC màu đỏ (phía Tây Bia Đá FTU · FCD 18/10)!</p>
-        </div>
+        <span class="hud-badge" id="hud-badge">FTU CLUB DAY · GEN 22</span>
+        <span class="hud-player-tag" id="hud-player-tag">🌸 Kouhai Gen 22</span>
       </div>
       <div class="hud-right">
         <button class="icon-btn" id="btn-sound" title="Âm thanh">🔊</button>
         <button class="icon-btn" id="btn-memory" title="Sổ Kỷ Niệm">📖 Sổ Kỷ Niệm</button>
         <button class="icon-btn" id="btn-fullscreen" title="Toàn màn hình">⛶</button>
+      </div>
+    </div>
+
+    <!-- MINIMAP & QUEST HUD PANEL (TOP-RIGHT) -->
+    <div id="minimap-panel">
+      <div class="minimap-card">
+        <div class="minimap-header">
+          <span class="minimap-title">🌸 BẢN ĐỒ FTU</span>
+          <span class="minimap-compass">N ▲</span>
+        </div>
+        <div class="minimap-canvas-wrapper">
+          <canvas id="minimap-canvas" width="140" height="98"></canvas>
+        </div>
+      </div>
+
+      <!-- QUEST CARD DIRECTLY UNDER MINIMAP -->
+      <div id="quest-hud-card" title="Chạm để xem chi tiết nhiệm vụ">
+        <div class="quest-card-top">
+          <span class="quest-card-badge" id="quest-badge">VÒNG 1</span>
+          <span class="quest-card-date" id="quest-date">01/10 – 20/10</span>
+        </div>
+        <div class="quest-card-name" id="quest-hud-name">Hội Trát 1: Khai Nhãn</div>
+        <div class="quest-card-action">
+          <span class="quest-detail-pill">📋 Chi tiết nhiệm vụ ▶</span>
+        </div>
       </div>
     </div>
 
@@ -197,6 +219,148 @@
     <div id="minigame-modal" class="modal-overlay hidden">
       <div class="form-card" id="minigame-container">
         <!-- Injected dynamically -->
+      </div>
+    </div>
+
+    <!-- QUEST DETAIL MODAL -->
+    <div id="quest-detail-modal" class="modal-overlay hidden">
+      <div class="quest-detail-card">
+        <div class="quest-detail-header">
+          <div class="quest-detail-badge" id="modal-quest-badge">VÒNG 1: KHAI NHÃN</div>
+          <h2 id="modal-quest-title">HỘI TRÁT 1: KHAI NHÃN (01/10 – 20/10)</h2>
+          <div class="quest-detail-timeline" id="modal-quest-timeline">📅 Thời gian: 01/10 – 20/10/2026 · FTU Club Day: 18/10</div>
+        </div>
+        <div class="quest-detail-body">
+          <div class="quest-section">
+            <h4 class="quest-section-title">🎯 MỤC TIÊU NHIỆM VỤ</h4>
+            <p id="modal-quest-objective">Đến Sân Trung Tâm FTU (dãy booth phía Tây Bia Đá FTU), gặp Senpai tại Gian Trại JPC màu đỏ thắm để nhận và niêm phong đơn đăng ký Vòng 1!</p>
+          </div>
+          <div class="quest-section">
+            <h4 class="quest-section-title">📍 VỊ TRÍ TRÊN BẢN ĐỒ</h4>
+            <p id="modal-quest-location">Sân Trung Tâm FTU · Gian trại JPC (màu đỏ rực rỡ thứ 2 từ phía Nam dãy booth Tây, có đèn lồng đỏ).</p>
+          </div>
+          <div class="quest-section">
+            <h4 class="quest-section-title">💡 HƯỚNG DẪN TỪ SENPAI</h4>
+            <p id="modal-quest-tip">Hãy đi theo vệt hoa anh đào phát sáng dưới chân Kokeshi của em để đến thẳng đích nhé!</p>
+          </div>
+        </div>
+        <div class="quest-detail-footer">
+          <button class="gold-btn" id="btn-close-quest-detail" type="button">ĐÃ HIỂU — TIẾP TỤC HÀNH TRÌNH</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CINEMATIC STAGE TRANSITION SCREEN ("N NGÀY SAU ĐÓ...") -->
+    <div id="transition-modal" class="modal-overlay hidden">
+      <div class="transition-screen">
+        <div class="transition-content">
+          <div class="transition-sakura-icon">🌸</div>
+          <h1 class="transition-heading" id="transition-title">VÀI NGÀY SAU ĐÓ...</h1>
+          <div class="transition-sub" id="transition-sub">Ngày 23 tháng 10 năm 2026</div>
+          <div class="transition-divider"></div>
+          <p class="transition-desc" id="transition-desc">
+            Sau những ngày ngóng trông hồi hộp, lá đơn của bạn đã xuất sắc chinh phục được Hội đồng tuyển sinh JPC.<br>
+            Bạn đã chính thức bước tiếp vào <b>Vòng 2: Hòa Nhịp (Phỏng Vấn Online)</b>!
+          </p>
+          <button class="gold-btn transition-btn" id="btn-transition-proceed" type="button">
+            BƯỚC VÀO PHÒNG PHỎNG VẤN ONLINE ▶
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIRST-PERSON COMPUTER MONITOR INTERVIEW MODAL (VÒNG 2: PHỎNG VẤN ONLINE) -->
+    <div id="computer-interview-modal" class="modal-overlay hidden">
+      <div class="computer-wrapper">
+        <div class="monitor-frame">
+          <!-- Top Webcam -->
+          <div class="monitor-top-bar">
+            <div class="webcam-housing">
+              <span class="webcam-lens"></span>
+              <span class="webcam-led"></span>
+              <span class="webcam-status">● Camera ON</span>
+            </div>
+          </div>
+
+          <!-- Screen Display -->
+          <div class="monitor-display">
+            <!-- Meet Window Titlebar -->
+            <div class="window-bar">
+              <div class="window-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+              </div>
+              <div class="window-title">
+                <img src="Image/Logo.png" alt="JPC" class="window-logo">
+                <span>JPC Online Interview Room — Google Meet · Gen 22 Selection</span>
+              </div>
+              <div class="window-info">
+                <span>🔴 23/10/2026 · 14:30</span>
+              </div>
+            </div>
+
+            <!-- Meet Content Grid -->
+            <div class="meet-content">
+              <!-- Left: Interviewer Video Feed -->
+              <div class="interviewer-feed-box">
+                <div class="feed-header">
+                  <span class="feed-tag">Host · Hội đồng Phỏng vấn JPC</span>
+                </div>
+                <div class="feed-avatar-wrap">
+                  <img src="Image/Kokeshi 5 Ban/kokeshi-chuyenmon.png" alt="Senpai" class="feed-avatar">
+                  <div class="feed-pulse"></div>
+                </div>
+                <div class="feed-name">
+                  <span>🎙️ Senpai JPC (Đang nói...)</span>
+                </div>
+                <!-- Small applicant pip -->
+                <div class="applicant-pip">
+                  <img id="applicant-pip-img" src="Image/Kokeshi 5 Ban/kokeshi-chuyenmon.png" alt="Applicant">
+                  <span id="applicant-pip-name">Bạn</span>
+                </div>
+              </div>
+
+              <!-- Right: Multiple Choice Question Box -->
+              <div class="quiz-box">
+                <div id="quiz-question-screen">
+                  <div class="quiz-step-row">
+                    <span class="quiz-step-badge" id="quiz-step-badge">CÂU HỎI 1 / 4</span>
+                    <span class="quiz-topic-badge">PHỎNG VẤN TRỰC TUYẾN</span>
+                  </div>
+                  <h3 class="quiz-prompt" id="quiz-prompt">
+                    Tên đầy đủ và chính thức của CLB Tiếng Nhật JPC tại Trường ĐH Ngoại Thương là gì?
+                  </h3>
+                  <div class="quiz-choices-grid" id="quiz-choices">
+                    <!-- Populated dynamically via JS -->
+                  </div>
+                  <div class="quiz-status-msg hidden" id="quiz-status-msg"></div>
+                </div>
+
+                <!-- Quiz Completed Screen -->
+                <div id="quiz-complete-screen" class="hidden">
+                  <div class="complete-badge">🎉 XUẤT SẮC VƯỢT QUA</div>
+                  <h2 class="complete-title">PHỎNG VẤN TRỰC TUYẾN THÀNH CÔNG!</h2>
+                  <div class="complete-score">ĐIỂM SỐ: 4 / 4</div>
+                  <p class="complete-feedback">
+                    "Em đã thể hiện sự thấu hiểu tuyệt vời về JPC và tinh thần Ngoại Thương rực rỡ. Chào mừng em tiến thẳng vào Hội trát 3.1: Phá Phong!"
+                  </p>
+                  <button class="gold-btn" id="btn-pass-interview" type="button">
+                    HOÀN THÀNH VÒNG 2 & TIẾP TỤC HÀNH TRÌNH ▶
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Monitor Chin -->
+          <div class="monitor-bottom-chin">
+            <span class="monitor-logo-text">JPC STUDIO DISPLAY</span>
+          </div>
+        </div>
+        <!-- Stand -->
+        <div class="monitor-neck"></div>
+        <div class="monitor-base"></div>
       </div>
     </div>
 

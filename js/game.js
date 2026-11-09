@@ -1097,8 +1097,8 @@ class Game {
 
       // Name tag above NPC (Compact, neat pill in Montserrat)
       this.ctx.save();
-      this.ctx.font = 'bold 9.5px "Montserrat", sans-serif';
-      const nameW = this.ctx.measureText(npc.name).width + 12;
+      this.ctx.font = 'bold 8.5px "Montserrat", sans-serif';
+      const nameW = Math.max(36, Math.round(this.ctx.measureText(npc.name).width + 12));
 
       this.ctx.fillStyle = 'rgba(34, 7, 10, 0.9)';
       this.ctx.beginPath();
@@ -1110,7 +1110,7 @@ class Game {
 
       this.ctx.fillStyle = '#ffd778';
       this.ctx.textAlign = 'center';
-      this.ctx.fillText(npc.name, x + 16, y - 17);
+      this.ctx.fillText(npc.name, x + 16, y - 17.5);
       this.ctx.restore();
     });
   }
@@ -1163,28 +1163,25 @@ class Game {
 
     this.ctx.restore();
 
-    // 3. Single Unified Player Badge above Kokeshi (No double-stacking)
+    // 3. Compact Player Name Tag above Kokeshi (Small, neat pill with only player name)
     this.ctx.save();
     const tagBaseY = py - 30;
-
-    const deptName = this.player.selectedDeptName || 'Ban Chuyên Môn';
     const playerName = this.playerName || 'Kouhai Gen 22';
 
-    this.ctx.font = 'bold 9.5px "Montserrat", sans-serif';
-    const badgeText = `★ ${deptName} · ${playerName}`;
-    const badgeW = this.ctx.measureText(badgeText).width + 16;
+    this.ctx.font = 'bold 8.5px "Montserrat", sans-serif';
+    const badgeW = Math.max(38, Math.round(this.ctx.measureText(playerName).width + 12));
 
     this.ctx.fillStyle = 'rgba(34, 7, 10, 0.9)';
     this.ctx.beginPath();
-    this.ctx.roundRect(centerX - badgeW / 2, tagBaseY - 14, badgeW, 18, 5);
+    this.ctx.roundRect(centerX - badgeW / 2, tagBaseY - 14, badgeW, 14, 4);
     this.ctx.fill();
     this.ctx.strokeStyle = '#ffd778';
-    this.ctx.lineWidth = 1.2;
+    this.ctx.lineWidth = 1;
     this.ctx.stroke();
 
     this.ctx.fillStyle = '#ffd778';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText(badgeText, centerX, tagBaseY - 1);
+    this.ctx.fillText(playerName, centerX, tagBaseY - 3.5);
     this.ctx.restore();
   }
 

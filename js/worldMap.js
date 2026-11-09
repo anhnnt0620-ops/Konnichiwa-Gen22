@@ -998,7 +998,6 @@ class WorldMap {
     // Live Vector Text Pass for Razor-Sharp Typography (Never Blurry / Never Pixelated!)
     this.renderAllSignboards(ctx, currentStageId);
   }
-  }
 
   renderMiniMapToCanvas(targetCanvas, playerX, playerY, questSpot, currentStageId = 'stage1') {
     if (!targetCanvas) return;

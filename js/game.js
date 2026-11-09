@@ -1211,34 +1211,70 @@ class Game {
       targetY = this.nearbyInteractable.data.y * 32 - 40;
     }
 
-    const bob = Math.sin(Date.now() / 150) * 3;
+    // Determine concise action verb
+    let actionLabel = 'Tương tác';
+    if (this.nearbyInteractable.type === 'npc') {
+      actionLabel = 'Trò chuyện';
+    } else if (this.nearbyInteractable.type === 'booth_jpc') {
+      actionLabel = 'Ghé Booth';
+    } else if (this.nearbyInteractable.type === 'prop') {
+      actionLabel = 'Kiểm tra';
+    }
+
+    const bob = Math.sin(Date.now() / 150) * 2.5;
 
     this.ctx.save();
-    const promptText = 'Nhấn [A] / Chạm để tương tác';
-    this.ctx.font = 'bold 9.5px "Be Vietnam Pro", sans-serif';
-    const textW = this.ctx.measureText(promptText).width + 20;
+    this.ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
+    const textWidth = this.ctx.measureText(actionLabel).width;
 
-    // Glowing badge background
-    this.ctx.fillStyle = 'rgba(185, 43, 69, 0.95)';
+    // Sleek console-style Action Badge: [A] Trò chuyện
+    const keycapRadius = 7;
+    const paddingX = 8;
+    const badgeHeight = 20;
+    const badgeWidth = Math.round(paddingX * 2 + keycapRadius * 2 + 5 + textWidth);
+    const badgeX = Math.round(targetX - badgeWidth / 2);
+    const badgeY = Math.round(targetY + bob - badgeHeight / 2);
+
+    // 1. Sleek semi-transparent dark lacquer badge pill
+    this.ctx.fillStyle = 'rgba(20, 5, 8, 0.9)';
     this.ctx.beginPath();
-    this.ctx.roundRect(targetX - textW / 2, targetY + bob - 11, textW, 20, 10);
+    this.ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 10);
     this.ctx.fill();
 
+    // Subtle golden rim
     this.ctx.strokeStyle = '#ffd778';
-    this.ctx.lineWidth = 1.4;
+    this.ctx.lineWidth = 1.2;
     this.ctx.stroke();
 
-    // Golden prompt text
-    this.ctx.fillStyle = '#ffd778';
-    this.ctx.textAlign = 'center';
-    this.ctx.fillText(`★ ${promptText} ★`, targetX, targetY + bob + 3);
+    // 2. Round Golden Keycap [A] button
+    const keycapCenterX = badgeX + paddingX + keycapRadius;
+    const keycapCenterY = badgeY + badgeHeight / 2;
 
-    // Little downward arrow pointing to interactable
     this.ctx.fillStyle = '#ffd778';
     this.ctx.beginPath();
-    this.ctx.moveTo(targetX - 4, targetY + bob + 9);
-    this.ctx.lineTo(targetX + 4, targetY + bob + 9);
-    this.ctx.lineTo(targetX, targetY + bob + 13);
+    this.ctx.arc(keycapCenterX, keycapCenterY, keycapRadius, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // 'A' letter inside keycap
+    this.ctx.fillStyle = '#5c1216';
+    this.ctx.font = 'bold 9px sans-serif';
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.fillText('A', keycapCenterX, keycapCenterY + 0.5);
+
+    // 3. Action Label text
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
+    this.ctx.textAlign = 'left';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.fillText(actionLabel, keycapCenterX + keycapRadius + 5, keycapCenterY);
+
+    // 4. Subtle downward pointing triangle below pill
+    this.ctx.fillStyle = '#ffd778';
+    this.ctx.beginPath();
+    this.ctx.moveTo(targetX - 3.5, badgeY + badgeHeight);
+    this.ctx.lineTo(targetX + 3.5, badgeY + badgeHeight);
+    this.ctx.lineTo(targetX, badgeY + badgeHeight + 3.5);
     this.ctx.closePath();
     this.ctx.fill();
 

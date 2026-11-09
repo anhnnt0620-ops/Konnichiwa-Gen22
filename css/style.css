@@ -16,6 +16,14 @@
 }
 
 @font-face {
+  font-family: 'Alviona';
+  src: url('../Font/Alviona.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'HKGokukai';
   src: url('../Font/hkgokukaikk.ttf') format('truetype');
   font-weight: normal;

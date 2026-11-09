@@ -461,15 +461,15 @@ class WorldMap {
     ctx.arc(doorX + doorW - 4, doorY + doorH / 2, 2, 0, Math.PI * 2);
     ctx.fill();
 
-    // 6. Signboard with 'Be Vietnam Pro' Font (Flawless Vietnamese Typography)
-    ctx.font = 'bold 10.5px "Be Vietnam Pro", sans-serif';
-    const textW = Math.max(50, Math.round(ctx.measureText(b.name).width + 16));
+    // 6. Signboard with 'Alviona' Font
+    ctx.font = 'bold 12px "Alviona", "Cinzel", serif';
+    const textW = Math.max(50, Math.round(ctx.measureText(b.name).width + 18));
     const signX = x + Math.floor(w / 2) - textW / 2;
-    const signY = y + roofHeight - 16;
+    const signY = y + roofHeight - 17;
 
     ctx.fillStyle = 'rgba(34, 7, 10, 0.9)';
     ctx.beginPath();
-    ctx.roundRect(signX, signY, textW, 18, 4);
+    ctx.roundRect(signX, signY, textW, 19, 4);
     ctx.fill();
     ctx.strokeStyle = '#ffd778';
     ctx.lineWidth = 1;
@@ -477,7 +477,7 @@ class WorldMap {
 
     ctx.fillStyle = '#ffd778';
     ctx.textAlign = 'center';
-    ctx.fillText(b.name, signX + textW / 2, signY + 13);
+    ctx.fillText(b.name, signX + textW / 2, signY + 14);
     ctx.textAlign = 'start';
   }
 
@@ -588,7 +588,7 @@ class WorldMap {
 
     // FTU Monogram / Crest
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 12px "Be Vietnam Pro", sans-serif';
+    ctx.font = 'bold 12px "Alviona", "Cinzel", serif';
     ctx.textAlign = 'center';
     ctx.fillText('FTU', biaX, biaY + 3);
 
@@ -601,7 +601,7 @@ class WorldMap {
     ctx.lineWidth = 1;
     ctx.stroke();
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 9px "Be Vietnam Pro", sans-serif';
+    ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
     ctx.fillText('★ BIA ĐÁ FTU ★', biaX, biaY - 21);
     ctx.textAlign = 'start';
   }
@@ -640,7 +640,7 @@ class WorldMap {
     ctx.stroke();
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 10px "Be Vietnam Pro", sans-serif';
+    ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
     ctx.textAlign = 'center';
     ctx.fillText('★ BOOTH KHỐI CLB CHUYÊN MÔN ★', cmBannerX + cmBannerW / 2, cmY + 18);
     ctx.textAlign = 'start';
@@ -758,7 +758,7 @@ class WorldMap {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(doanX + 4, southY + 28, doanW - 8, 5);
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 9px "Be Vietnam Pro", sans-serif';
+    ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
     ctx.textAlign = 'center';
     ctx.fillText('Booth Đoàn', doanX + doanW / 2, southY + 20);
 
@@ -772,7 +772,7 @@ class WorldMap {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(hsvX + 4, southY + 28, hsvW - 8, 5);
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 9px "Be Vietnam Pro", sans-serif';
+    ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
     ctx.fillText('Booth HSV', hsvX + hsvW / 2, southY + 20);
 
     // C. Booth khối CLB sở thích
@@ -796,7 +796,7 @@ class WorldMap {
     ctx.stroke();
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 9.5px "Be Vietnam Pro", sans-serif';
+    ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
     ctx.fillText('★ BOOTH KHỐI CLB SỞ THÍCH ★', stBannerX + stBannerW / 2, southY + 18);
     ctx.textAlign = 'start';
   }
@@ -822,7 +822,7 @@ class WorldMap {
     ctx.stroke();
 
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 9px "Be Vietnam Pro", sans-serif';
+    ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
     ctx.textAlign = 'center';
     ctx.fillText('CỔNG CHÀO TÂN SINH VIÊN · FTU', ax + aw / 2, ay + 6);
     ctx.textAlign = 'start';

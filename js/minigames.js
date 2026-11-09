@@ -365,26 +365,26 @@ class MinigameManager {
 
     const questions = [
       {
-        q: "Điều gì thôi thúc bạn bước vào cánh cửa JPC?",
+        q: "Điều gì thôi thúc bạn chọn bước vào cánh cửa JPC giữa muôn vàn CLB tại Ngoại Thương?",
         choices: [
           "Đam mê vẻ đẹp văn hóa và con người xứ sở mặt trời mọc.",
-          "Muốn tìm một mái nhà ấm áp để cùng cười, cùng trưởng thành.",
+          "Muốn tìm một mái nhà ấm áp để cùng cười, cùng trưởng thành tại FTU.",
           "Muốn thử thách bản thân và bứt phá khỏi vùng an toàn."
         ]
       },
       {
-        q: "Khi gặp khó khăn trong công việc nhóm, bạn sẽ chọn cách nào?",
+        q: "Khi gặp khó khăn trước áp lực học tập và deadline sự kiện tại FTU, bạn sẽ làm gì?",
         choices: [
-          "Chủ động sẻ chia, cùng lắng nghe và tìm tiếng nói chung.",
-          "Giữ tinh thần tích cực, trở thành điểm tựa vững chãi cho đồng đội.",
-          "Không ngần ngại học hỏi từ các anh chị và tiếp thu góp ý."
+          "Chủ động sẻ chia, cùng lắng nghe và tìm tiếng nói chung với đồng đội.",
+          "Giữ tinh thần lạc quan, trở thành điểm tựa vững chãi cho cả nhóm.",
+          "Không ngần ngại học hỏi từ các anh chị tiền bối JPC."
         ]
       },
       {
-        q: "Với bạn, JPC trong 3 năm tới sẽ là...?",
+        q: "Với bạn, JPC trong những năm tháng tại Trường Đại học Ngoại Thương sẽ là...?",
         choices: [
-          "Nơi lưu giữ thanh xuân rực rỡ nhất thời sinh viên.",
-          "Cầu nối đưa đam mê của tôi vươn xa hơn nữa.",
+          "Nơi lưu giữ thanh xuân rực rỡ nhất thời sinh viên FTU.",
+          "Cầu nối đưa đam mê tiếng Nhật và văn hóa của tôi vươn xa hơn nữa.",
           "Gia đình thứ hai luôn dang rộng vòng tay đón tôi về."
         ]
       }

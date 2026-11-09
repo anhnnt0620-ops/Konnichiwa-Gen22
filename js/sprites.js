@@ -422,6 +422,34 @@ class SpriteManager {
     mCtx.fill();
     this.cache['prop_mailbox'] = mailbox;
 
+    // FTU Campus Sign (Biển tên Ngoại Thương 64x32)
+    const { canvas: ftuSign, ctx: fCtx } = this.createCanvas(64, 32);
+    fCtx.fillStyle = '#1d3557';
+    fCtx.fillRect(2, 4, 60, 24);
+    fCtx.strokeStyle = '#ffd166';
+    fCtx.lineWidth = 2;
+    fCtx.strokeRect(2, 4, 60, 24);
+    fCtx.fillStyle = '#e63946';
+    fCtx.fillRect(6, 7, 52, 6);
+    fCtx.fillStyle = '#fff';
+    fCtx.font = 'bold 9px sans-serif';
+    fCtx.fillText('★ FTU - JPC ★', 8, 22);
+    this.cache['prop_ftu_sign'] = ftuSign;
+
+    // Blackboard / Bảng xanh Giảng đường Nhà B FTU (48x32)
+    const { canvas: board, ctx: bBoardCtx } = this.createCanvas(48, 32);
+    bBoardCtx.fillStyle = '#5c4033'; // Wooden frame
+    bBoardCtx.fillRect(0, 2, 48, 28);
+    bBoardCtx.fillStyle = '#2d6a4f'; // Green chalkboard
+    bBoardCtx.fillRect(3, 5, 42, 22);
+    bBoardCtx.fillStyle = '#ffffff'; // White chalk marks
+    bBoardCtx.fillRect(6, 8, 12, 1);
+    bBoardCtx.fillRect(6, 12, 18, 1);
+    bBoardCtx.fillStyle = '#ffccd5'; // Pink chalk "JPC"
+    bBoardCtx.font = 'bold 7px sans-serif';
+    bBoardCtx.fillText('JPC GEN 22', 8, 22);
+    this.cache['prop_blackboard'] = board;
+
     // Red Japanese Lantern (Chōchin) (20x28)
     const { canvas: lantern, ctx: lCtx } = this.createCanvas(24, 32);
     // Hanging cord

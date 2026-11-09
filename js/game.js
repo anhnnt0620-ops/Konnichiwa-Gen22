@@ -94,11 +94,11 @@ class Game {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Người Dẫn Chuyện',
-          text: `Chào mừng ${this.playerName} đến với hành trình tìm kiếm giấc mơ tại JPC!`
+          text: `Chào mừng ${this.playerName} đến với khuôn viên Trường Đại học Ngoại Thương (FTU)!`
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Trước mắt bạn là Hội trát 1: Khai Nhãn (Vòng Đơn). Hãy đi xung quanh thu thập các mảnh ghép cảm xúc và gửi gắm tâm tư vào Hòm thư JPC nhé!'
+          text: 'Trước mắt bạn là Tiền sảnh Nhà A rực rỡ cờ hoa. Hãy đi quanh thu thập 3 mảnh ghép tinh thần FTU & JPC, rồi gửi gắm tâm tư vào Hòm thư tuyển thành viên Gen 22 nhé!'
         }
       ]);
     }, 400);
@@ -127,40 +127,40 @@ class Game {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Hội Trát 2',
-          text: 'Chúc mừng bạn đã vượt qua Vòng Đơn! Chào mừng đến với Vòng Phỏng Vấn Nhóm: Hòa Nhịp!'
+          text: 'Chúc mừng bạn đã vượt qua Vòng Đơn! Chào mừng đến với Giảng đường B201 FTU - Vòng Phỏng Vấn Nhóm: Hòa Nhịp!'
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Hãy đến trò chuyện cùng các bạn ứng viên đang ngồi ở bàn tròn trước mặt nhé!'
+          text: 'Hãy đến trò chuyện cùng các bạn FTUers đang ngồi ở bàn tròn trước mặt nhé!'
         }
       ]);
     } else if (stageId === 'stage3_1') {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Hội Trát 3.1',
-          text: 'Chúc mừng bạn bước vào Vòng Teamwork: Phá Phong!'
+          text: 'Chúc mừng bạn bước vào Vòng Teamwork: Phá Phong tại Dốc Nhà B huyền thoại của FTU!'
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Các bạn cùng nhóm đang nỗ lực hết mình tại bàn dự án. Hãy tới gặp Trưởng Nhóm để cùng bứt phá giới hạn!'
+          text: 'Các bạn cùng nhóm đang nỗ lực hết mình tại bàn dự án. Hãy tới gặp Trưởng Nhóm để cùng bứt phá giới hạn deadline!'
         }
       ]);
     } else if (stageId === 'stage3_2') {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Hội Trát 3.2',
-          text: 'Chào mừng bạn đến với Vòng Phỏng Vấn Cá Nhân: Chân Diện.'
+          text: 'Chào mừng bạn đến với Không gian Nhật Bản VJCC FTU - Vòng Phỏng Vấn Cá Nhân: Chân Diện.'
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Ánh hoàng hôn buông xuống ấm áp. Hãy tiến lại chiếc bàn trà và mở lòng đối thoại cùng Ban Điều Hành.'
+          text: 'Ánh hoàng hôn buông xuống ấm áp qua rèm Shoji. Hãy tiến lại chiếc bàn trà và mở lòng đối thoại cùng Ban Điều Hành.'
         }
       ]);
     } else if (stageId === 'stage_final') {
       window.dialogueManager.startDialogue([
         {
           speaker: 'JPC FTU',
-          text: `Khoảnh khắc vinh quang đã tới! Chào mừng ${this.playerName} đến với Đại sảnh Lễ Hội JPC!`
+          text: `Khoảnh khắc vinh quang đã tới! Chào mừng tân FTUer ${this.playerName} đến với Quảng trường Sân Nhà A FTU rợp bóng hoa anh đào!`
         },
         {
           speaker: 'Người Dẫn Chuyện',
@@ -465,24 +465,24 @@ class Game {
           window.minigameManager.start('stage2', (success) => {
             this.stageProgress.stage2.completed = true;
             this.stage.portal.unlocked = true;
-            this.addMemory('Hội trát 2: Hòa Nhịp', 'Vượt qua Vòng Phỏng Vấn Nhóm với sự đồng điệu cùng đồng đội!', 'Image/Color/Vòng 2 - Color.png');
-            this.stage.questText = 'Đã mở khóa cổng Hội trát tiếp theo! Hãy bước qua cánh cổng để tiến vào Vòng Teamwork!';
+            this.addMemory('Hội trát 2: Hòa Nhịp', 'Hòa nhịp trái tim cùng đồng đội tại Giảng đường B201 FTU!', 'Image/Color/Vòng 2 - Color.png');
+            this.stage.questText = 'Đã mở khóa cổng Hội trát tiếp theo! Hãy bước qua cánh cổng để tiến vào Dốc Nhà B!';
             this.updateHUD();
           });
         } else if (this.currentStageId === 'stage3_1' && data.id === 'npc_leader') {
           window.minigameManager.start('stage3_1', (success) => {
             this.stageProgress.stage3_1.completed = true;
             this.stage.portal.unlocked = true;
-            this.addMemory('Hội trát 3.1: Phá Phong', 'Cùng đồng đội bứt phá mọi deadline trong dự án Teamwork!', 'Image/Color/Vòng 3.1 - Color.png');
-            this.stage.questText = 'Hoàn thành xuất sắc! Cổng tiến vào Vòng Phỏng Vấn Cá Nhân đã mở!';
+            this.addMemory('Hội trát 3.1: Phá Phong', 'Cháy hết mình vượt qua deadline tại Dốc Nhà B FTU!', 'Image/Color/Vòng 3.1 - Color.png');
+            this.stage.questText = 'Hoàn thành xuất sắc! Cổng tiến vào Không gian VJCC đã mở!';
             this.updateHUD();
           });
         } else if (this.currentStageId === 'stage3_2' && data.id === 'npc_mentor_heart') {
           window.minigameManager.start('stage3_2', (success) => {
             this.stageProgress.stage3_2.completed = true;
             this.stage.portal.unlocked = true;
-            this.addMemory('Hội trát 3.2: Chân Diện', 'Hiểu rõ chính mình và thể hiện trọn vẹn bản sắc trước Ban Điều Hành!', 'Image/Color/Vòng 3.2 - Color.png');
-            this.stage.questText = 'Cổng Vinh Quang đã mở! Bước qua cánh cổng để tiến tới Lễ Công Bố Thành Viên!';
+            this.addMemory('Hội trát 3.2: Chân Diện', 'Tỏa sáng chân diện tại không gian văn hóa VJCC Ngoại Thương!', 'Image/Color/Vòng 3.2 - Color.png');
+            this.stage.questText = 'Cổng Vinh Quang đã mở! Tiến tới Quảng trường Sân Nhà A FTU!';
             this.updateHUD();
           });
         } else if (this.currentStageId === 'stage_final' && data.id === 'npc_final_president') {
@@ -495,31 +495,31 @@ class Game {
           window.dialogueManager.startDialogue([
             {
               speaker: 'Hòm Thư JPC',
-              text: 'Bạn cần thu thập đủ 3 mảnh ghép cảm xúc trong phòng trước khi niêm phong lá đơn nhé!'
+              text: 'Bạn cần thu thập đủ 3 mảnh ghép cảm xúc trước sảnh Nhà A trước khi niêm phong lá đơn nhé!'
             }
           ]);
         } else {
           window.minigameManager.start('stage1', (success) => {
             this.stageProgress.stage1.completed = true;
             this.stage.portal.unlocked = true;
-            this.addMemory('Hội trát 1: Khai Nhãn', 'Niêm phong và gửi trọn tâm huyết vào lá đơn tuyển thành viên Gen 22!', 'Image/Color/Vòng 1 - Color.png');
-            this.stage.questText = 'Lá đơn đã gửi đi! Cổng Hội Trát 2 đã mở ra ở bên phải!';
+            this.addMemory('Hội trát 1: Khai Nhãn', 'Gửi trọn lá đơn tuyển thành viên tại Tiền sảnh Nhà A - Đại học Ngoại Thương!', 'Image/Color/Vòng 1 - Color.png');
+            this.stage.questText = 'Lá đơn đã gửi đi! Cổng Giảng đường B201 đã mở ra ở bên phải!';
             this.updateHUD();
           });
         }
       } else if (data.type === 'prop_desk') {
         window.dialogueManager.startDialogue([
           {
-            speaker: 'Bàn Học',
-            text: 'Những trang giấy ghi chép văn hóa Nhật, những giấc mơ được nhen nhóm từ chính nơi này.'
+            speaker: 'Bàn Tuyển Sinh JPC',
+            text: 'Bàn sự kiện Konnichiwa Gen 22 tại FTU, nơi bao ước mơ tuổi trẻ bắt đầu nảy mầm.'
           }
         ]);
       } else if (data.type === 'prop_boba') {
         if (window.audioManager) window.audioManager.playCollect();
         window.dialogueManager.startDialogue([
           {
-            speaker: 'Trà Sữa Động Viên',
-            text: 'Một ngụm trà sữa ngọt ngào xua tan mọi mệt mỏi! Các anh chị JPC luôn tâm lý thế đấy!'
+            speaker: 'Trà Sữa Chùa Láng',
+            text: 'Một ly trà sữa Chùa Láng mát lạnh xua tan căng thẳng deadline! Sinh viên Ngoại Thương ai cũng mê!'
           }
         ]);
       }

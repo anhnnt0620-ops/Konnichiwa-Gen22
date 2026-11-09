@@ -23,23 +23,33 @@ const TILE_TYPES = {
   FESTIVAL_PLAZA: 12
 };
 
-// FTU Buildings Definition
+// FTU Buildings Definition (According to Official Sơ đồ FTU)
 const FTU_BUILDINGS = [
-  { id: "K", name: "Nhà K", x: 4, y: 4, w: 6, h: 4, style: "lilac" },
-  { id: "KTX4", name: "KTX 4 tầng", x: 12, y: 3, w: 8, h: 4, style: "peach" },
-  { id: "TC", name: "Nhà Thể chất", x: 37, y: 3, w: 10, h: 5, style: "mint", door: "bottom" },
-  { id: "E", name: "Nhà E", x: 49, y: 3, w: 6, h: 4, style: "sky" },
-  { id: "G", name: "Nhà G", x: 49, y: 9, w: 6, h: 4, style: "sky" },
-  { id: "CT", name: "Canteen FTU", x: 3, y: 10, w: 6, h: 4, style: "butter" },
-  { id: "H", name: "Nhà H", x: 3, y: 16, w: 6, h: 4, style: "lilac" },
-  { id: "F", name: "Nhà F", x: 3, y: 22, w: 6, h: 4, style: "lilac" },
-  { id: "SHOP", name: "FTU Shop", x: 3, y: 28, w: 4, h: 3, style: "red" },
-  { id: "B", name: "Nhà B (Giảng Đường)", x: 14, y: 12, w: 20, h: 4, style: "cream" },
-  { id: "A", name: "Nhà A (Trung Tâm)", x: 14, y: 24, w: 20, h: 4, style: "cream" },
-  { id: "D", name: "Nhà D & Sân FCD", x: 49, y: 20, w: 7, h: 4, style: "rose", door: "bottom" },
-  { id: "VJCC", name: "Viện VJCC Nhật Bản", x: 18, y: 29, w: 13, h: 4, style: "vjcc", door: "left" },
-  { id: "KTX7", name: "KTX 7 tầng", x: 21, y: 31, w: 8, h: 3, style: "peach" },
-  { id: "BV", name: "Cổng Chùa Láng", x: 3, y: 31, w: 3, h: 2, style: "booth", small: true }
+  // Dọc mép Tây (hướng phố Chùa Láng)
+  { id: "BV", name: "Bốt Bảo Vệ", x: 3, y: 32, w: 4, h: 3, style: "booth", small: true },
+  { id: "SHOP", name: "FTU Shop", x: 3, y: 26, w: 5, h: 3, style: "red" },
+  { id: "F", name: "Nhà F", x: 3, y: 19, w: 5, h: 5, style: "lilac" },
+  { id: "H", name: "Nhà H", x: 3, y: 11, w: 5, h: 6, style: "lilac" },
+  { id: "CT", name: "Canteen FTU", x: 3, y: 4, w: 5, h: 5, style: "butter" },
+
+  // Dãy phía Bắc
+  { id: "K", name: "Nhà K", x: 10, y: 3, w: 6, h: 4, style: "lilac" },
+  { id: "KTX4", name: "KTX 4 tầng", x: 18, y: 3, w: 14, h: 4, style: "peach" },
+  { id: "TC", name: "Nhà Thể chất", x: 34, y: 3, w: 12, h: 5, style: "mint", door: "bottom" },
+
+  // Dãy phía Đông
+  { id: "E", name: "Nhà E", x: 50, y: 3, w: 6, h: 4, style: "sky" },
+  { id: "G", name: "Nhà G", x: 50, y: 8, w: 6, h: 4, style: "sky" },
+  { id: "D", name: "Nhà D", x: 48, y: 18, w: 8, h: 8, style: "rose", door: "bottom" },
+
+  // Khu Trung Tâm
+  { id: "B", name: "Nhà B (Giảng Đường)", x: 11, y: 10, w: 25, h: 5, style: "cream" },
+  { id: "VP_DOAN", name: "VP Đoàn & VP CLB", x: 36, y: 11, w: 10, h: 4, style: "red" },
+  { id: "A", name: "Nhà A (Trung Tâm)", x: 11, y: 23, w: 26, h: 5, style: "cream" },
+  { id: "VJCC", name: "Viện VJCC (VJCBI)", x: 16, y: 28, w: 14, h: 3, style: "vjcc", door: "bottom" },
+
+  // Dãy phía Nam (Tách biệt hoàn toàn với VJCC bằng đại lộ hàng 31-33!)
+  { id: "KTX7", name: "KTX 7 Tầng - Study Space", x: 15, y: 34, w: 15, h: 3, style: "peach" }
 ];
 
 // Warm, bright color palette matching jpc-ftu
@@ -129,36 +139,53 @@ class WorldMap {
       }
     };
 
-    // 3. Paved Avenues & Pathways
-    paint(9, 8, 4, 27, TILE_TYPES.PATH, false); // Wide Main Avenue from Cổng Chùa Láng
-    paint(8, 30, 6, 4, TILE_TYPES.PATH, false);
-    paint(10, 9, 39, 2, TILE_TYPES.PATH, false);
-    paint(10, 16, 47, 2, TILE_TYPES.PATH, false); // Avenue to Dốc Nhà B
-    paint(10, 20, 47, 2, TILE_TYPES.PATH, false); // Avenue between Nhà A & B
-    paint(10, 28, 24, 2, TILE_TYPES.PATH, false);
-    paint(12, 29, 3, 5, TILE_TYPES.PATH, false);
-    paint(12, 34, 36, 2, TILE_TYPES.PATH, false); // Direct wide South Avenue to Sân Nhà D!
-    paint(31, 28, 3, 6, TILE_TYPES.PATH, false);
-    paint(40, 11, 2, 23, TILE_TYPES.PATH, false);
-    paint(47, 9, 2, 25, TILE_TYPES.PATH, false); // Path straight to Sân Nhà D
-    paint(25, 8, 2, 2, TILE_TYPES.PATH, false);
+    // 3. Paved Avenues & Pathways (Theo Sơ đồ thực tế FTU)
+    // Cổng Chùa Láng Entrance Plaza (Walkable)
+    paint(7, 31, 7, 6, TILE_TYPES.PLAZA, false);
+    paint(2, 31, 5, 1, TILE_TYPES.FENCE, true); // Hàng rào bên trái bốt bảo vệ
 
-    // 4. SÂN NHÀ D (FTU CLUB DAY PLAZA)
-    paint(45, 22, 12, 10, TILE_TYPES.FESTIVAL_PLAZA, false); // Big FCD Plaza in front of Nhà D
+    // Đại lộ tách biệt giữa VJCC (hàng 28-30) và KTX 7 Tầng (hàng 34-36)
+    paint(12, 31, 35, 3, TILE_TYPES.PATH, false);
 
-    // Special Zones
-    paint(21, 3, 8, 5, TILE_TYPES.COURT, false);
-    paint(15, 17, 7, 3, TILE_TYPES.LAWN, false);
-    paint(26, 17, 7, 3, TILE_TYPES.LAWN, false);
-    paint(22, 17, 4, 3, TILE_TYPES.PLAZA, false);
-    paint(7, 29, 8, 6, TILE_TYPES.PLAZA, false); // Cổng Chùa Láng Entrance Plaza (walkable!)
-    paint(2, 31, 5, 1, TILE_TYPES.FENCE, true);   // Left boundary fence
-    paint(35, 22, 4, 9, TILE_TYPES.PARKING, false);
+    // Con đường chính mép Tây chạy dọc từ Cổng lên Canteen
+    paint(8, 8, 3, 27, TILE_TYPES.PATH, false);
+    paint(10, 8, 38, 2, TILE_TYPES.PATH, false); // Đường trước KTX 4 tầng & Nhà Thể chất
+
+    // Dốc Nhà B (giữa Nhà H và Nhà B)
+    paint(8, 12, 4, 3, TILE_TYPES.PATH, false);
+
+    // Đường kết nối sang Văn phòng đoàn & Nhà D
+    paint(36, 15, 12, 3, TILE_TYPES.PATH, false);
+    paint(46, 17, 2, 10, TILE_TYPES.PATH, false);
+
+    // 4. SÂN TRUNG TÂM FTU (Giữa Nhà A và Nhà B — Nơi đặt Bia đá FTU & Gian trại FCD)
+    paint(11, 15, 25, 8, TILE_TYPES.FESTIVAL_PLAZA, false);
+
+    // Thảm cỏ xanh 2 bên Bia đá FTU
+    paint(18, 16, 4, 2, TILE_TYPES.LAWN, false);
+    paint(26, 16, 4, 2, TILE_TYPES.LAWN, false);
+
+    // Thảm cây xanh ("Cây" trong Ảnh 2) ngăn giữa dãy trại và Nhà H
+    paint(13, 21, 20, 1, TILE_TYPES.FLOWERBED, true);
+
+    // Hàng ghế đá Nhà A ("Ghế nhà A" trong Ảnh 2)
+    paint(13, 22, 20, 1, TILE_TYPES.PATH, false);
+
+    // Sân KTX (phía Nam KTX 4 tầng)
+    paint(18, 7, 14, 2, TILE_TYPES.COURT, false);
+
+    // Khu vực gửi xe phía Bắc
+    paint(34, 8, 14, 2, TILE_TYPES.PARKING, false);
+
+    // Khu vực gửi xe ngõ 84 Chùa Láng (phía Đông KTX 7 tầng)
+    paint(31, 33, 16, 4, TILE_TYPES.PARKING, false);
+
+    // Sân Nhà D & Khu vực Backdrop số 13
+    paint(46, 26, 10, 5, TILE_TYPES.PLAZA, false);
 
     // Hedges & Flowerbeds
-    paint(34, 21, 1, 11, TILE_TYPES.HEDGE, true);
-    paint(39, 21, 1, 11, TILE_TYPES.HEDGE, true);
-    paint(35, 31, 4, 1, TILE_TYPES.HEDGE, true);
+    paint(34, 21, 1, 6, TILE_TYPES.HEDGE, true);
+    paint(39, 21, 1, 6, TILE_TYPES.HEDGE, true);
 
     const flowerBeds = [
       [12, 18], [12, 19], [33, 18], [34, 18], [36, 18], [37, 18],
@@ -433,126 +460,182 @@ class WorldMap {
     ctx.textAlign = 'start';
   }
 
-  // Draw FCD Festival Elements at Sân Nhà D (Other club booths & the prominent JPC Booth)
+  // Draw FCD Festival Elements at Central Plaza (Bia đá FTU & 6 Gian trại theo Ảnh 2)
   drawFCDPlaza(ctx) {
-    const px = 45 * this.tileSize;
-    const py = 24 * this.tileSize;
-
-    // Festival fairy lights hanging across plaza
-    ctx.strokeStyle = 'rgba(255, 215, 120, 0.8)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(px, py + 10);
-    ctx.quadraticCurveTo(px + 100, py + 40, px + 200, py + 10);
-    ctx.stroke();
-
-    // Little glowing bulbs
-    const bulbColors = ['#ff85a1', '#ffd778', '#64b5f6', '#81c784'];
-    for (let i = 0; i < 8; i++) {
-      const t = (i + 1) / 9;
-      const bx = px + t * 200;
-      const by = py + 10 + Math.sin(t * Math.PI) * 20;
-      ctx.fillStyle = bulbColors[i % bulbColors.length];
-      ctx.beginPath();
-      ctx.arc(bx, by, 3, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Other Club Booths (Music, Dance, Debate)
-    const otherBooths = [
-      { name: "CLB Âm Nhạc", x: 46 * this.tileSize, y: 25 * this.tileSize, color: "#5b8fd9" },
-      { name: "CLB Nhảy", x: 46 * this.tileSize, y: 29 * this.tileSize, color: "#8b6cb0" },
-      { name: "CLB Tình Nguyện", x: 53 * this.tileSize, y: 29 * this.tileSize, color: "#e76f51" }
-    ];
-
-    otherBooths.forEach(b => {
-      // Canopy
-      ctx.fillStyle = b.color;
-      ctx.beginPath();
-      ctx.roundRect(b.x, b.y, 60, 40, 4);
-      ctx.fill();
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(b.x + 4, b.y + 36, 52, 4);
-
-      // Label
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 8px "Be Vietnam Pro", sans-serif';
-      ctx.fillText(b.name, b.x + 6, b.y + 22);
-    });
-
     // ========================================================================
-    // ★ GRAND JPC BOOTH AT SÂN NHÀ D (x: 50, y: 24)
-    // Decorated with Torii gate, cherry blossoms, red lanterns & big banner!
+    // 1. BIA ĐÁ FTU (Tâm điểm Sân trường giữa Nhà A và Nhà B)
     // ========================================================================
-    const jpcX = 49 * this.tileSize;
-    const jpcY = 24 * this.tileSize;
-    const jpcW = 120;
-    const jpcH = 75;
+    const biaX = 23 * this.tileSize + 16;
+    const biaY = 16 * this.tileSize + 16;
 
-    // Soft glow under booth
-    ctx.fillStyle = 'rgba(230, 57, 70, 0.25)';
+    // Stone base / pedestal
+    ctx.fillStyle = '#6c757d';
     ctx.beginPath();
-    ctx.ellipse(jpcX + jpcW / 2, jpcY + jpcH - 5, jpcW / 1.6, 20, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Crimson & Gold Royal Canopy
-    const canopyGrad = ctx.createLinearGradient(jpcX, jpcY, jpcX, jpcY + 36);
-    canopyGrad.addColorStop(0, '#e63946');
-    canopyGrad.addColorStop(1, '#5c1216');
-
-    ctx.fillStyle = canopyGrad;
-    ctx.beginPath();
-    ctx.roundRect(jpcX, jpcY, jpcW, 40, [8, 8, 0, 0]);
-    ctx.fill();
-
-    // Gold trim
-    ctx.fillStyle = '#ffd778';
-    ctx.fillRect(jpcX, jpcY + 37, jpcW, 4);
-
-    // Front Table / Reception Desk
-    ctx.fillStyle = '#fffdf8';
-    ctx.beginPath();
-    ctx.roundRect(jpcX + 10, jpcY + 41, jpcW - 20, 28, 4);
+    ctx.roundRect(biaX - 28, biaY + 8, 56, 14, 4);
     ctx.fill();
     ctx.strokeStyle = '#cf9f3f';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Big Banner: "CLB TIẾNG NHẬT JPC — GEN 22"
-    ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 11px "Alviona", "Cinzel", serif';
+    // Red Circular FTU Stone Emblem
+    ctx.fillStyle = '#b92b45';
+    ctx.beginPath();
+    ctx.arc(biaX, biaY - 2, 22, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // FTU Monogram / Crest
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 12px "Be Vietnam Pro", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('★ JPC FTU — GEN 22 ★', jpcX + jpcW / 2, jpcY + 24);
+    ctx.fillText('FTU', biaX, biaY + 3);
+
+    // Label: "BIA ĐÁ FTU"
+    ctx.fillStyle = '#22070a';
+    ctx.beginPath();
+    ctx.roundRect(biaX - 38, biaY - 32, 76, 16, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 9px "Alviona", "Cinzel", serif';
+    ctx.fillText('★ BIA ĐÁ FTU ★', biaX, biaY - 21);
     ctx.textAlign = 'start';
 
-    // Hanging Red Lanterns (Chōchin)
+    // ========================================================================
+    // 2. DÃY 6 GIAN TRẠI FCD TẠI SÂN TRUNG TÂM (Theo Sơ đồ Ảnh 2)
+    // Gian 1, 2, 3, 4, JPC (gian thứ 2 từ bên phải!), Gian 6
+    // ========================================================================
+    const boothY = 18 * this.tileSize;
+
+    // Các gian khác (Booth 1, 2, 3, 4, 6)
+    const otherBooths = [
+      { name: "CLB Âm Nhạc", x: 15 * this.tileSize, color: "#5b8fd9" },
+      { name: "CLB Nhảy", x: 18 * this.tileSize, color: "#8b6cb0" },
+      { name: "CLB Tình Nguyện", x: 21 * this.tileSize, color: "#e76f51" },
+      { name: "CLB Tiếng Anh", x: 24 * this.tileSize, color: "#4fa58b" },
+      { name: "CLB Tranh Biện", x: 30 * this.tileSize, color: "#e0a030" }
+    ];
+
+    otherBooths.forEach(b => {
+      // Canopy mái bạt
+      ctx.fillStyle = b.color;
+      ctx.beginPath();
+      ctx.roundRect(b.x, boothY, 68, 40, [6, 6, 2, 2]);
+      ctx.fill();
+
+      // Bàn lễ tân đón khách
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(b.x + 4, boothY + 34, 60, 6);
+
+      // Tên CLB
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 8.5px "Be Vietnam Pro", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(b.name, b.x + 34, boothY + 22);
+      ctx.textAlign = 'start';
+    });
+
+    // ========================================================================
+    // ★ GIAN TRẠI JPC: GIAN THỨ 2 TỪ BÊN PHẢI (x: 27 * 32, y: 18 * 32)
+    // Trang trí Cổng Torii, Đèn lồng đỏ, Mái vòm hoàng gia, Banner JPC!
+    // ========================================================================
+    const jpcX = 27 * this.tileSize - 4;
+    const jpcY = boothY - 6;
+    const jpcW = 76;
+    const jpcH = 48;
+
+    // Ánh hào quang ấm áp dưới gian trại JPC
+    ctx.fillStyle = 'rgba(230, 57, 70, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(jpcX + jpcW / 2, jpcY + jpcH + 6, 44, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mái vòm đỏ thắm viền vàng kim
+    const canopyGrad = ctx.createLinearGradient(jpcX, jpcY, jpcX, jpcY + 32);
+    canopyGrad.addColorStop(0, '#e63946');
+    canopyGrad.addColorStop(1, '#5c1216');
+    ctx.fillStyle = canopyGrad;
+    ctx.beginPath();
+    ctx.roundRect(jpcX, jpcY, jpcW, 32, [8, 8, 2, 2]);
+    ctx.fill();
+
+    // Viền vàng kim
+    ctx.fillStyle = '#ffd778';
+    ctx.fillRect(jpcX, jpcY + 30, jpcW, 3);
+
+    // Bàn tư vấn nộp đơn Vòng 1
+    ctx.fillStyle = '#fffdf8';
+    ctx.beginPath();
+    ctx.roundRect(jpcX + 6, jpcY + 33, jpcW - 12, 18, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#cf9f3f';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Huy hiệu JPC đỏ chữ vàng rực rỡ (Khớp logo JPC trong Ảnh 2)
+    ctx.fillStyle = '#b92b45';
+    ctx.beginPath();
+    ctx.roundRect(jpcX + jpcW / 2 - 20, jpcY + 6, 40, 18, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('JPC', jpcX + jpcW / 2, jpcY + 19);
+
+    // Chú thích: Gian thứ 2 từ bên phải!
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 7.5px "Be Vietnam Pro", sans-serif';
+    ctx.fillText('VÒNG 1: KHAI NHÃN', jpcX + jpcW / 2, jpcY + 45);
+    ctx.textAlign = 'start';
+
+    // Đèn lồng Chōchin 2 bên
     const drawLantern = (lx, ly) => {
       ctx.fillStyle = '#222';
-      ctx.fillRect(lx - 1, ly - 4, 2, 4);
+      ctx.fillRect(lx - 1, ly - 3, 2, 3);
       ctx.fillStyle = '#e63946';
       ctx.beginPath();
-      ctx.ellipse(lx, ly + 6, 6, 8, 0, 0, Math.PI * 2);
+      ctx.ellipse(lx, ly + 5, 5, 7, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = '#ffd778';
-      ctx.fillRect(lx - 4, ly + 4, 8, 4);
+      ctx.fillRect(lx - 3, ly + 3, 6, 3);
     };
-    drawLantern(jpcX + 8, jpcY + 40);
-    drawLantern(jpcX + jpcW - 8, jpcY + 40);
+    drawLantern(jpcX + 5, jpcY + 28);
+    drawLantern(jpcX + jpcW - 5, jpcY + 28);
 
-    // Torii Gate on the side of JPC Booth
-    const toriiX = jpcX - 34;
-    const toriiY = jpcY + 10;
-    ctx.fillStyle = '#c1121f';
-    ctx.fillRect(toriiX, toriiY, 30, 4); // top beam
-    ctx.fillRect(toriiX + 2, toriiY + 6, 26, 3);
-    ctx.fillRect(toriiX + 5, toriiY + 4, 4, 42); // pillars
-    ctx.fillRect(toriiX + 21, toriiY + 4, 4, 42);
+    // ========================================================================
+    // 3. BACKDROP SỐ 13 TẠI SÂN NHÀ D (Theo Sơ đồ Ảnh 1)
+    // ========================================================================
+    const bdX = 48 * this.tileSize - 12;
+    const bdY = 25 * this.tileSize;
+    ctx.fillStyle = '#b92b45';
+    ctx.beginPath();
+    ctx.roundRect(bdX, bdY, 70, 36, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 8px "Be Vietnam Pro", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('BACKDROP #13', bdX + 35, bdY + 16);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('FCD 18/10 FTU', bdX + 35, bdY + 28);
+    ctx.textAlign = 'start';
   }
 
   // Draw Welcome Arch at Cổng Chùa Láng
   drawEntranceArch(ctx) {
     const ax = 7 * this.tileSize;
-    const ay = 32 * this.tileSize;
+    const ay = 33 * this.tileSize;
     const aw = 96;
     const ah = 44;
 
@@ -573,7 +656,7 @@ class WorldMap {
     ctx.fillStyle = '#ffd778';
     ctx.font = 'bold 9px "Alviona", "Cinzel", serif';
     ctx.textAlign = 'center';
-    ctx.fillText('FTU CLUB DAY (FCD)', ax + aw / 2, ay + 6);
+    ctx.fillText('CỔNG CHÙA LÁNG · FTU', ax + aw / 2, ay + 6);
     ctx.textAlign = 'start';
   }
 
@@ -603,14 +686,14 @@ class WorldMap {
       const by = b.y * this.tileSize * scaleY;
       const bw = b.w * this.tileSize * scaleX;
       const bh = b.h * this.tileSize * scaleY;
-      ctx.fillStyle = (b.id === 'D' || b.id === 'A') ? '#e63946' : '#ffd778';
+      ctx.fillStyle = (b.id === 'D' || b.id === 'A' || b.id === 'B') ? '#e63946' : '#ffd778';
       ctx.fillRect(bx, by, Math.max(3, bw), Math.max(3, bh));
     });
 
-    // Highlight Sân Nhà D FCD
+    // Highlight Central Plaza JPC Booth in Mini-map
     ctx.fillStyle = '#ff85a1';
     ctx.beginPath();
-    ctx.arc(49 * this.tileSize * scaleX + 8, 25 * this.tileSize * scaleY + 6, 6, 0, Math.PI * 2);
+    ctx.arc(27 * this.tileSize * scaleX + 8, 19 * this.tileSize * scaleY + 6, 6, 0, Math.PI * 2);
     ctx.fill();
 
     this.miniMapCanvas = c;

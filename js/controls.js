@@ -27,14 +27,36 @@ class ControlsManager {
       const code = e.code || '';
       const key = (e.key || '').toLowerCase();
 
-      if (code === 'ArrowUp' || code === 'KeyW' || key === 'arrowup' || key === 'w') this.keys.up = true;
-      if (code === 'ArrowDown' || code === 'KeyS' || key === 'arrowdown' || key === 's') this.keys.down = true;
-      if (code === 'ArrowLeft' || code === 'KeyA' || key === 'arrowleft' || key === 'a') this.keys.left = true;
-      if (code === 'ArrowRight' || code === 'KeyD' || key === 'arrowright' || key === 'd') this.keys.right = true;
-      if (code === 'Space' || code === 'KeyE' || code === 'Enter' || key === ' ' || key === 'enter' || key === 'e') {
+      // Action / Interact keys: Space, Enter, E, F, Z
+      const isExplicitActionKey = (code === 'Space' || code === 'KeyE' || code === 'KeyF' || code === 'KeyZ' ||
+                                   code === 'Enter' || key === ' ' || key === 'enter' || key === 'e' || key === 'f' || key === 'z');
+
+      if (isExplicitActionKey) {
         this.keys.action = true;
         if (window.gameInstance) window.gameInstance.handleAction();
+        return;
       }
+
+      // When key 'A' is pressed:
+      if (code === 'KeyA' || key === 'a') {
+        // If near an interactable or dialogue is open, trigger interaction immediately!
+        if (window.gameInstance) {
+          window.gameInstance.checkInteractions();
+          if (window.gameInstance.nearbyInteractable || (window.dialogueManager && window.dialogueManager.active)) {
+            this.keys.action = true;
+            window.gameInstance.handleAction();
+            return;
+          }
+        }
+        // Otherwise move left (WASD)
+        this.keys.left = true;
+      }
+
+      if (code === 'ArrowUp' || code === 'KeyW' || key === 'arrowup' || key === 'w') this.keys.up = true;
+      if (code === 'ArrowDown' || code === 'KeyS' || key === 'arrowdown' || key === 's') this.keys.down = true;
+      if (code === 'ArrowLeft' || key === 'arrowleft') this.keys.left = true;
+      if (code === 'ArrowRight' || code === 'KeyD' || key === 'arrowright' || key === 'd') this.keys.right = true;
+
       if (code === 'KeyM' || key === 'm') {
         if (window.gameInstance) window.gameInstance.toggleMemoryBook();
       }
@@ -46,9 +68,12 @@ class ControlsManager {
 
       if (code === 'ArrowUp' || code === 'KeyW' || key === 'arrowup' || key === 'w') this.keys.up = false;
       if (code === 'ArrowDown' || code === 'KeyS' || key === 'arrowdown' || key === 's') this.keys.down = false;
-      if (code === 'ArrowLeft' || code === 'KeyA' || key === 'arrowleft' || key === 'a') this.keys.left = false;
+      if (code === 'ArrowLeft' || code === 'KeyA' || key === 'arrowleft' || key === 'a') {
+        this.keys.left = false;
+        this.keys.action = false;
+      }
       if (code === 'ArrowRight' || code === 'KeyD' || key === 'arrowright' || key === 'd') this.keys.right = false;
-      if (code === 'Space' || code === 'KeyE' || code === 'Enter' || key === ' ' || key === 'enter' || key === 'e') {
+      if (code === 'Space' || code === 'KeyE' || code === 'KeyF' || code === 'KeyZ' || code === 'Enter' || key === ' ' || key === 'enter' || key === 'e' || key === 'f' || key === 'z') {
         this.keys.action = false;
       }
     });
@@ -64,6 +89,7 @@ class ControlsManager {
         this.keys[keyName] = true;
         btn.classList.add('active');
         if (keyName === 'action' && window.gameInstance) {
+          window.gameInstance.checkInteractions();
           window.gameInstance.handleAction();
         }
       };

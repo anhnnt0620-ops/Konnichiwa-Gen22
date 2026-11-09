@@ -69,8 +69,68 @@ class Game {
     this.resizeCanvas();
     this.initParticles();
     this.setupStartScreen();
+    this.setupCanvasInteraction();
     this.setupApplicationForm();
     this.setupCelebrationModal();
+  }
+
+  setupCanvasInteraction() {
+    const handleTap = (clientX, clientY) => {
+      // If dialogue is active, advance dialogue
+      if (window.dialogueManager && window.dialogueManager.active) {
+        window.dialogueManager.advance();
+        return;
+      }
+
+      // Convert screen coordinates to world coordinates
+      const rect = this.canvas.getBoundingClientRect();
+      const screenX = clientX - rect.left;
+      const screenY = clientY - rect.top;
+      const worldX = screenX + this.camera.x;
+      const worldY = screenY + this.camera.y;
+
+      // Check click on NPCs
+      if (this.stage && this.stage.npcs) {
+        for (const npc of this.stage.npcs) {
+          const nx = npc.x * 32 + 16;
+          const ny = npc.y * 32 + 16;
+          if (Math.hypot(worldX - nx, worldY - ny) < 65) {
+            this.nearbyInteractable = { type: 'npc', data: npc };
+            this.handleAction();
+            return;
+          }
+        }
+      }
+
+      // Check click on Booth JPC (Sân Trung Tâm x: 27*32, y: 18*32)
+      if (this.currentStageId === 'stage1') {
+        const jpcCenterX = 27 * 32 + 16;
+        const jpcCenterY = 18 * 32 + 24;
+        if (Math.abs(worldX - jpcCenterX) < 70 && Math.abs(worldY - jpcCenterY) < 70) {
+          this.nearbyInteractable = {
+            type: 'booth_jpc',
+            data: { name: 'Gian Trại CLB Tiếng Nhật JPC' }
+          };
+          this.handleAction();
+          return;
+        }
+      }
+
+      // If clicked near player or floating prompt:
+      if (this.nearbyInteractable) {
+        this.handleAction();
+      }
+    };
+
+    this.canvas.addEventListener('click', (e) => {
+      handleTap(e.clientX, e.clientY);
+    });
+
+    this.canvas.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches[0]) {
+        handleTap(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
   }
 
   resizeCanvas() {
@@ -133,11 +193,15 @@ class Game {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Bác Bảo Vệ FTU',
-          text: 'Hôm nay là FCD đó, sẽ có rất nhiều CLB tổ chức booth!'
+          text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương FTU!'
         },
         {
           speaker: 'Bác Bảo Vệ FTU',
-          text: 'Cháu đi thẳng vào Sân Nhà D, tìm booth của CLB Tiếng Nhật JPC để điền đơn Vòng 1 nhé!'
+          text: 'Hôm nay ngày 18/10 là ngày hội CLB FTU Club Day (FCD) bùng nổ đó! Vòng 1 Khai Nhãn của JPC mở từ 01/10 đến 20/10.'
+        },
+        {
+          speaker: 'Bác Bảo Vệ FTU',
+          text: 'Cháu đi thẳng vào Sân giữa Nhà A và Nhà B, tìm Gian trại JPC cạnh Bia Đá FTU (gian thứ 2 từ bên phải nha) để điền đơn Vòng 1 nhé!'
         }
       ]);
     }, 300);
@@ -174,8 +238,8 @@ class Game {
 
         this.stageProgress.stage1.completed = true;
         this.addMemory(
-          'Hội trát 1: Khai Nhãn',
-          `Đã nộp đơn tại Booth JPC (Sân Nhà D) — Chúc mừng ${fullName} bước vào Vòng 2!`,
+          'Hội trát 1: Khai Nhãn (01/10 – 20/10)',
+          `Đã nộp đơn tại Gian Trại JPC (Sân Trung Tâm FTU · FCD 18/10) — Chúc mừng ${fullName} bước vào Vòng 2!`,
           'Image/Color/Vòng 1 - Color.png'
         );
 
@@ -278,11 +342,11 @@ class Game {
     if (questDesc) questDesc.textContent = this.stage.questText;
     if (badge) {
       const stageMap = {
-        stage1: 'FCD · VÒNG 1',
-        stage2: 'HỘI TRÁT 2',
-        stage3_1: 'HỘI TRÁT 3.1',
-        stage3_2: 'HỘI TRÁT 3.2',
-        stage_final: 'CHÍNH THỨC'
+        stage1: 'VÒNG 1 (01/10-20/10) · FCD 18/10',
+        stage2: 'VÒNG 2 (23/10-25/10)',
+        stage3_1: 'VÒNG 3.1 (27/10-03/11)',
+        stage3_2: 'VÒNG 3.2 (08/11-09/11)',
+        stage_final: 'CHÍNH THỨC GEN 22'
       };
       badge.textContent = stageMap[this.currentStageId] || 'JPC FTU';
     }
@@ -472,10 +536,10 @@ class Game {
     this.nearbyInteractable = null;
     const px = this.player.x;
     const py = this.player.y;
-    const interactRadius = 50;
+    const interactRadius = 75;
 
     // Check NPCs
-    if (this.stage.npcs) {
+    if (this.stage && this.stage.npcs) {
       for (const npc of this.stage.npcs) {
         const nx = npc.x * 32;
         const ny = npc.y * 32;
@@ -487,25 +551,26 @@ class Game {
       }
     }
 
-    // Check Booth JPC at Sân Nhà D
+    // Check Booth JPC at Sân Trung Tâm (near Bia Đá FTU — Gian thứ 2 từ bên phải!)
     if (this.currentStageId === 'stage1') {
-      const boothDist = Math.hypot(px - 50 * 32, py - 25 * 32);
-      if (boothDist < 60) {
+      const jpcCenterX = 27 * 32 + 16;
+      const jpcCenterY = 18 * 32 + 24;
+      if (Math.abs(px - jpcCenterX) < 75 && Math.abs(py - jpcCenterY) < 80) {
         this.nearbyInteractable = {
           type: 'booth_jpc',
-          data: { name: 'Booth CLB Tiếng Nhật JPC' }
+          data: { name: 'Gian Trại CLB Tiếng Nhật JPC' }
         };
         return;
       }
     }
 
     // Check Props
-    if (this.stage.props) {
+    if (this.stage && this.stage.props) {
       for (const prop of this.stage.props) {
         const prx = prop.x * 32;
         const pry = prop.y * 32;
         const dist = Math.hypot(px - prx, py - pry);
-        if (dist < interactRadius) {
+        if (dist < 65) {
           this.nearbyInteractable = { type: 'prop', data: prop };
           return;
         }
@@ -529,11 +594,11 @@ class Game {
       window.dialogueManager.startDialogue([
         {
           speaker: 'Senpai JPC',
-          text: `Konnichiwa ${this.playerName}! Chào mừng em đến với Booth của CLB Tiếng Nhật JPC tại FTU Club Day!`
+          text: `Konnichiwa ${this.playerName}! Chào mừng em đến với Gian Trại của CLB Tiếng Nhật JPC tại FTU Club Day (18/10)!`
         },
         {
           speaker: 'Senpai JPC',
-          text: `Thật tuyệt vời khi em hướng tới ${deptName}! Hôm nay JPC chính thức mở đơn tuyển Gen 22 — Hội trát 1: Khai Nhãn. Hãy viết nên ước mơ của em nhé!`
+          text: `Thật tuyệt vời khi em hướng tới ${deptName}! Vòng 1 Khai Nhãn diễn ra từ 01/10 đến 20/10. Hãy điền đơn gia nhập Gen 22 nhé!`
         }
       ], () => {
         this.openApplicationForm();
@@ -945,23 +1010,40 @@ class Game {
 
   renderInteractionPrompt() {
     if (!this.nearbyInteractable) return;
-    const screenX = this.player.x - this.camera.x + 8;
-    const screenY = this.player.y - this.camera.y - 48;
-
+    const centerX = this.player.x - this.camera.x + 16;
+    const topY = this.player.y - this.camera.y - 48;
     const bob = Math.sin(Date.now() / 150) * 3;
 
-    this.ctx.fillStyle = 'linear-gradient(135deg, #cf9f3f, #ffd778)';
-    this.ctx.fillStyle = '#ffd778';
-    this.ctx.strokeStyle = '#5c1216';
-    this.ctx.lineWidth = 2;
+    this.ctx.save();
+    const promptText = 'Nhấn [A] / Chạm để tương tác';
+    this.ctx.font = 'bold 11px "Be Vietnam Pro", sans-serif';
+    const textW = this.ctx.measureText(promptText).width + 24;
+
+    // Glowing badge background
+    this.ctx.fillStyle = 'rgba(185, 43, 69, 0.95)';
     this.ctx.beginPath();
-    this.ctx.arc(screenX + 8, screenY + bob, 14, 0, Math.PI * 2);
+    this.ctx.roundRect(centerX - textW / 2, topY + bob - 12, textW, 22, 11);
     this.ctx.fill();
+
+    this.ctx.strokeStyle = '#ffd778';
+    this.ctx.lineWidth = 1.8;
     this.ctx.stroke();
 
-    this.ctx.fillStyle = '#5c1216';
-    this.ctx.font = 'bold 12px "Alviona", "Cinzel", serif';
-    this.ctx.fillText('A', screenX + 4, screenY + bob + 4);
+    // Golden prompt text
+    this.ctx.fillStyle = '#ffd778';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText(`★ ${promptText} ★`, centerX, topY + bob + 3);
+
+    // Little downward arrow pointing to player
+    this.ctx.fillStyle = '#b92b45';
+    this.ctx.beginPath();
+    this.ctx.moveTo(centerX - 5, topY + bob + 10);
+    this.ctx.lineTo(centerX + 5, topY + bob + 10);
+    this.ctx.lineTo(centerX, topY + bob + 15);
+    this.ctx.closePath();
+    this.ctx.fill();
+
+    this.ctx.restore();
   }
 }
 

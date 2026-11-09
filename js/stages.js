@@ -5,7 +5,7 @@ const STAGE_DATA = {
     name: 'HỘI TRÁT 1: KHAI NHÃN (01/10 – 20/10)',
     subtitle: 'Sân Nhà D FTU — Ngày Hội FCD (18/10) · Điền Đơn Vòng 1',
     bgm: 'stage1',
-    playerStart: { x: 9, y: 38 }, // Cổng trường Chùa Láng
+    playerStart: { x: 11, y: 38 }, // Cổng trường Chùa Láng
     questSpot: { x: 17 * 32, y: 22.5 * 32 }, // Trước Gian trại JPC Sân Nhà D
     questText: 'Đến Sân Nhà D (phía Tây Bia đá FTU), gặp Senpai tại Gian trại JPC màu đỏ để điền đơn Vòng 1!',
     questTitle: 'Hội Trát 1: Khai Nhãn',
@@ -14,17 +14,16 @@ const STAGE_DATA = {
     location: 'Gian Trại JPC · Dãy Booth Sân Nhà D FTU',
     tip: 'Đi theo vệt hoa anh đào phát sáng dưới chân Kokeshi của bạn để đến thẳng Gian Trại JPC!',
     props: [
-      { type: 'prop_ftu_sign', x: 8, y: 37, label: 'Cổng Chùa Láng' },
       { type: 'prop_boba', x: 19, y: 22, label: 'Trà sữa FCD' }
     ],
     items: [],
     npcs: [
       {
         id: 'npc_guard',
-        name: 'Bác Bảo Vệ FTU',
+        name: 'Bác Bảo Vệ',
         sprite: 'npc_president',
-        x: 7,
-        y: 38,
+        x: 6.5,
+        y: 37.5,
         avatarIcon: '👴',
         dialogues: [
           { speaker: 'Bác Bảo Vệ', text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương!' },

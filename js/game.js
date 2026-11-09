@@ -11,7 +11,7 @@ class Game {
 
     // Player State (Starts at Chùa Láng Gate)
     this.player = {
-      x: 9 * 32,
+      x: 11 * 32,
       y: 38 * 32,
       speed: 3.4,
       direction: 'up',
@@ -1140,44 +1140,28 @@ class Game {
 
     this.ctx.restore();
 
-    // 3. Name Tag & Department Pill above Kokeshi
+    // 3. Single Unified Player Badge above Kokeshi (No double-stacking)
     this.ctx.save();
-    const tagBaseY = py - 34;
+    const tagBaseY = py - 30;
 
-    // A. Mini Department Pill Badge
     const deptName = this.player.selectedDeptName || 'Ban Chuyên Môn';
-    this.ctx.font = 'bold 8.5px "Be Vietnam Pro", sans-serif';
-    const deptW = this.ctx.measureText(deptName).width + 14;
-
-    this.ctx.fillStyle = 'rgba(185, 43, 69, 0.95)';
-    this.ctx.beginPath();
-    this.ctx.roundRect(centerX - deptW / 2, tagBaseY - 14, deptW, 13, 5);
-    this.ctx.fill();
-    this.ctx.strokeStyle = '#ffd778';
-    this.ctx.lineWidth = 1;
-    this.ctx.stroke();
-
-    this.ctx.fillStyle = '#ffd778';
-    this.ctx.textAlign = 'center';
-    this.ctx.fillText(`★ ${deptName}`, centerX, tagBaseY - 4);
-
-    // B. Player Name Tag
     const playerName = this.playerName || 'Kouhai Gen 22';
-    this.ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
-    const nameW = Math.max(64, this.ctx.measureText(playerName).width + 18);
+
+    this.ctx.font = 'bold 9px "Be Vietnam Pro", sans-serif';
+    const badgeText = `★ ${deptName} · ${playerName}`;
+    const badgeW = this.ctx.measureText(badgeText).width + 16;
 
     this.ctx.fillStyle = 'rgba(34, 7, 10, 0.9)';
     this.ctx.beginPath();
-    this.ctx.roundRect(centerX - nameW / 2, tagBaseY + 2, nameW, 16, 5);
+    this.ctx.roundRect(centerX - badgeW / 2, tagBaseY - 14, badgeW, 18, 5);
     this.ctx.fill();
     this.ctx.strokeStyle = '#ffd778';
     this.ctx.lineWidth = 1.2;
     this.ctx.stroke();
 
-    this.ctx.fillStyle = '#ffffff';
-    this.ctx.fillText(playerName, centerX, tagBaseY + 14);
-    this.ctx.textAlign = 'start';
-
+    this.ctx.fillStyle = '#ffd778';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText(badgeText, centerX, tagBaseY - 1);
     this.ctx.restore();
   }
 
@@ -1209,6 +1193,8 @@ class Game {
 
   renderInteractionPrompt() {
     if (!this.nearbyInteractable) return;
+    // Don't show interaction prompt when dialogue is already active
+    if (window.dialogueManager && window.dialogueManager.active) return;
 
     let targetX = this.player.x + 16;
     let targetY = this.player.y - 56;
@@ -1261,5 +1247,13 @@ class Game {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  new Game();
+  const game = new Game();
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      if (window.worldMap) {
+        window.worldMap.buildPreRenderedCanvas();
+        window.worldMap.buildFCDBoothsCanvas();
+      }
+    });
+  }
 });

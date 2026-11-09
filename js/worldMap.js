@@ -226,11 +226,13 @@ class WorldMap {
   }
 
   buildPreRenderedCanvas() {
+    const scale = 2; // HiDPI 2x supersampling for razor-sharp text & graphics
     const c = document.createElement('canvas');
-    c.width = this.width;
-    c.height = this.height;
+    c.width = this.width * scale;
+    c.height = this.height * scale;
     const ctx = c.getContext('2d');
     ctx.imageSmoothingEnabled = true;
+    ctx.scale(scale, scale);
 
     // A. Render Smooth 2D Vector Tiles
     for (let r = 0; r < this.rows; r++) {
@@ -366,11 +368,13 @@ class WorldMap {
 
   // Pre-render temporary FCD Festival Booths (Only for Stage 1 · FCD 18/10)
   buildFCDBoothsCanvas() {
+    const scale = 2; // HiDPI 2x supersampling
     const c = document.createElement('canvas');
-    c.width = this.width;
-    c.height = this.height;
+    c.width = this.width * scale;
+    c.height = this.height * scale;
     const ctx = c.getContext('2d');
     ctx.imageSmoothingEnabled = true;
+    ctx.scale(scale, scale);
     this.drawFCDBooths(ctx);
     this.fcdBoothsCanvas = c;
   }
@@ -457,8 +461,9 @@ class WorldMap {
     ctx.arc(doorX + doorW - 4, doorY + doorH / 2, 2, 0, Math.PI * 2);
     ctx.fill();
 
-    // 6. Signboard with 'Alviona' Font
-    const textW = b.name.length * 7 + 18;
+    // 6. Signboard with 'Be Vietnam Pro' Font (Flawless Vietnamese Typography)
+    ctx.font = 'bold 10.5px "Be Vietnam Pro", sans-serif';
+    const textW = Math.max(50, Math.round(ctx.measureText(b.name).width + 16));
     const signX = x + Math.floor(w / 2) - textW / 2;
     const signY = y + roofHeight - 16;
 
@@ -471,7 +476,6 @@ class WorldMap {
     ctx.stroke();
 
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 11px "Alviona", "Cinzel", serif';
     ctx.textAlign = 'center';
     ctx.fillText(b.name, signX + textW / 2, signY + 13);
     ctx.textAlign = 'start';
@@ -597,7 +601,7 @@ class WorldMap {
     ctx.lineWidth = 1;
     ctx.stroke();
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 9px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 9px "Be Vietnam Pro", sans-serif';
     ctx.fillText('★ BIA ĐÁ FTU ★', biaX, biaY - 21);
     ctx.textAlign = 'start';
   }
@@ -799,9 +803,9 @@ class WorldMap {
 
   // Draw Welcome Arch at Cổng Tân Sinh Viên FTU
   drawEntranceArch(ctx) {
-    const ax = 11 * this.tileSize;
+    const ax = 10.5 * this.tileSize;
     const ay = 41 * this.tileSize;
-    const aw = 120;
+    const aw = 150;
     const ah = 44;
 
     ctx.fillStyle = '#5c1216';
@@ -818,7 +822,7 @@ class WorldMap {
     ctx.stroke();
 
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 8.5px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 9px "Be Vietnam Pro", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('CỔNG CHÀO TÂN SINH VIÊN · FTU', ax + aw / 2, ay + 6);
     ctx.textAlign = 'start';
@@ -889,12 +893,12 @@ class WorldMap {
 
   render(ctx, camera, currentStageId = 'stage1') {
     if (this.preRenderedCanvas) {
-      // ctx is already camera-translated in game.js, so draw at world origin (0, 0)
-      ctx.drawImage(this.preRenderedCanvas, 0, 0);
+      // Draw 2x supersampled canvas with exact world dimensions for razor-sharp rendering
+      ctx.drawImage(this.preRenderedCanvas, 0, 0, this.width, this.height);
     }
     // Only draw FCD festival booths during Stage 1 (FTU Club Day · FCD 18/10)!
     if (currentStageId === 'stage1' && this.fcdBoothsCanvas) {
-      ctx.drawImage(this.fcdBoothsCanvas, 0, 0);
+      ctx.drawImage(this.fcdBoothsCanvas, 0, 0, this.width, this.height);
     }
   }
 

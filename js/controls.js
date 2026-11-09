@@ -21,27 +21,36 @@ class ControlsManager {
 
   setupKeyboard() {
     window.addEventListener('keydown', (e) => {
-      const code = e.code;
-      if (code === 'ArrowUp' || code === 'KeyW') this.keys.up = true;
-      if (code === 'ArrowDown' || code === 'KeyS') this.keys.down = true;
-      if (code === 'ArrowLeft' || code === 'KeyA') this.keys.left = true;
-      if (code === 'ArrowRight' || code === 'KeyD') this.keys.right = true;
-      if (code === 'Space' || code === 'KeyE' || code === 'Enter') {
+      // Don't capture keys if input fields are focused
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+      const code = e.code || '';
+      const key = (e.key || '').toLowerCase();
+
+      if (code === 'ArrowUp' || code === 'KeyW' || key === 'arrowup' || key === 'w') this.keys.up = true;
+      if (code === 'ArrowDown' || code === 'KeyS' || key === 'arrowdown' || key === 's') this.keys.down = true;
+      if (code === 'ArrowLeft' || code === 'KeyA' || key === 'arrowleft' || key === 'a') this.keys.left = true;
+      if (code === 'ArrowRight' || code === 'KeyD' || key === 'arrowright' || key === 'd') this.keys.right = true;
+      if (code === 'Space' || code === 'KeyE' || code === 'Enter' || key === ' ' || key === 'enter' || key === 'e') {
         this.keys.action = true;
         if (window.gameInstance) window.gameInstance.handleAction();
       }
-      if (code === 'KeyM') {
+      if (code === 'KeyM' || key === 'm') {
         if (window.gameInstance) window.gameInstance.toggleMemoryBook();
       }
     });
 
     window.addEventListener('keyup', (e) => {
-      const code = e.code;
-      if (code === 'ArrowUp' || code === 'KeyW') this.keys.up = false;
-      if (code === 'ArrowDown' || code === 'KeyS') this.keys.down = false;
-      if (code === 'ArrowLeft' || code === 'KeyA') this.keys.left = false;
-      if (code === 'ArrowRight' || code === 'KeyD') this.keys.right = false;
-      if (code === 'Space' || code === 'KeyE' || code === 'Enter') this.keys.action = false;
+      const code = e.code || '';
+      const key = (e.key || '').toLowerCase();
+
+      if (code === 'ArrowUp' || code === 'KeyW' || key === 'arrowup' || key === 'w') this.keys.up = false;
+      if (code === 'ArrowDown' || code === 'KeyS' || key === 'arrowdown' || key === 's') this.keys.down = false;
+      if (code === 'ArrowLeft' || code === 'KeyA' || key === 'arrowleft' || key === 'a') this.keys.left = false;
+      if (code === 'ArrowRight' || code === 'KeyD' || key === 'arrowright' || key === 'd') this.keys.right = false;
+      if (code === 'Space' || code === 'KeyE' || code === 'Enter' || key === ' ' || key === 'enter' || key === 'e') {
+        this.keys.action = false;
+      }
     });
   }
 
@@ -51,7 +60,7 @@ class ControlsManager {
       if (!btn) return;
 
       const onPress = (e) => {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         this.keys[keyName] = true;
         btn.classList.add('active');
         if (keyName === 'action' && window.gameInstance) {
@@ -60,13 +69,14 @@ class ControlsManager {
       };
 
       const onRelease = (e) => {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         this.keys[keyName] = false;
         btn.classList.remove('active');
       };
 
       btn.addEventListener('touchstart', onPress, { passive: false });
       btn.addEventListener('touchend', onRelease, { passive: false });
+      btn.addEventListener('touchcancel', onRelease, { passive: false });
       btn.addEventListener('mousedown', onPress);
       btn.addEventListener('mouseup', onRelease);
       btn.addEventListener('mouseleave', onRelease);

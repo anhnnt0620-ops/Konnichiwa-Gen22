@@ -38,8 +38,8 @@ const FTU_BUILDINGS = [
   { id: "A", name: "Nhà A (Trung Tâm)", x: 14, y: 24, w: 20, h: 4, style: "cream" },
   { id: "D", name: "Nhà D & Sân FCD", x: 49, y: 20, w: 7, h: 4, style: "rose", door: "bottom" },
   { id: "VJCC", name: "Viện VJCC Nhật Bản", x: 18, y: 29, w: 13, h: 4, style: "vjcc", door: "left" },
-  { id: "KTX7", name: "KTX 7 tầng", x: 21, y: 34, w: 8, h: 3, style: "peach" },
-  { id: "BV", name: "Cổng Chùa Láng", x: 3, y: 33, w: 3, h: 2, style: "booth", small: true }
+  { id: "KTX7", name: "KTX 7 tầng", x: 21, y: 31, w: 8, h: 3, style: "peach" },
+  { id: "BV", name: "Cổng Chùa Láng", x: 3, y: 31, w: 3, h: 2, style: "booth", small: true }
 ];
 
 // Warm, bright color palette matching jpc-ftu
@@ -123,39 +123,37 @@ class WorldMap {
         for (let c = startX; c < startX + w; c++) {
           if (c >= 0 && c < this.cols && r >= 0 && r < this.rows) {
             this.grid[r][c] = type;
-            if (isSolid) this.solidGrid[r][c] = 1;
+            this.solidGrid[r][c] = isSolid ? 1 : 0;
           }
         }
       }
     };
 
     // 3. Paved Avenues & Pathways
-    paint(10, 8, 2, 24, TILE_TYPES.PATH);
-    paint(8, 31, 4, 1, TILE_TYPES.PATH);
-    paint(10, 9, 39, 2, TILE_TYPES.PATH);
-    paint(10, 16, 47, 1, TILE_TYPES.PATH); // Avenue to Dốc Nhà B
-    paint(10, 20, 47, 1, TILE_TYPES.PATH);
-    paint(10, 28, 24, 1, TILE_TYPES.PATH);
-    paint(12, 29, 2, 3, TILE_TYPES.PATH);
-    paint(15, 33, 41, 1, TILE_TYPES.PATH);
-    paint(31, 28, 3, 6, TILE_TYPES.PATH);
-    paint(40, 11, 2, 23, TILE_TYPES.PATH);
-    paint(47, 9, 2, 25, TILE_TYPES.PATH); // Path straight to Sân Nhà D
-    paint(25, 8, 2, 2, TILE_TYPES.PATH);
+    paint(9, 8, 4, 27, TILE_TYPES.PATH, false); // Wide Main Avenue from Cổng Chùa Láng
+    paint(8, 30, 6, 4, TILE_TYPES.PATH, false);
+    paint(10, 9, 39, 2, TILE_TYPES.PATH, false);
+    paint(10, 16, 47, 2, TILE_TYPES.PATH, false); // Avenue to Dốc Nhà B
+    paint(10, 20, 47, 2, TILE_TYPES.PATH, false); // Avenue between Nhà A & B
+    paint(10, 28, 24, 2, TILE_TYPES.PATH, false);
+    paint(12, 29, 3, 5, TILE_TYPES.PATH, false);
+    paint(12, 34, 36, 2, TILE_TYPES.PATH, false); // Direct wide South Avenue to Sân Nhà D!
+    paint(31, 28, 3, 6, TILE_TYPES.PATH, false);
+    paint(40, 11, 2, 23, TILE_TYPES.PATH, false);
+    paint(47, 9, 2, 25, TILE_TYPES.PATH, false); // Path straight to Sân Nhà D
+    paint(25, 8, 2, 2, TILE_TYPES.PATH, false);
 
     // 4. SÂN NHÀ D (FTU CLUB DAY PLAZA)
-    paint(45, 24, 11, 8, TILE_TYPES.FESTIVAL_PLAZA); // Big FCD Plaza in front of Nhà D
+    paint(45, 22, 12, 10, TILE_TYPES.FESTIVAL_PLAZA, false); // Big FCD Plaza in front of Nhà D
 
     // Special Zones
-    paint(21, 3, 8, 5, TILE_TYPES.COURT);
-    paint(15, 17, 7, 3, TILE_TYPES.LAWN);
-    paint(26, 17, 7, 3, TILE_TYPES.LAWN);
-    paint(22, 17, 4, 3, TILE_TYPES.PLAZA);
-    paint(5, 33, 9, 4, TILE_TYPES.PLAZA);
-    paint(3, 32, 12, 1, TILE_TYPES.FENCE, true);
-    paint(14, 32, 1, 5, TILE_TYPES.FENCE, true);
-    paint(8, 32, 2, 1, TILE_TYPES.PLAZA);
-    paint(35, 22, 4, 9, TILE_TYPES.PARKING);
+    paint(21, 3, 8, 5, TILE_TYPES.COURT, false);
+    paint(15, 17, 7, 3, TILE_TYPES.LAWN, false);
+    paint(26, 17, 7, 3, TILE_TYPES.LAWN, false);
+    paint(22, 17, 4, 3, TILE_TYPES.PLAZA, false);
+    paint(7, 29, 8, 6, TILE_TYPES.PLAZA, false); // Cổng Chùa Láng Entrance Plaza (walkable!)
+    paint(2, 31, 5, 1, TILE_TYPES.FENCE, true);   // Left boundary fence
+    paint(35, 22, 4, 9, TILE_TYPES.PARKING, false);
 
     // Hedges & Flowerbeds
     paint(34, 21, 1, 11, TILE_TYPES.HEDGE, true);
@@ -620,7 +618,8 @@ class WorldMap {
 
   render(ctx, camera) {
     if (this.preRenderedCanvas) {
-      ctx.drawImage(this.preRenderedCanvas, -Math.round(camera.x), -Math.round(camera.y));
+      // ctx is already camera-translated in game.js, so draw at world origin (0, 0)
+      ctx.drawImage(this.preRenderedCanvas, 0, 0);
     }
   }
 

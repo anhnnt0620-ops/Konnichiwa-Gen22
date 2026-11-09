@@ -630,7 +630,9 @@ class Game {
   // RENDER PIPELINE
   // ==========================================================================
   render() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // Fill canvas with soothing water blue matching river surrounding campus
+    this.ctx.fillStyle = '#6ec1e4';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.ctx.save();
     this.ctx.translate(-Math.round(this.camera.x), -Math.round(this.camera.y));

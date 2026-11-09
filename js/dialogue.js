@@ -27,7 +27,7 @@ class DialogueManager {
     this.choicesElem = document.getElementById('dialogue-choices');
     this.continuePrompt = document.getElementById('dialogue-continue');
 
-    // Tap/Click on dialogue box advances it
+    // Tap/Click on dialogue box or screen advances it
     if (this.container) {
       this.container.addEventListener('click', (e) => {
         // Do not advance if clicking inside choices
@@ -35,6 +35,19 @@ class DialogueManager {
         this.advance();
       });
     }
+
+    // Tap anywhere on the game screen when dialogue is open
+    document.addEventListener('pointerdown', (e) => {
+      if (!this.active) return;
+      if (e.target.closest('#dialogue-choices')) return;
+      if (e.target.closest('.modal-overlay')) return;
+      if (e.target.closest('#touch-controls')) {
+        // If user taps action button [A], it already advances; if user taps D-pad, advance too!
+        this.advance();
+        return;
+      }
+      this.advance();
+    });
   }
 
   // Start a sequence of dialogue lines

@@ -5,11 +5,11 @@ const STAGE_DATA = {
     name: 'HỘI TRÁT 1: KHAI NHÃN',
     subtitle: 'Sân Nhà D (FTU Club Day) — Điền Đơn Vòng 1',
     bgm: 'stage1',
-    playerStart: { x: 10, y: 34 }, // Cổng trường Chùa Láng cạnh bốt bảo vệ
+    playerStart: { x: 10, y: 32 }, // Cổng trường Chùa Láng
     questSpot: { x: 50 * 32, y: 25 * 32 }, // Booth JPC tại Sân Nhà D
     questText: 'Đến Sân Nhà D, tìm Booth của CLB Tiếng Nhật JPC để điền đơn Vòng 1!',
     props: [
-      { type: 'prop_ftu_sign', x: 8, y: 31, label: 'Cổng Chùa Láng' },
+      { type: 'prop_ftu_sign', x: 8, y: 30, label: 'Cổng Chùa Láng' },
       { type: 'prop_boba', x: 47, y: 27, label: 'Trà sữa FCD' },
       { type: 'prop_lantern', x: 48, y: 24, label: 'Đèn lồng JPC' },
       { type: 'prop_lantern', x: 52, y: 24, label: 'Đèn lồng JPC' }
@@ -20,8 +20,8 @@ const STAGE_DATA = {
         id: 'npc_guard',
         name: 'Bác Bảo Vệ FTU',
         sprite: 'npc_president',
-        x: 10,
-        y: 33,
+        x: 7,
+        y: 32,
         avatarIcon: '👴',
         dialogues: [
           { speaker: 'Bác Bảo Vệ', text: 'Hôm nay là FCD đó, sẽ có rất nhiều CLB tổ chức booth!' },

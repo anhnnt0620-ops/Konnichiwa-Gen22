@@ -30,7 +30,7 @@ const STAGE_DATA = {
         avatarIcon: '👴',
         dialogues: [
           { speaker: 'Bác Bảo Vệ', text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương!' },
-          { speaker: 'Bác Bảo Vệ', text: 'Hôm nay, 18/10 tại FTU có Ngày hội các Câu lạc bộ - FCD đó! Cháu có thể đến sân nhà D để khám phá các CLB của trường mình nhé!' },
+          { speaker: 'Bác Bảo Vệ', text: 'Hôm nay 18/10, tại FTU có Ngày hội các Câu lạc bộ - FCD đó! Cháu có thể đến sân nhà D để khám phá các CLB của trường mình nhé!' },
           { speaker: 'Bác Bảo Vệ', text: 'Cháu đi thẳng vào Sân Nhà D, nhìn sang dãy booth bên trái (phía Tây Bia Đá FTU) sẽ thấy Gian Trại JPC màu đỏ thắm rất nổi bật để điền đơn Vòng 1 nhé!' }
         ]
       },

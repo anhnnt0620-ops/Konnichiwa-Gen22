@@ -11,8 +11,8 @@ class Game {
 
     // Player State (Starts at Chùa Láng Gate)
     this.player = {
-      x: 10 * 32,
-      y: 32 * 32,
+      x: 9 * 32,
+      y: 38 * 32,
       speed: 3.4,
       direction: 'up',
       animFrame: 0,
@@ -102,10 +102,10 @@ class Game {
         }
       }
 
-      // Check click on Booth JPC (Sân Trung Tâm x: 27*32, y: 18*32)
+      // Check click on Booth JPC (Sân Trung Tâm x: 15*32, y: 22*32)
       if (this.currentStageId === 'stage1') {
-        const jpcCenterX = 27 * 32 + 16;
-        const jpcCenterY = 18 * 32 + 24;
+        const jpcCenterX = 15 * 32;
+        const jpcCenterY = 22 * 32 + 16;
         if (Math.abs(worldX - jpcCenterX) < 70 && Math.abs(worldY - jpcCenterY) < 70) {
           this.nearbyInteractable = {
             type: 'booth_jpc',
@@ -201,7 +201,7 @@ class Game {
         },
         {
           speaker: 'Bác Bảo Vệ FTU',
-          text: 'Cháu đi thẳng vào Sân giữa Nhà A và Nhà B, tìm Gian trại JPC cạnh Bia Đá FTU (gian thứ 2 từ bên phải nha) để điền đơn Vòng 1 nhé!'
+          text: 'Cháu đi thẳng vào Sân Trung Tâm, nhìn sang dãy booth bên trái (phía Tây Bia Đá FTU) sẽ thấy Gian Trại JPC màu đỏ thắm rất nổi bật để điền đơn Vòng 1 nhé!'
         }
       ]);
     }, 300);
@@ -551,10 +551,10 @@ class Game {
       }
     }
 
-    // Check Booth JPC at Sân Trung Tâm (near Bia Đá FTU — Gian thứ 2 từ bên phải!)
+    // Check Booth JPC at Sân Trung Tâm (Dãy booth dọc phía Tây — Màu đỏ JPC)
     if (this.currentStageId === 'stage1') {
-      const jpcCenterX = 27 * 32 + 16;
-      const jpcCenterY = 18 * 32 + 24;
+      const jpcCenterX = 15 * 32;
+      const jpcCenterY = 22 * 32 + 16;
       if (Math.abs(px - jpcCenterX) < 75 && Math.abs(py - jpcCenterY) < 80) {
         this.nearbyInteractable = {
           type: 'booth_jpc',

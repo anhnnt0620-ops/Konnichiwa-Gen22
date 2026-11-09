@@ -189,6 +189,15 @@ html, body {
   align-items: center;
 }
 
+.welcome-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+}
+
 .welcome-heading {
   font-family: var(--font-title);
   font-size: 26px !important;
@@ -353,18 +362,21 @@ html, body {
     max-height: 98vh;
   }
   .title-logo {
+    display: block;
+    margin: 0 auto 2px auto;
     width: 44px;
     height: 44px;
-    margin-bottom: 2px;
   }
   .welcome-heading {
     font-size: 18px !important;
     margin-bottom: 2px;
   }
   .title-badge {
+    display: inline-block;
+    margin: 0 auto 3px auto;
     font-size: 9px;
     padding: 2px 10px;
-    margin-bottom: 3px;
+    letter-spacing: 0.5px;
   }
   .title-sub {
     font-size: 11px;
@@ -428,10 +440,11 @@ html, body {
 }
 
 .title-logo {
+  display: block;
+  margin: 0 auto 10px auto;
   width: 80px;
   height: 80px;
   object-fit: contain;
-  margin-bottom: 10px;
   filter: drop-shadow(0 4px 12px rgba(207, 159, 63, 0.5));
   animation: floatLogo 3s ease-in-out infinite;
 }
@@ -447,11 +460,13 @@ html, body {
   background: linear-gradient(90deg, var(--red), var(--red-bright));
   color: var(--gold-bright);
   display: inline-block;
-  padding: 5px 16px;
+  padding: 6px 18px;
   border-radius: 20px;
   border: 1px solid var(--gold);
-  margin-bottom: 12px;
-  letter-spacing: 2px;
+  margin: 0 auto 12px auto;
+  letter-spacing: 0.8px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .title-card h1 {

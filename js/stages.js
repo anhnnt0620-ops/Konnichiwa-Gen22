@@ -5,7 +5,7 @@ const STAGE_DATA = {
     name: 'HỘI TRÁT 1: KHAI NHÃN (01/10 – 20/10)',
     subtitle: 'Sân Nhà D FTU — Ngày Hội FCD (18/10) · Điền Đơn Vòng 1',
     bgm: 'stage1',
-    playerStart: { x: 12, y: 41 }, // Cổng trường Chùa Láng (dưới Cổng Trường ĐH Ngoại Thương)
+    playerStart: { x: 9.3, y: 41.2 }, // Cổng trường Chùa Láng (ngay dưới Cổng Trường ĐH Ngoại Thương)
     questSpot: { x: 10 * 32, y: 31 * 32 }, // Cổng chào & Bàn Check-in FCD đối diện FTU Shop
     questText: 'Đi qua FTU Shop đến Cổng chào Ngày hội để Check-in vào FCD!',
     questTitle: 'Hội Trát 1: Khai Nhãn',
@@ -22,8 +22,8 @@ const STAGE_DATA = {
         id: 'npc_guard',
         name: 'Bác Bảo Vệ FTU',
         sprite: 'npc_president',
-        x: 6.5,
-        y: 37.5,
+        x: 5.8,
+        y: 38.5,
         avatarIcon: '👴',
         dialogues: [
           { speaker: 'Bác Bảo Vệ FTU', text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương!' },

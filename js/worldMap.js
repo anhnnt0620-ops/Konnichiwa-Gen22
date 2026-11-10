@@ -53,7 +53,7 @@ const FTU_BUILDINGS = [
   // Dãy phía Nam
   { id: "A", name: "Nhà A", x: 20, y: 28, w: 14, h: 3, style: "cream" },
   { id: "VJCBI", name: "Trường VJCBI", x: 20, y: 33, w: 14, h: 3, style: "vjcc", door: "bottom" },
-  { id: "KTX7", name: "KTX 7 tầng", x: 20, y: 38, w: 8, h: 3, style: "peach" }
+  { id: "KTX7", name: "KTX 7 tầng", x: 18, y: 37.5, w: 9, h: 3, style: "peach" }
 ];
 
 // Warm, bright color palette matching jpc-ftu
@@ -146,8 +146,9 @@ class WorldMap {
     };
 
     // 3. Paved Avenues & Pathways (Theo Sơ đồ mặt bằng FTU & FCD)
-    // Cổng Chùa Láng Entrance Plaza (Walkable)
-    paint(7, 36, 6, 5, TILE_TYPES.PLAZA, false);
+    // Cổng Chùa Láng Entrance Plaza (Walkable - spans from booth bảo vệ across cổng trường)
+    paint(7, 36, 6, 6, TILE_TYPES.PLAZA, false);
+    paint(7, 41, 5, 2, TILE_TYPES.PATH, false); // Cầu / Lối vào qua cổng trường
     paint(2, 36, 5, 1, TILE_TYPES.FENCE, true); // Hàng rào bên trái bốt bảo vệ
 
     // Con đường chính mép Tây chạy dọc từ Cổng lên Canteen
@@ -172,8 +173,10 @@ class WorldMap {
     // Đại lộ tách biệt giữa Nhà A (hàng 28-30) và Trường VJCBI (hàng 33-35)
     paint(12, 31, 35, 2, TILE_TYPES.PATH, false);
 
-    // Đại lộ tách biệt giữa Trường VJCBI (hàng 33-35) và KTX 7 Tầng (hàng 38-40)
+    // Đại lộ tách biệt giữa Trường VJCBI (hàng 33-35) và KTX 7 Tầng (hàng 37.5-40.5)
     paint(12, 36, 35, 2, TILE_TYPES.PATH, false);
+    // Sân trước KTX 7 tầng (sau tường chắn)
+    paint(12, 38, 6, 3, TILE_TYPES.PATH, false);
 
     // Sân trước Sân khấu FCD & Nhà D
     paint(46, 25, 10, 3, TILE_TYPES.PLAZA, false);
@@ -182,7 +185,7 @@ class WorldMap {
     paint(33, 7, 20, 2, TILE_TYPES.PARKING, false);
 
     // Khu vực gửi xe ngõ 84 Chùa Láng (phía Đông KTX 7 tầng)
-    paint(29, 38, 20, 3, TILE_TYPES.PARKING, false);
+    paint(27, 38, 22, 3, TILE_TYPES.PARKING, false);
 
     // Hàng rào hoa / tiểu cảnh ngăn cách dọc dãy booth Tây
     paint(13, 18, 1, 8, TILE_TYPES.FLOWERBED, true);
@@ -201,10 +204,12 @@ class WorldMap {
 
     // 5. Register Building Collisions
     FTU_BUILDINGS.forEach(b => {
-      for (let r = b.y; r < b.y + b.h; r++) {
+      const startR = Math.floor(b.y);
+      const endR = Math.ceil(b.y + b.h);
+      for (let r = startR; r < endR; r++) {
         for (let c = b.x; c < b.x + b.w; c++) {
           if (r >= 0 && r < this.rows && c >= 0 && c < this.cols) {
-            const isDoor = (r === b.y + b.h - 1) && Math.abs(c - (b.x + Math.floor(b.w / 2))) <= 0;
+            const isDoor = (r === endR - 1) && Math.abs(c - (b.x + Math.floor(b.w / 2))) <= 0;
             if (!isDoor) {
               this.solidGrid[r][c] = 1;
             }
@@ -212,6 +217,22 @@ class WorldMap {
         }
       }
     });
+
+    // 6. Register Boundary Wall Collisions (Tường Chắn dọc mặt tiền FTU)
+    // Phía Tây Bốt bảo vệ (c = 0..2, r = 41)
+    for (let c = 0; c < 3; c++) {
+      if (this.solidGrid[41]) this.solidGrid[41][c] = 1;
+    }
+    // Phía Đông Cổng Trường (c = 12..34, r = 41) - chạy trước KTX 7 tầng
+    for (let c = 12; c <= 34; c++) {
+      if (this.solidGrid[41]) this.solidGrid[41][c] = 1;
+    }
+    // Đảm bảo lối đi qua Cổng trường (c = 7..11, r = 40..42) hoàn toàn thông thoáng
+    for (let r = 40; r <= 42; r++) {
+      for (let c = 7; c <= 11; c++) {
+        if (this.solidGrid[r]) this.solidGrid[r][c] = 0;
+      }
+    }
 
     this.buildPreRenderedCanvas();
     this.buildFCDBoothsCanvas();
@@ -360,7 +381,10 @@ class WorldMap {
     // C. Draw Permanent Bia Đá FTU
     this.drawBiaDaFTU(ctx, false);
 
-    // D. Draw Cổng Tân Sinh Viên FTU
+    // D. Draw Boundary Wall (Tường Chắn bao quanh trường & trước KTX 7 tầng)
+    this.drawBoundaryWall(ctx);
+
+    // E. Draw Cổng Trường ĐH Ngoại Thương (ngay cạnh Bốt bảo vệ)
     this.drawEntranceArch(ctx, false);
 
     this.preRenderedCanvas = c;
@@ -969,21 +993,88 @@ class WorldMap {
     ctx.textAlign = 'start';
   }
 
-  // Draw Gate at Cổng Trường ĐH Ngoại Thương
+  // Draw Boundary Wall (Tường Chắn bao quanh trường & trước KTX 7 tầng)
+  drawBoundaryWall(ctx) {
+    const wy = 40.5 * this.tileSize + 12; // 1308px
+    const wallH = 20;
+
+    const drawWallSection = (startX, endX) => {
+      const w = endX - startX;
+      if (w <= 0) return;
+
+      // 1. Soft drop shadow on ground / water
+      ctx.fillStyle = 'rgba(11, 4, 3, 0.22)';
+      ctx.fillRect(startX - 2, wy + wallH - 2, w + 4, 6);
+
+      // 2. Concrete/Stone Plinth Base
+      ctx.fillStyle = '#455a64';
+      ctx.fillRect(startX, wy + wallH - 6, w, 6);
+      ctx.fillStyle = '#37474f';
+      ctx.fillRect(startX, wy + wallH - 1, w, 1.5);
+
+      // 3. Stucco Wall Body (Warm creamy FTU white)
+      ctx.fillStyle = '#fffdf8';
+      ctx.fillRect(startX, wy + 2, w, wallH - 8);
+
+      // Decorative panel inset line
+      ctx.strokeStyle = '#e0d8c3';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(startX + 2, wy + 4, w - 4, wallH - 12);
+
+      // 4. Terracotta Roof Cap with Gold Trim (Matching FTU architectural red tile)
+      ctx.fillStyle = '#b92b45';
+      ctx.fillRect(startX - 1, wy - 2, w + 2, 4.5);
+      ctx.fillStyle = '#ffd778';
+      ctx.fillRect(startX - 1, wy + 2.5, w + 2, 1);
+
+      // 5. Decorative Brick Pillars with Finials every 3.5 tiles (112px)
+      const step = 3.5 * this.tileSize;
+      for (let px = startX; px <= endX; px += step) {
+        const pillarW = 10;
+        const pX = Math.min(endX - pillarW, Math.max(startX, px - pillarW / 2));
+
+        // Pillar Body
+        ctx.fillStyle = '#5c1216';
+        ctx.fillRect(pX, wy - 4, pillarW, wallH + 5);
+
+        // Pillar Gold Cap
+        ctx.fillStyle = '#ffd778';
+        ctx.fillRect(pX - 1.5, wy - 5.5, pillarW + 3, 3);
+
+        // Ornamental Gold Finial / Crest
+        ctx.fillStyle = '#cf9f3f';
+        ctx.beginPath();
+        ctx.arc(pX + pillarW / 2, wy - 8, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    // Phân đoạn Tây: Bên trái Bốt bảo vệ (c = 1.5..3)
+    drawWallSection(1.5 * this.tileSize, 3 * this.tileSize);
+
+    // Phân đoạn Đông: Từ cột phải Cổng trường chạy ngang qua toàn bộ KTX 7 tầng & Bãi đỗ xe (c = 11.5..33)
+    const rightPillarX = 7 * this.tileSize + 148 - 8; // 364px
+    drawWallSection(rightPillarX, 33 * this.tileSize);
+  }
+
+  // Draw Gate at Cổng Trường ĐH Ngoại Thương (ngay cạnh Bốt bảo vệ)
   drawEntranceArch(ctx, drawSign = true) {
-    const ax = 10 * this.tileSize;
-    const ay = 41 * this.tileSize;
-    const aw = 168;
+    const ax = 7 * this.tileSize; // 224px (ngay cạnh Bốt bảo vệ col 3..7)
+    const ay = 40.5 * this.tileSize;
+    const aw = 148;
     const ah = 44;
 
+    // Gate pillars (Crimson with gold accents)
     ctx.fillStyle = '#5c1216';
-    ctx.fillRect(ax + 4, ay, 10, ah);
-    ctx.fillRect(ax + aw - 14, ay, 10, ah);
+    ctx.fillRect(ax + 2, ay, 10, ah);
+    ctx.fillRect(ax + aw - 12, ay, 10, ah);
 
-    // Decorative columns
+    // Decorative pillar caps & bases
     ctx.fillStyle = '#cf9f3f';
-    ctx.fillRect(ax + 2, ay, 14, 4);
-    ctx.fillRect(ax + aw - 16, ay, 14, 4);
+    ctx.fillRect(ax, ay, 14, 4);
+    ctx.fillRect(ax + aw - 14, ay, 14, 4);
+    ctx.fillRect(ax, ay + ah - 4, 14, 4);
+    ctx.fillRect(ax + aw - 14, ay + ah - 4, 14, 4);
 
     if (drawSign) {
       this.renderEntranceArchSignboard(ctx);
@@ -992,9 +1083,9 @@ class WorldMap {
 
   // Live Vector Signboard for Cổng Trường ĐH Ngoại Thương
   renderEntranceArchSignboard(ctx) {
-    const ax = 10 * this.tileSize;
-    const ay = 41 * this.tileSize;
-    const aw = 168;
+    const ax = 7 * this.tileSize;
+    const ay = 40.5 * this.tileSize;
+    const aw = 148;
 
     // Top Signboard
     ctx.fillStyle = '#b92b45';
@@ -1006,7 +1097,7 @@ class WorldMap {
     ctx.stroke();
 
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 8.5px "Alviona", "Cinzel", serif';
     ctx.textAlign = 'center';
     ctx.fillText('TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG', ax + aw / 2, ay + 6);
     ctx.textAlign = 'start';

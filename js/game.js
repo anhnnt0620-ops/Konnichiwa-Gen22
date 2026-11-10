@@ -2029,8 +2029,8 @@ class Game {
       targetX = this.nearbyInteractable.data.x * 32 + 16;
       targetY = this.nearbyInteractable.data.y * 32 - 52;
     } else if (this.nearbyInteractable.type === 'booth_jpc') {
-      targetX = 15 * 32 + 16;
-      targetY = 20 * 32;
+      targetX = 15 * 32;
+      targetY = 21 * 32 - 12;
     } else if (this.nearbyInteractable.type === 'prop' && this.nearbyInteractable.data) {
       targetX = this.nearbyInteractable.data.x * 32 + 16;
       targetY = this.nearbyInteractable.data.y * 32 - 42;

@@ -197,20 +197,8 @@ class WorldMap {
     // Khu vực gửi xe ngõ 84 Chùa Láng (phía Đông KTX 7 tầng)
     paint(27, 38, 22, 3, TILE_TYPES.PARKING, false);
 
-    // Hàng rào hoa / tiểu cảnh ngăn cách dọc dãy booth Tây
+    // Hàng rào hoa / tiểu cảnh ngăn cách dọc duy nhất 1 dãy thẳng sau lưng booth Tây (col 13, hàng 18-25)
     paint(13, 18, 1, 8, TILE_TYPES.FLOWERBED, true);
-
-    const flowerBeds = [
-      [12, 18], [12, 19], [33, 18], [34, 18], [36, 18], [37, 18],
-      [13, 27], [13, 28], [43, 23], [43, 24], [43, 29], [43, 30],
-      [8, 14], [8, 15], [30, 40], [31, 40], [17, 40], [18, 40]
-    ];
-    flowerBeds.forEach(([fc, fr]) => {
-      if (fc >= 0 && fc < this.cols && fr >= 0 && fr < this.rows) {
-        this.grid[fr][fc] = TILE_TYPES.FLOWERBED;
-        this.solidGrid[fr][fc] = 1;
-      }
-    });
 
     // 5. Register Building Collisions (STAGE_FCD is temporary for Stage 1 only)
     FTU_BUILDINGS.forEach(b => {
@@ -261,10 +249,22 @@ class WorldMap {
     const row = Math.floor(worldY / this.tileSize);
     if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) return true;
 
-    // Sân khấu FCD chỉ tồn tại và cản trở di chuyển trong Vòng 1 (Stage 1 · FCD 18/10)!
-    // Hết vòng 1 là dẹp sân khấu, khu vực này trở thành sân gạch mở!
+    // Các công trình tạm thời trong Vòng 1 (Stage 1 · FCD 18/10):
     if (currentStageId === 'stage1') {
+      // 1. Sân khấu FCD (col 48..52, row 17..24)
       if (col >= 48 && col < 53 && row >= 17 && row < 25) {
+        return true;
+      }
+      // 2. Dãy Booth Tây (Booth xanh, Gian trại JPC, Booth tím: col 14..15, row 18..25) - Chặn không cho đi đè lên mặt booth
+      if (col >= 14 && col <= 15 && row >= 18 && row <= 25) {
+        return true;
+      }
+      // 3. Dãy Booth Nam (Booth Đoàn, Booth HSV, Booth Sở Thích: col 18..31, row 25..26)
+      if (col >= 18 && col <= 31 && row >= 25 && row <= 26) {
+        return true;
+      }
+      // 4. Dãy Booth Bắc (Khối CLB Chuyên Môn: col 18..46, row 17)
+      if (col >= 18 && col <= 46 && row === 17) {
         return true;
       }
     }

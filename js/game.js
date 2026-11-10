@@ -221,7 +221,7 @@ class Game {
       const openingDialogues = guardNpc?.dialogues || [
         { speaker: 'Bác Bảo Vệ FTU', text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương!' },
         { speaker: 'Bác Bảo Vệ FTU', text: 'Hôm nay 18/10, tại FTU diễn ra Ngày hội các Câu lạc bộ - FTU Club\'s Day (FCD) rộn ràng lắm đấy!' },
-        { speaker: 'Bác Bảo Vệ FTU', text: 'Cháu đi thẳng theo con đường này, qua FTU Shop sẽ thấy Cổng chào Ngày hội và bàn Check-in FCD nhé. Hãy tới đó check-in lấy thẻ tham gia hội chợ nha!' }
+        { speaker: 'Bác Bảo Vệ FTU', text: 'Cháu đi thẳng qua Cổng chào Ngày hội, đối diện FTU Shop sẽ thấy Bàn Check-in FCD nhé. Hãy tới đó check-in lấy thẻ tham gia hội chợ nha!' }
       ];
       window.dialogueManager.startDialogue(openingDialogues);
     }, 400);
@@ -380,8 +380,8 @@ class Game {
       this.stage1CheckedIn = false;
       this.stage1MetSenpai = false;
       if (this.stage) {
-        this.stage.questSpot = { x: 10 * 32, y: 31 * 32 };
-        this.stage.questText = 'Đi qua FTU Shop đến Cổng chào Ngày hội để Check-in vào FCD!';
+        this.stage.questSpot = { x: 13 * 32, y: 31 * 32 };
+        this.stage.questText = 'Đến Bàn Check-in FCD đối diện FTU Shop để nhận thẻ ngày hội!';
       }
     }
 
@@ -756,8 +756,8 @@ class Game {
         if (data.id === 'npc_guard') {
           window.dialogueManager.startDialogue(data.dialogues, () => {
             if (!this.stage1CheckedIn && this.stage) {
-              this.stage.questSpot = { x: 10 * 32, y: 31 * 32 };
-              this.stage.questText = 'Đi qua FTU Shop đến Cổng chào Ngày hội để Check-in vào FCD!';
+              this.stage.questSpot = { x: 13 * 32, y: 31 * 32 };
+              this.stage.questText = 'Đến Bàn Check-in FCD đối diện FTU Shop để nhận thẻ ngày hội!';
             }
             this.updateHUD();
           });
@@ -1316,7 +1316,7 @@ class Game {
     // Determine concise action verb
     let actionLabel = 'Tương tác';
     if (this.nearbyInteractable.type === 'npc') {
-      actionLabel = 'Trò chuyện';
+      actionLabel = (this.nearbyInteractable.data && this.nearbyInteractable.data.id === 'npc_fcd_checkin') ? 'Check-in' : 'Trò chuyện';
     } else if (this.nearbyInteractable.type === 'booth_jpc') {
       actionLabel = 'Ghé Booth';
     } else if (this.nearbyInteractable.type === 'prop') {

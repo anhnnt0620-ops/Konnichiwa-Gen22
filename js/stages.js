@@ -6,13 +6,13 @@ const STAGE_DATA = {
     subtitle: 'Sân Nhà D FTU — Ngày Hội FCD (18/10) · Điền Đơn Vòng 1',
     bgm: 'stage1',
     playerStart: { x: 9.3, y: 41.2 }, // Cổng trường Chùa Láng (ngay dưới Cổng Trường ĐH Ngoại Thương)
-    questSpot: { x: 10 * 32, y: 31 * 32 }, // Cổng chào & Bàn Check-in FCD đối diện FTU Shop
-    questText: 'Đi qua FTU Shop đến Cổng chào Ngày hội để Check-in vào FCD!',
+    questSpot: { x: 13 * 32, y: 31 * 32 }, // Bàn Check-in FCD đối diện FTU Shop
+    questText: 'Đến Bàn Check-in FCD đối diện FTU Shop để nhận thẻ ngày hội!',
     questTitle: 'Hội Trát 1: Khai Nhãn',
     timeline: '01/10 – 20/10/2026 · FTU Club Day: 18/10',
-    objective: 'Đi qua FTU Shop đến Cổng chào Tân Sinh Viên để check-in vào Ngày hội FCD, sau đó gặp Senpai JPC trên đường và ghé Gian Trại JPC điền đơn Vòng 1.',
-    location: 'Cổng chào FCD & Gian Trại JPC Sân Nhà D FTU',
-    tip: 'Đi theo vệt hoa anh đào phát sáng dưới chân Kokeshi để check-in và gặp Senpai JPC!',
+    objective: 'Đi qua Cổng chào Ngày hội đến Bàn Check-in FCD đối diện FTU Shop để check-in, sau đó gặp Senpai JPC trên đường và ghé Gian Trại JPC điền đơn Vòng 1.',
+    location: 'Bàn Check-in FCD & Gian Trại JPC Sân Nhà D FTU',
+    tip: 'Đi qua Cổng chào Ngày hội để gặp BTC Check-in FCD tại bàn check-in!',
     props: [
       { type: 'prop_boba', x: 19, y: 22, label: 'Trà sữa FCD' }
     ],
@@ -28,14 +28,14 @@ const STAGE_DATA = {
         dialogues: [
           { speaker: 'Bác Bảo Vệ FTU', text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương!' },
           { speaker: 'Bác Bảo Vệ FTU', text: 'Hôm nay 18/10, tại FTU diễn ra Ngày hội các Câu lạc bộ - FTU Club\'s Day (FCD) rộn ràng lắm đấy!' },
-          { speaker: 'Bác Bảo Vệ FTU', text: 'Cháu đi thẳng theo con đường này, qua FTU Shop sẽ thấy Cổng chào Ngày hội và bàn Check-in FCD nhé. Hãy tới đó check-in lấy thẻ tham gia hội chợ nha!' }
+          { speaker: 'Bác Bảo Vệ FTU', text: 'Cháu đi thẳng qua Cổng chào Ngày hội, đối diện FTU Shop sẽ thấy Bàn Check-in FCD nhé. Hãy tới đó check-in lấy thẻ tham gia hội chợ nha!' }
         ]
       },
       {
         id: 'npc_fcd_checkin',
         name: 'BTC Check-in FCD',
         sprite: 'npc_president',
-        x: 10.5,
+        x: 13.5,
         y: 31,
         avatarIcon: '📋',
         dialogues: [

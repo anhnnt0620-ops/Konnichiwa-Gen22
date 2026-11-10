@@ -664,11 +664,11 @@ class WorldMap {
   // Draw Temporary FCD Festival Booths (Chỉ xuất hiện trong Vòng 1 / FCD 18/10)
   drawFCDBooths(ctx, drawSign = true) {
     // ========================================================================
-    // 1. CỔNG CHÀO TÂN SINH VIÊN & BÀN CHECK-IN FCD (ĐỐI DIỆN FTU SHOP · HÀNG 30.5-31.5)
+    // 1. CỔNG CHÀO TÂN SINH VIÊN (BẮC NGANG ĐẠI LỘ · HÀNG 33.5)
     // ========================================================================
     const fcdGateX = 7.5 * this.tileSize;
-    const fcdGateY = 30.5 * this.tileSize;
-    const fcdGateW = 5.5 * this.tileSize; // 176px spanning road
+    const fcdGateY = 33.5 * this.tileSize;
+    const fcdGateW = 5 * this.tileSize; // 160px spanning road
     const fcdGateH = 42;
 
     // A. Thảm đỏ check-in chào đón trên đường
@@ -712,32 +712,61 @@ class WorldMap {
     drawBalloonCluster(fcdGateX + 9, fcdGateY - 2);
     drawBalloonCluster(fcdGateX + fcdGateW - 9, fcdGateY - 2);
 
-    // D. Bàn Check-in FCD (Kê bên phải cổng chào, phía đông đường)
-    const deskX = fcdGateX + fcdGateW - 32;
-    const deskY = fcdGateY + 16;
+    // ========================================================================
+    // 2. BÀN CHECK-IN FCD (ĐỐI DIỆN FTU SHOP · PHÍA ĐÔNG ĐƯỜNG · HÀNG 31)
+    // Tách biệt hoàn toàn khỏi Cổng chào, không gian thông thoáng, không bị díu chữ!
+    // ========================================================================
+    const deskX = 12.5 * this.tileSize;
+    const deskY = 31 * this.tileSize;
+    const deskW = 52;
+    const deskH = 22;
+
+    // A. Mái che / Canopy kẻ sọc đỏ-vàng cho bàn check-in
+    ctx.fillStyle = '#b92b45';
+    ctx.beginPath();
+    ctx.roundRect(deskX - 3, deskY - 16, deskW + 6, 12, [4, 4, 1, 1]);
+    ctx.fill();
+    ctx.fillStyle = '#ffd778';
+    ctx.fillRect(deskX - 3, deskY - 6, deskW + 6, 2.5);
+
+    // 2 cột đỡ mái
+    ctx.fillStyle = '#5c1216';
+    ctx.fillRect(deskX + 2, deskY - 5, 2.5, 7);
+    ctx.fillRect(deskX + deskW - 4.5, deskY - 5, 2.5, 7);
+
+    // B. Mặt bàn Check-in FCD (Khăn trải bàn trắng viền đỏ)
     ctx.fillStyle = '#fffdf8';
     ctx.beginPath();
-    ctx.roundRect(deskX - 10, deskY, 44, 20, 3);
+    ctx.roundRect(deskX, deskY, deskW, deskH, 3);
     ctx.fill();
     ctx.strokeStyle = '#cf9f3f';
     ctx.lineWidth = 1.2;
     ctx.stroke();
 
-    // Khăn trải bàn đỏ trung tâm bàn check-in
+    // Khăn trải bàn đỏ trung tâm
     ctx.fillStyle = '#b92b45';
-    ctx.fillRect(deskX + 2, deskY, 20, 20);
+    ctx.fillRect(deskX + 8, deskY, deskW - 16, deskH);
 
-    // Laptop check-in & danh sách tân sinh viên
+    // Chữ 'CHECK-IN' in trên mặt khăn trải bàn phía trước
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 7px "Montserrat", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('CHECK-IN FCD', deskX + deskW / 2, deskY + deskH - 5);
+    ctx.textAlign = 'start';
+
+    // C. Laptop check-in & danh sách tân sinh viên
     ctx.fillStyle = '#37474f';
-    ctx.fillRect(deskX + 6, deskY + 4, 12, 8);
+    ctx.fillRect(deskX + 18, deskY + 2, 14, 8);
     ctx.fillStyle = '#90caf9';
-    ctx.fillRect(deskX + 7, deskY + 5, 10, 6);
-    // Tài liệu check-in
+    ctx.fillRect(deskX + 19, deskY + 3, 12, 6);
+
+    // Tài liệu & bút check-in
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(deskX - 6, deskY + 5, 8, 10);
+    ctx.fillRect(deskX + 4, deskY + 4, 10, 11);
     ctx.fillStyle = '#cf9f3f';
-    ctx.fillRect(deskX - 4, deskY + 7, 4, 1.5);
-    ctx.fillRect(deskX - 4, deskY + 10, 4, 1.5);
+    ctx.fillRect(deskX + 6, deskY + 6, 6, 1.5);
+    ctx.fillRect(deskX + 6, deskY + 9, 6, 1.5);
+    ctx.fillRect(deskX + 6, deskY + 12, 4, 1.5);
 
     // ========================================================================
     // 2. DÃY BOOTH KHỐI CLB CHUYÊN MÔN (Dọc phía Bắc Sân Trung Tâm, dưới Tòa B)
@@ -892,10 +921,10 @@ class WorldMap {
 
   // Live Vector Signboards for FCD Festival Booths (Razor-sharp, never blurry)
   renderFCDBoothsSignboards(ctx) {
-    // 0. CỔNG CHÀO TÂN SINH VIÊN · CHECK-IN FCD (Alviona)
+    // 0. CỔNG CHÀO TÂN SINH VIÊN (Alviona - Hàng 33.5 thông thoáng bắc ngang đại lộ)
     const fcdGateX = 7.5 * this.tileSize;
-    const fcdGateY = 30.5 * this.tileSize;
-    const fcdGateW = 5.5 * this.tileSize;
+    const fcdGateY = 33.5 * this.tileSize;
+    const fcdGateW = 5 * this.tileSize;
 
     ctx.fillStyle = '#b92b45';
     ctx.beginPath();
@@ -906,23 +935,10 @@ class WorldMap {
     ctx.stroke();
 
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 8px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 8.5px "Alviona", "Cinzel", serif';
     ctx.textAlign = 'center';
-    ctx.fillText('★ CỔNG CHÀO TÂN SINH VIÊN · CHECK-IN FCD ★', fcdGateX + fcdGateW / 2, fcdGateY + 6);
-
-    // Nhãn bàn Check-in FCD (Montserrat)
-    const deskX = fcdGateX + fcdGateW - 32;
-    const deskY = fcdGateY + 16;
-    ctx.fillStyle = 'rgba(34, 7, 10, 0.9)';
-    ctx.beginPath();
-    ctx.roundRect(deskX - 16, deskY - 14, 56, 13, 3);
-    ctx.fill();
-    ctx.strokeStyle = '#ffd778';
-    ctx.lineWidth = 0.9;
-    ctx.stroke();
-    ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 7.5px "Montserrat", sans-serif';
-    ctx.fillText('BÀN CHECK-IN FCD', deskX + 12, deskY - 5);
+    ctx.fillText('★ CỔNG CHÀO TÂN SINH VIÊN · FCD 2026 ★', fcdGateX + fcdGateW / 2, fcdGateY + 6);
+    ctx.textAlign = 'start';
 
     // 1. Banner khối CLB chuyên môn (Montserrat)
     const cmX = 18 * this.tileSize;

@@ -5,8 +5,8 @@ const STAGE_DATA = {
     name: 'HỘI TRÁT 1: KHAI NHÃN (01/10 – 20/10)',
     subtitle: 'Sân Nhà D FTU — Ngày Hội FCD (18/10) · Điền Đơn Vòng 1',
     bgm: 'stage1',
-    playerStart: { x: 9.3, y: 41.2 }, // Cổng trường Chùa Láng (ngay dưới Cổng Trường ĐH Ngoại Thương)
-    questSpot: { x: 13 * 32, y: 31 * 32 }, // Bàn Check-in FCD đối diện FTU Shop
+    playerStart: { x: 9.5, y: 41.5 }, // Cổng trường Chùa Láng (ngay dưới Cổng Trường ĐH Ngoại Thương)
+    questSpot: { x: 13.8 * 32, y: 29.8 * 32 }, // Bàn Check-in FCD đối diện FTU Shop
     questText: 'Đến Bàn Check-in FCD đối diện FTU Shop để nhận thẻ ngày hội!',
     questTitle: 'Hội Trát 1: Khai Nhãn',
     timeline: '01/10 – 20/10/2026 · FTU Club Day: 18/10',
@@ -22,8 +22,8 @@ const STAGE_DATA = {
         id: 'npc_guard',
         name: 'Bác Bảo Vệ FTU',
         sprite: 'npc_president',
-        x: 5.8,
-        y: 38.5,
+        x: 7.2,
+        y: 38.2,
         avatarIcon: '👴',
         dialogues: [
           { speaker: 'Bác Bảo Vệ FTU', text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương!' },
@@ -35,8 +35,8 @@ const STAGE_DATA = {
         id: 'npc_fcd_checkin',
         name: 'BTC Check-in FCD',
         sprite: 'npc_president',
-        x: 13.5,
-        y: 31,
+        x: 13.8,
+        y: 28.5,
         avatarIcon: '📋',
         dialogues: [
           { speaker: 'BTC Check-in FCD', text: 'Chào mừng tân sinh viên đến với Ngày hội Chào Tân Sinh Viên - FTU Club\'s Day (FCD) 2026!' },
@@ -88,8 +88,8 @@ const STAGE_DATA = {
         y: 17,
         avatarIcon: '🌸',
         dialogues: [
-          { speaker: 'Senpai JPC', text: 'Konnichiwa! Chúc mừng em đã xuất sắc vượt qua Vòng Đơn và bước vào Vòng 2: Hòa Nhịp (23/10 – 25/10)!' },
-          { speaker: 'Senpai JPC', text: 'Vòng 2 năm nay là Phỏng Vấn Online! Em hãy mở máy tính lên để kết nối phòng phỏng vấn trực tuyến và trả lời bộ 5 câu hỏi trắc nghiệm về JPC nhé (cần đạt tối thiểu 4/5 câu để qua vòng)!' }
+          { speaker: 'Senpai JPC', text: 'Konnichiwa! Chúc mừng em đã xuất sắc vượt qua Hội trát 1: Khai Nhãn và bước vào Hội trát 2: Hòa Nhịp!' },
+          { speaker: 'Senpai JPC', text: 'Hội trát 2 năm nay sẽ được thực hiện online! Em hãy mở máy tính lên để kết nối phòng phỏng vấn trực tuyến với Pokemon bô lão của JPC và trả lời bộ 5 câu hỏi trắc nghiệm về nhé (cần đạt tối thiểu 4/5 câu để qua vòng)!' }
         ]
       }
     ]

@@ -148,8 +148,18 @@ class WorldMap {
     // 3. Paved Avenues & Pathways (Theo Sơ đồ mặt bằng FTU & FCD)
     // Cổng Chùa Láng Entrance Plaza (Walkable - spans from booth bảo vệ across cổng trường)
     paint(7, 36, 6, 6, TILE_TYPES.PLAZA, false);
-    paint(7, 41, 5, 2, TILE_TYPES.PATH, false); // Cầu / Lối vào qua cổng trường
+    paint(8, 41, 4, 3, TILE_TYPES.PATH, false); // Cầu / Lối vào qua cổng trường
     paint(2, 36, 5, 1, TILE_TYPES.FENCE, true); // Hàng rào bên trái bốt bảo vệ
+
+    // Southern boundary wall collision (Solid wall along row 40)
+    for (let c = 0; c <= 7; c++) this.solidGrid[40][c] = 1;
+    for (let c = 12; c <= 33; c++) this.solidGrid[40][c] = 1;
+    // Keep gate opening completely clear & walkable
+    for (let r = 39; r <= 43; r++) {
+      for (let c = 8; c <= 11; c++) {
+        this.solidGrid[r][c] = 0;
+      }
+    }
 
     // Con đường chính mép Tây chạy dọc từ Cổng lên Canteen
     paint(8, 5, 4, 32, TILE_TYPES.PATH, false);
@@ -664,10 +674,10 @@ class WorldMap {
   // Draw Temporary FCD Festival Booths (Chỉ xuất hiện trong Vòng 1 / FCD 18/10)
   drawFCDBooths(ctx, drawSign = true) {
     // ========================================================================
-    // 1. CỔNG CHÀO TÂN SINH VIÊN (BẮC NGANG ĐẠI LỘ · HÀNG 33.5)
+    // 1. CỔNG CHÀO TÂN SINH VIÊN (BẮC NGANG ĐẠI LỘ · HÀNG 34.5)
     // ========================================================================
     const fcdGateX = 7.5 * this.tileSize;
-    const fcdGateY = 33.5 * this.tileSize;
+    const fcdGateY = 34.5 * this.tileSize;
     const fcdGateW = 5 * this.tileSize; // 160px spanning road
     const fcdGateH = 42;
 
@@ -713,12 +723,12 @@ class WorldMap {
     drawBalloonCluster(fcdGateX + fcdGateW - 9, fcdGateY - 2);
 
     // ========================================================================
-    // 2. BÀN CHECK-IN FCD (ĐỐI DIỆN FTU SHOP · PHÍA ĐÔNG ĐƯỜNG · HÀNG 31)
+    // 2. BÀN CHECK-IN FCD (ĐỐI DIỆN FTU SHOP · PHÍA ĐÔNG ĐƯỜNG · HÀNG 29.5)
     // Tách biệt hoàn toàn khỏi Cổng chào, không gian thông thoáng, không bị díu chữ!
     // ========================================================================
-    const deskX = 12.5 * this.tileSize;
-    const deskY = 31 * this.tileSize;
-    const deskW = 52;
+    const deskX = 13 * this.tileSize;
+    const deskY = 29.5 * this.tileSize;
+    const deskW = 54;
     const deskH = 22;
 
     // A. Mái che / Canopy kẻ sọc đỏ-vàng cho bàn check-in
@@ -919,11 +929,10 @@ class WorldMap {
     }
   }
 
-  // Live Vector Signboards for FCD Festival Booths (Razor-sharp, never blurry)
-  renderFCDBoothsSignboards(ctx) {
-    // 0. CỔNG CHÀO TÂN SINH VIÊN (Alviona - Hàng 33.5 thông thoáng bắc ngang đại lộ)
+  // Live Vector Signboard for Cổng Chào Tân Sinh Viên FCD
+  renderFCDGateSignboard(ctx) {
     const fcdGateX = 7.5 * this.tileSize;
-    const fcdGateY = 33.5 * this.tileSize;
+    const fcdGateY = 34.5 * this.tileSize;
     const fcdGateW = 5 * this.tileSize;
 
     ctx.fillStyle = '#b92b45';
@@ -935,11 +944,14 @@ class WorldMap {
     ctx.stroke();
 
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 8.5px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 8.5px "Montserrat", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('★ CỔNG CHÀO TÂN SINH VIÊN · FCD 2026 ★', fcdGateX + fcdGateW / 2, fcdGateY + 6);
     ctx.textAlign = 'start';
+  }
 
+  // Live Vector Signboards for FCD Festival Booths (Razor-sharp, never blurry)
+  renderFCDBoothsSignboards(ctx) {
     // 1. Banner khối CLB chuyên môn (Montserrat)
     const cmX = 18 * this.tileSize;
     const cmY = 17 * this.tileSize;
@@ -1113,13 +1125,13 @@ class WorldMap {
     ctx.stroke();
 
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 8.5px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 8.5px "Montserrat", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG', ax + aw / 2, ay + 6);
     ctx.textAlign = 'start';
   }
 
-  // Render All Vector Signboards Live (Always razor-sharp, DirectWrite vector rendering)
+  // Render All Vector Signboards Live (Ground / Building Level)
   renderAllSignboards(ctx, currentStageId = 'stage1') {
     // 1. Building Name Signboards (Alviona)
     FTU_BUILDINGS.forEach(b => {
@@ -1133,12 +1145,20 @@ class WorldMap {
     // 2. Bia Đá FTU Signboard (Alviona)
     this.renderBiaDaSignboard(ctx);
 
-    // 3. Welcome Arch Signboard (Alviona)
-    this.renderEntranceArchSignboard(ctx);
-
-    // 4. Temporary FCD Booths Signboards (Stage 1 only)
+    // 3. Temporary FCD Booths Signboards (Stage 1 only)
     if (currentStageId === 'stage1') {
       this.renderFCDBoothsSignboards(ctx);
+    }
+  }
+
+  // Overhead Arches & Gate Signboards (Drawn OVER player and NPCs so they pass UNDER the arches)
+  drawOverheadSignboards(ctx, currentStageId = 'stage1') {
+    // A. Cổng Trường ĐH Ngoại Thương
+    this.renderEntranceArchSignboard(ctx);
+
+    // B. Cổng Chào Tân Sinh Viên FCD
+    if (currentStageId === 'stage1') {
+      this.renderFCDGateSignboard(ctx);
     }
   }
 

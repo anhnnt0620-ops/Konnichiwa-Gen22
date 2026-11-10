@@ -56,8 +56,11 @@ class Game {
       stage_final: { celebrationStarted: false }
     };
 
-    // Unlocked Memories Book
+    // Unlocked Memories Book & Stage Progress Saves
     this.memories = [];
+    this.unlockedStages = ['stage1'];
+    this.completedStages = [];
+    this.SAVE_KEY = 'jpc_gen22_save_v1';
 
     // Particles (Sakura petals, fireworks)
     this.particles = [];
@@ -74,6 +77,8 @@ class Game {
     window.gameInstance = this;
     this.resizeCanvas();
     this.initParticles();
+    this.setupImageLightbox();
+    this.setupToast();
     this.setupStartScreen();
     this.setupCanvasInteraction();
     this.setupApplicationForm();
@@ -170,11 +175,191 @@ class Game {
     this.zoom = this.calculateZoom();
   }
 
+  /* ==========================================================================
+     IMAGE LIGHTBOX / ZOOM POPUP (Phóng to ảnh minigame & kỷ vật)
+     ========================================================================== */
+  setupImageLightbox() {
+    window.openImageLightbox = (src, caption = '') => {
+      const modal = document.getElementById('image-lightbox-modal');
+      const img = document.getElementById('lightbox-img');
+      const cap = document.getElementById('lightbox-caption');
+      if (!modal || !img) return;
+      img.src = src;
+      if (cap) {
+        cap.textContent = caption;
+        cap.style.display = caption ? 'block' : 'none';
+      }
+      modal.classList.remove('hidden');
+      if (window.audioManager) window.audioManager.playBlip();
+    };
+
+    window.closeImageLightbox = (e) => {
+      if (e && e.target && e.target.classList.contains('lightbox-content-box')) return;
+      const modal = document.getElementById('image-lightbox-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('image-lightbox-modal');
+        if (modal && !modal.classList.contains('hidden')) {
+          modal.classList.add('hidden');
+        }
+      }
+    });
+  }
+
+  /* ==========================================================================
+     TOAST NOTIFICATION (Thông báo lưu tiến độ / trạng thái)
+     ========================================================================== */
+  setupToast() {
+    window.showToast = (msg, duration = 3200) => {
+      const toast = document.getElementById('game-toast');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      if (this.toastTimeout) clearTimeout(this.toastTimeout);
+      this.toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, duration);
+    };
+  }
+
+  /* ==========================================================================
+     GAME SAVE & RESUME SYSTEM (Lưu tiến độ theo từng Hội Trát)
+     ========================================================================== */
+  saveGameState(isManual = false) {
+    try {
+      const saveData = {
+        version: '1.0',
+        playerName: this.playerName,
+        selectedDept: this.player.selectedDept,
+        selectedDeptName: this.player.selectedDeptName,
+        currentStageId: this.currentStageId,
+        unlockedStages: this.unlockedStages,
+        completedStages: this.completedStages,
+        stageProgress: this.stageProgress,
+        memories: this.memories,
+        lastSaved: new Date().toISOString()
+      };
+      localStorage.setItem(this.SAVE_KEY, JSON.stringify(saveData));
+      if (isManual && window.showToast) {
+        window.showToast('💾 Đã lưu tiến độ chơi thành công!');
+      }
+    } catch (err) {
+      console.warn('Could not save game state to localStorage:', err);
+    }
+  }
+
+  loadSavedGameState() {
+    try {
+      const raw = localStorage.getItem(this.SAVE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (err) {
+      console.warn('Failed to parse save game state:', err);
+      return null;
+    }
+  }
+
+  continueSavedGame() {
+    const saved = this.loadSavedGameState();
+    if (!saved) return;
+
+    if (saved.playerName) this.playerName = saved.playerName;
+    if (saved.selectedDept) {
+      this.player.selectedDept = saved.selectedDept;
+      this.player.selectedDeptName = saved.selectedDeptName || 'Ban Chuyên Môn';
+    }
+    if (Array.isArray(saved.unlockedStages)) {
+      this.unlockedStages = saved.unlockedStages;
+    }
+    if (Array.isArray(saved.completedStages)) {
+      this.completedStages = saved.completedStages;
+    }
+    if (saved.stageProgress) {
+      this.stageProgress = Object.assign(this.stageProgress, saved.stageProgress);
+    }
+    if (Array.isArray(saved.memories)) {
+      this.memories = saved.memories;
+    }
+
+    const titleScreen = document.getElementById('title-screen');
+    if (titleScreen) titleScreen.classList.add('hidden');
+
+    this.isRunning = true;
+    const stageToLoad = saved.currentStageId || 'stage1';
+    this.loadStage(stageToLoad, true);
+
+    if (window.audioManager) {
+      window.audioManager.init();
+      window.audioManager.playBGM(this.stage?.bgm || stageToLoad);
+    }
+    this.updateHUD();
+
+    if (window.showToast) {
+      const stageName = STAGE_DATA[stageToLoad]?.name || stageToLoad;
+      window.showToast(`🌸 Chào mừng trở lại, ${this.playerName}! Tiếp tục: ${stageName}`);
+    }
+
+    requestAnimationFrame(this.gameLoop.bind(this));
+  }
+
+  replayStage(stageId) {
+    if (!this.unlockedStages.includes(stageId)) {
+      if (window.showToast) window.showToast('⚠️ Màn chơi này chưa được mở khóa!');
+      return;
+    }
+
+    const memoryModal = document.getElementById('memory-modal');
+    if (memoryModal) memoryModal.classList.add('hidden');
+
+    this.loadStage(stageId, true);
+    if (window.audioManager) {
+      window.audioManager.playBGM(this.stage?.bgm || stageId);
+    }
+    this.updateHUD();
+
+    const stageName = STAGE_DATA[stageId]?.name || stageId;
+    if (window.showToast) {
+      window.showToast(`▶ Đang chơi lại: ${stageName}`);
+    }
+  }
+
+  resetSaveData() {
+    const confirmReset = window.confirm('Bạn có chắc muốn xóa tiến độ đã lưu và bắt đầu lại từ đầu không?');
+    if (confirmReset) {
+      try {
+        localStorage.removeItem(this.SAVE_KEY);
+      } catch (e) {}
+      window.location.reload();
+    }
+  }
+
   setupStartScreen() {
     const startBtn = document.getElementById('btn-start-game');
+    const continueBox = document.getElementById('continue-game-box');
+    const continueBtn = document.getElementById('btn-continue-game');
+    const continueMeta = document.getElementById('continue-game-meta');
     const nameInput = document.getElementById('input-player-name');
     const titleScreen = document.getElementById('title-screen');
     const kokeshiCards = document.querySelectorAll('.kokeshi-card');
+
+    // Check for saved game progress
+    const saved = this.loadSavedGameState();
+    if (saved && continueBox) {
+      continueBox.classList.remove('hidden');
+      const savedStageName = STAGE_DATA[saved.currentStageId]?.name || 'Hội Trát 1: Khai Nhãn';
+      const saveTime = saved.lastSaved ? new Date(saved.lastSaved).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+      if (continueMeta) {
+        continueMeta.textContent = `Tiến độ đã lưu: ${saved.playerName || 'Kouhai'} (${saved.selectedDeptName || ''}) • ${savedStageName} ${saveTime ? '• ' + saveTime : ''}`;
+      }
+      if (continueBtn) {
+        continueBtn.addEventListener('click', () => {
+          this.continueSavedGame();
+        });
+      }
+    }
 
     // Handle Kokeshi Selection for 5 Departments
     kokeshiCards.forEach(card => {
@@ -257,6 +442,13 @@ class Game {
         rewardModal.classList.remove('hidden');
 
         this.stageProgress.stage1.completed = true;
+        if (!this.completedStages.includes('stage1')) {
+          this.completedStages.push('stage1');
+        }
+        if (!this.unlockedStages.includes('stage2')) {
+          this.unlockedStages.push('stage2');
+        }
+        this.saveGameState(false);
         this.addMemory(
           'Hội trát 1: Khai Nhãn (01/10 – 20/10)',
           `Đã nộp đơn tại Gian Trại JPC (Sân Trung Tâm FTU · FCD 18/10) — Chúc mừng ${fullName} bước vào Vòng 2!`,
@@ -376,11 +568,16 @@ class Game {
     this.stage = STAGE_DATA[stageId];
     if (!this.stage) return;
 
+    if (!this.unlockedStages.includes(stageId)) {
+      this.unlockedStages.push(stageId);
+    }
+    this.saveGameState(false);
+
     if (stageId === 'stage1') {
       this.stage1CheckedIn = false;
       this.stage1MetSenpai = false;
       if (this.stage) {
-        this.stage.questSpot = { x: 13 * 32, y: 31 * 32 };
+        this.stage.questSpot = { x: 13.8 * 32, y: 29.8 * 32 };
         this.stage.questText = 'Đến Bàn Check-in FCD đối diện FTU Shop để nhận thẻ ngày hội!';
       }
     }
@@ -817,22 +1014,33 @@ class Game {
         if (this.currentStageId === 'stage2' && data.id === 'npc_interviewer') {
           window.minigameManager.start('stage2', (success) => {
             this.stageProgress.stage2.completed = true;
+            if (!this.completedStages.includes('stage2')) this.completedStages.push('stage2');
+            if (!this.unlockedStages.includes('stage3_1')) this.unlockedStages.push('stage3_1');
             this.addMemory('Hội trát 2: Hòa Nhịp', 'Hòa nhịp trái tim cùng đồng đội tại Giảng đường B201 FTU!', 'Image/Color/Vòng 2 - Color.png');
+            this.saveGameState(false);
             this.loadStage('stage3_1');
           });
         } else if (this.currentStageId === 'stage3_1' && data.id === 'npc_leader') {
           window.minigameManager.start('stage3_1', (success) => {
             this.stageProgress.stage3_1.completed = true;
+            if (!this.completedStages.includes('stage3_1')) this.completedStages.push('stage3_1');
+            if (!this.unlockedStages.includes('stage3_2')) this.unlockedStages.push('stage3_2');
             this.addMemory('Hội trát 3.1: Phá Phong', 'Cháy hết mình vượt qua deadline tại Dốc Nhà B FTU!', 'Image/Color/Vòng 3.1 - Color.png');
+            this.saveGameState(false);
             this.loadStage('stage3_2');
           });
         } else if (this.currentStageId === 'stage3_2' && data.id === 'npc_mentor_heart') {
           window.minigameManager.start('stage3_2', (success) => {
             this.stageProgress.stage3_2.completed = true;
+            if (!this.completedStages.includes('stage3_2')) this.completedStages.push('stage3_2');
+            if (!this.unlockedStages.includes('stage_final')) this.unlockedStages.push('stage_final');
             this.addMemory('Hội trát 3.2: Chân Diện', 'Tỏa sáng chân diện tại không gian văn hóa VJCC Ngoại Thương!', 'Image/Color/Vòng 3.2 - Color.png');
+            this.saveGameState(false);
             this.loadStage('stage_final');
           });
         } else if (this.currentStageId === 'stage_final' && data.id === 'npc_final_president') {
+          if (!this.completedStages.includes('stage_final')) this.completedStages.push('stage_final');
+          this.saveGameState(false);
           this.showCelebrationModal();
         }
       });
@@ -872,31 +1080,134 @@ class Game {
   }
 
   renderMemoryBook() {
-    const list = document.getElementById('memory-list');
-    if (!list) return;
-    list.innerHTML = '';
+    const stageList = document.getElementById('memory-stage-list');
+    const playerNameEl = document.getElementById('memory-player-name');
+    const playerDeptEl = document.getElementById('memory-player-dept');
+    const playerAvatarEl = document.getElementById('memory-player-avatar');
+    const progressTextEl = document.getElementById('memory-progress-text');
+    const saveBtn = document.getElementById('btn-save-progress');
+    const resetBtn = document.getElementById('btn-reset-save');
+    const closeBtn = document.getElementById('btn-close-memory');
 
-    if (this.memories.length === 0) {
-      list.innerHTML = '<p class="empty-text" style="color:var(--white); font-size:13px;">Chưa có hồi ức nào được mở khóa. Hãy nộp đơn tại Booth JPC để nhận kỷ vật đầu tiên nhé!</p>';
-      return;
+    if (playerNameEl) playerNameEl.textContent = this.playerName || 'Kouhai Gen 22';
+    if (playerDeptEl) playerDeptEl.textContent = `★ ${this.player.selectedDeptName || 'Ban Chuyên Môn'}`;
+    if (playerAvatarEl) {
+      const avatarMap = { chuyenmon: '🌸', doingoai: '🌏', tochuc: '🏮', thongtin: '🎨', nhansu: '🤝' };
+      playerAvatarEl.textContent = avatarMap[this.player.selectedDept] || '🌸';
     }
 
-    this.memories.forEach((mem) => {
-      const card = document.createElement('div');
-      card.className = 'memory-card';
-      const iconOrImg = mem.image
-        ? `<img src="${mem.image}" class="memory-card-thumb" alt="${mem.title}">`
-        : `<div class="memory-card-icon">🌸</div>`;
+    const CHAPTERS = [
+      {
+        id: 'stage1',
+        title: 'Hội Trát 1: Khai Nhãn',
+        timeline: '01/10 – 20/10/2026 · FTU Club Day: 18/10',
+        desc: 'Sân Nhà D FTU — Check-in Ngày hội FCD và ghé Gian Trại JPC điền đơn ứng tuyển Gen 22.',
+        thumb: 'Image/Color/Vòng 1 - Color.png',
+        fallbackIcon: '🌸'
+      },
+      {
+        id: 'stage2',
+        title: 'Hội Trát 2: Hòa Nhịp',
+        timeline: '23/10 – 25/10/2026',
+        desc: 'Tòa B FTU — Tham gia phòng Google Meet phỏng vấn trực tuyến và giải câu đố áo Happi truyền thống JPC.',
+        thumb: 'Image/happi-jpc.jpg',
+        fallbackIcon: '💻'
+      },
+      {
+        id: 'stage3_1',
+        title: 'Hội Trát 3.1: Phá Phong',
+        timeline: '29/10/2026',
+        desc: 'Dốc Nhà B FTU — Hoạt động Teamwork cùng đồng đội ghép mô hình búp bê Kokeshi mang bản sắc ban.',
+        thumb: 'Image/Color/Vòng 3.1 - Color.png',
+        fallbackIcon: '🎎'
+      },
+      {
+        id: 'stage3_2',
+        title: 'Hội Trát 3.2: Chân Diện',
+        timeline: '30/10 – 01/11/2026',
+        desc: 'Viện VJCBI FTU — Phỏng vấn chuyên sâu trực tiếp cùng Ban Chủ nhiệm & các Senpai JPC.',
+        thumb: 'Image/Color/Vòng 3.2 - Color.png',
+        fallbackIcon: '🏛️'
+      },
+      {
+        id: 'stage_final',
+        title: 'Hội Trát Chung Kết: Hòa Sắc',
+        timeline: '03/11/2026',
+        desc: 'Sân Khấu FCD — Vinh danh tân thành viên Gen 22 và nhận Giấy chứng nhận chính thức của JPC FTU!',
+        thumb: 'Image/Logo.png',
+        fallbackIcon: '🏆'
+      }
+    ];
 
-      card.innerHTML = `
-        ${iconOrImg}
-        <div class="memory-card-content">
-          <h4 style="font-family: var(--font-title); font-size: 15px; color: var(--gold-bright); margin: 0 0 4px 0;">${mem.title}</h4>
-          <p style="font-size: 12px; color: var(--white); margin: 0;">${mem.desc}</p>
-        </div>
-      `;
-      list.appendChild(card);
-    });
+    const unlockedCount = CHAPTERS.filter(ch => this.unlockedStages.includes(ch.id)).length;
+    if (progressTextEl) {
+      progressTextEl.textContent = `Tiến độ: ${unlockedCount}/${CHAPTERS.length} Hội Trát`;
+    }
+
+    if (stageList) {
+      stageList.innerHTML = '';
+      CHAPTERS.forEach((ch, idx) => {
+        const isUnlocked = this.unlockedStages.includes(ch.id);
+        const isCurrent = this.currentStageId === ch.id;
+        const isCompleted = this.completedStages.includes(ch.id) || (idx < CHAPTERS.findIndex(c => c.id === this.currentStageId));
+
+        let statusClass = 'locked';
+        let statusText = 'CHƯA MỞ KHÓA';
+        if (isCompleted) {
+          statusClass = 'completed';
+          statusText = '✓ ĐÃ HOÀN THÀNH';
+        } else if (isCurrent) {
+          statusClass = 'playing';
+          statusText = '● ĐANG CHƠI';
+        }
+
+        const card = document.createElement('div');
+        card.className = `memory-chapter-card ${statusClass} ${isCurrent ? 'active' : ''}`;
+
+        card.innerHTML = `
+          <div class="memory-card-thumb-box zoomable-img" onclick="if (window.openImageLightbox) window.openImageLightbox('${ch.thumb}', '${ch.title} — ${ch.timeline}')" title="Bấm để phóng to kỷ vật">
+            <img src="${ch.thumb}" class="memory-card-thumb" alt="${ch.title}" onerror="this.onerror=null; this.src='Image/Logo.png';">
+          </div>
+          <div class="memory-chapter-info">
+            <div class="memory-chapter-header">
+              <span class="memory-chapter-title">${ch.title}</span>
+              <span class="memory-chapter-status ${statusClass}">${statusText}</span>
+            </div>
+            <p class="memory-chapter-desc">${ch.desc}</p>
+            <div class="memory-chapter-timeline">📅 ${ch.timeline}</div>
+          </div>
+          <div class="memory-chapter-action">
+            <button class="btn-replay-stage" ${isUnlocked ? '' : 'disabled'} title="${isUnlocked ? 'Chơi lại màn này' : 'Chưa mở khóa'}">
+              ${isCurrent ? '▶ Tiếp tục' : '↺ Chơi lại'}
+            </button>
+          </div>
+        `;
+
+        const replayBtn = card.querySelector('.btn-replay-stage');
+        if (replayBtn && isUnlocked) {
+          replayBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.replayStage(ch.id);
+          });
+        }
+
+        stageList.appendChild(card);
+      });
+    }
+
+    // Bind footer buttons safely
+    if (saveBtn) {
+      saveBtn.onclick = () => this.saveGameState(true);
+    }
+    if (resetBtn) {
+      resetBtn.onclick = () => this.resetSaveData();
+    }
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        const modal = document.getElementById('memory-modal');
+        if (modal) modal.classList.add('hidden');
+      };
+    }
   }
 
   setupCelebrationModal() {
@@ -972,7 +1283,12 @@ class Game {
     // 5. Render Player Chibi Vector Character
     this.renderPlayer();
 
-    // 6. Render Interaction Prompt [A] (Rendered in world space above target)
+    // 6. Overhead Map Elements (Arches & Gate Signboards so player passes UNDER them!)
+    if (window.worldMap && window.worldMap.drawOverheadSignboards) {
+      window.worldMap.drawOverheadSignboards(this.ctx, this.currentStageId);
+    }
+
+    // 7. Render Interaction Prompt [A] (Rendered in world space above target)
     this.renderInteractionPrompt();
 
     this.ctx.restore();

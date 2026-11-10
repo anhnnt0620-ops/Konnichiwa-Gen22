@@ -258,7 +258,10 @@ class MinigameManager {
         if (q.image) {
           qPromptContainer.innerHTML = `
             <div class="quiz-media-prompt">
-              <img src="${q.image}" alt="Áo Happi JPC" class="quiz-happi-img">
+              <div class="quiz-img-wrapper zoomable-img" onclick="if (window.openImageLightbox) window.openImageLightbox('${q.image}', 'Áo Happi đồng phục truyền thống của CLB Tiếng Nhật JPC FTU')" title="Bấm vào ảnh để phóng to xem chi tiết">
+                <img src="${q.image}" alt="Áo Happi JPC" class="quiz-happi-img">
+                <span class="quiz-zoom-hint">🔍 Phóng to</span>
+              </div>
               <div class="quiz-prompt-text">${q.prompt}</div>
             </div>
           `;

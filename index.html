@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="Image/Logo.png">
-  <link rel="stylesheet" href="css/style.css?v=2.7">
+  <link rel="stylesheet" href="css/style.css?v=3.3">
 </head>
 <body>
 
@@ -166,7 +166,15 @@
           </div>
         </div>
 
-        <button class="gold-btn btn-launch" id="btn-start-game">BẮT ĐẦU HÀNH TRÌNH CÙNG JPC</button>
+        <!-- CONTINUE SAVED GAME BOX -->
+        <div id="continue-game-box" class="continue-game-box hidden">
+          <button id="btn-continue-game" class="btn-continue">
+            <span>▶ TIẾP TỤC HÀNH TRÌNH</span>
+          </button>
+          <div id="continue-game-meta" class="continue-game-meta"></div>
+        </div>
+
+        <button class="gold-btn btn-launch" id="btn-start-game">BẮT ĐẦU HÀNH TRÌNH MỚI CÙNG JPC</button>
         <div class="title-hint">💡 Hãy chơi theo phong crack của mình nhé!</div>
       </div>
     </div>
@@ -383,15 +391,40 @@
       </div>
     </div>
 
-    <!-- MEMORY BOOK MODAL -->
+    <!-- MEMORY BOOK MODAL (SỔ KỶ NIỆM · LƯU TIẾN ĐỘ & CHƠI LẠI MÀN) -->
     <div id="memory-modal" class="modal-overlay hidden">
-      <div class="title-card">
-        <div class="title-badge">KỶ NGUYÊN GEN 22</div>
-        <h2 style="font-family: var(--font-title); font-size: 18px; color: var(--gold-bright); margin-bottom: 16px;">SỔ HỒI ỨC HÀNH TRÌNH</h2>
-        <div id="memory-list" style="max-height: 240px; overflow-y: auto; margin-bottom: 18px;">
-          <!-- Memories injected dynamically -->
+      <div class="memory-modal-card">
+        <div class="memory-header">
+          <div class="title-badge">KỶ NGUYÊN GEN 22 · JPC FTU</div>
+          <h2>📖 SỔ KỶ NIỆM HÀNH TRÌNH</h2>
+          <p class="memory-sub">Tự động lưu tiến độ · Có thể chọn chơi lại bất kỳ Hội Trát nào em đã mở khóa!</p>
         </div>
-        <button class="gold-btn" onclick="document.getElementById('memory-modal').classList.add('hidden')">ĐÓNG</button>
+
+        <!-- PROFILE & PROGRESS BAR -->
+        <div id="memory-profile-bar" class="memory-profile-bar">
+          <div class="profile-avatar-box">
+            <span id="memory-player-avatar" class="profile-avatar">🌸</span>
+          </div>
+          <div class="profile-meta">
+            <div id="memory-player-name" class="profile-name">Kouhai Gen 22</div>
+            <div id="memory-player-dept" class="profile-dept">★ Ban Chuyên Môn</div>
+          </div>
+          <div class="profile-stats">
+            <div id="memory-progress-text" class="profile-progress">Tiến độ: 1/5 Hội Trát</div>
+          </div>
+        </div>
+
+        <!-- LIST OF 5 CHAPTERS / HỘI TRÁT -->
+        <div id="memory-stage-list" class="memory-stage-list">
+          <!-- Dynamically populated chapters -->
+        </div>
+
+        <!-- FOOTER ACTIONS -->
+        <div class="memory-modal-footer">
+          <button class="action-reset-btn" id="btn-reset-save" title="Xóa tiến độ và chơi lại từ đầu">🔄 Chơi lại từ đầu</button>
+          <button class="action-save-btn" id="btn-save-progress" title="Lưu tiến độ hiện tại">💾 Lưu tiến độ</button>
+          <button class="gold-btn" id="btn-close-memory" style="padding: 7px 22px; font-size: 12px;">ĐÓNG</button>
+        </div>
       </div>
     </div>
 
@@ -448,14 +481,27 @@
 
   </div>
 
+  <!-- IMAGE LIGHTBOX / ZOOM MODAL -->
+  <div id="image-lightbox-modal" class="hidden" onclick="window.closeImageLightbox(event)">
+    <div class="lightbox-content-box" onclick="event.stopPropagation()">
+      <button class="lightbox-close-btn" id="btn-close-lightbox" onclick="window.closeImageLightbox()" title="Đóng [Esc]">✕</button>
+      <img id="lightbox-img" class="lightbox-img" src="" alt="Phóng to ảnh" onclick="window.closeImageLightbox()">
+      <div id="lightbox-caption" class="lightbox-caption"></div>
+      <div class="lightbox-hint">Nhấn [Esc] hoặc bấm bất kỳ đâu để đóng</div>
+    </div>
+  </div>
+
+  <!-- GAME TOAST NOTIFICATION -->
+  <div id="game-toast" class="game-toast"></div>
+
   <!-- SCRIPTS -->
-  <script src="js/audio.js?v=3.2"></script>
-  <script src="js/sprites.js?v=3.2"></script>
-  <script src="js/worldMap.js?v=3.2"></script>
-  <script src="js/dialogue.js?v=3.2"></script>
-  <script src="js/minigames.js?v=3.2"></script>
-  <script src="js/stages.js?v=3.2"></script>
-  <script src="js/controls.js?v=3.2"></script>
-  <script src="js/game.js?v=3.2"></script>
+  <script src="js/audio.js?v=3.3"></script>
+  <script src="js/sprites.js?v=3.3"></script>
+  <script src="js/worldMap.js?v=3.3"></script>
+  <script src="js/dialogue.js?v=3.3"></script>
+  <script src="js/minigames.js?v=3.3"></script>
+  <script src="js/stages.js?v=3.3"></script>
+  <script src="js/controls.js?v=3.3"></script>
+  <script src="js/game.js?v=3.3"></script>
 </body>
 </html>

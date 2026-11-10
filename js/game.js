@@ -69,6 +69,8 @@ class Game {
     this.isRunning = false;
     this.lastTime = 0;
     this.nearbyInteractable = null;
+    this.hasMovedSinceSave = false;
+    this.lastMoveTime = 0;
 
     this.init();
   }
@@ -88,6 +90,14 @@ class Game {
     this.setupCelebrationModal();
     this.setupQuestDetailModal();
     this.setupTransitionModal();
+
+    // Auto-save player's exact standing position when closing/refreshing window
+    window.addEventListener('beforeunload', () => {
+      if (this.isRunning) this.saveGameState(false);
+    });
+    window.addEventListener('pagehide', () => {
+      if (this.isRunning) this.saveGameState(false);
+    });
   }
 
   setupCanvasInteraction() {
@@ -257,11 +267,16 @@ class Game {
   saveGameState(isManual = false) {
     try {
       const saveData = {
-        version: '1.0',
+        version: '1.1',
         playerName: this.playerName,
         selectedDept: this.player.selectedDept,
         selectedDeptName: this.player.selectedDeptName,
         currentStageId: this.currentStageId,
+        playerX: Math.round(this.player.x),
+        playerY: Math.round(this.player.y),
+        playerDirection: this.player.direction || 'up',
+        stage1CheckedIn: !!this.stage1CheckedIn,
+        stage1MetSenpai: !!this.stage1MetSenpai,
         unlockedStages: this.unlockedStages,
         completedStages: this.completedStages,
         stageProgress: this.stageProgress,
@@ -270,7 +285,7 @@ class Game {
       };
       localStorage.setItem(this.SAVE_KEY, JSON.stringify(saveData));
       if (isManual && window.showToast) {
-        window.showToast('💾 Đã lưu tiến độ chơi thành công!');
+        window.showToast('💾 Đã lưu tiến độ & vị trí nhân vật thành công!');
       }
     } catch (err) {
       console.warn('Could not save game state to localStorage:', err);
@@ -310,12 +325,52 @@ class Game {
       this.memories = saved.memories;
     }
 
+    // Restore Stage 1 progress flags
+    this.stage1CheckedIn = !!saved.stage1CheckedIn;
+    this.stage1MetSenpai = !!saved.stage1MetSenpai;
+
     const titleScreen = document.getElementById('title-screen');
     if (titleScreen) titleScreen.classList.add('hidden');
 
     this.isRunning = true;
     const stageToLoad = saved.currentStageId || 'stage1';
-    this.loadStage(stageToLoad, true);
+
+    // Load stage with preserveState = true so player position & stage flags aren't overwritten
+    this.loadStage(stageToLoad, false, true);
+
+    // Restore player's exact standing position when they left
+    const hasSavedPos = (typeof saved.playerX === 'number' && typeof saved.playerY === 'number');
+    if (hasSavedPos) {
+      const world = window.worldMap;
+      const maxX = (world ? world.width : 1920) - 32;
+      const maxY = (world ? world.height : 1280) - 32;
+      this.player.x = Math.max(16, Math.min(maxX, saved.playerX));
+      this.player.y = Math.max(16, Math.min(maxY, saved.playerY));
+      if (saved.playerDirection) {
+        this.player.direction = saved.playerDirection;
+      }
+    } else if (this.stage?.playerStart) {
+      this.player.x = this.stage.playerStart.x * 32;
+      this.player.y = this.stage.playerStart.y * 32;
+      this.player.direction = 'up';
+    }
+
+    // Restore quest tracker objective accordingly
+    if (stageToLoad === 'stage1' && this.stage) {
+      if (this.stage1MetSenpai) {
+        this.stage.questSpot = { x: 15 * 32, y: 22 * 32 };
+        this.stage.questText = 'Đến Gian Trại JPC (màu đỏ tại Sân Nhà D) để điền đơn Vòng 1!';
+      } else if (this.stage1CheckedIn) {
+        this.stage.questSpot = { x: 11.5 * 32, y: 24.5 * 32 };
+        this.stage.questText = 'Gặp Senpai JPC trên đường vào Sân Nhà D!';
+      } else {
+        this.stage.questSpot = { x: 13.8 * 32, y: 29.8 * 32 };
+        this.stage.questText = 'Đến Bàn Check-in FCD đối diện FTU Shop để nhận thẻ ngày hội!';
+      }
+    }
+
+    // Immediately center camera on player's resumed position
+    this.updateCamera();
 
     if (window.audioManager) {
       window.audioManager.init();
@@ -616,7 +671,7 @@ class Game {
     if (appModal) appModal.classList.remove('hidden');
   }
 
-  loadStage(stageId, isInitial = false) {
+  loadStage(stageId, isInitial = false, preserveState = false) {
     this.currentStageId = stageId;
     this.stage = STAGE_DATA[stageId];
     if (!this.stage) return;
@@ -624,21 +679,23 @@ class Game {
     if (!this.unlockedStages.includes(stageId)) {
       this.unlockedStages.push(stageId);
     }
-    this.saveGameState(false);
 
-    if (stageId === 'stage1') {
-      this.stage1CheckedIn = false;
-      this.stage1MetSenpai = false;
-      if (this.stage) {
-        this.stage.questSpot = { x: 13.8 * 32, y: 29.8 * 32 };
-        this.stage.questText = 'Đến Bàn Check-in FCD đối diện FTU Shop để nhận thẻ ngày hội!';
+    if (!preserveState) {
+      if (stageId === 'stage1') {
+        this.stage1CheckedIn = false;
+        this.stage1MetSenpai = false;
+        if (this.stage) {
+          this.stage.questSpot = { x: 13.8 * 32, y: 29.8 * 32 };
+          this.stage.questText = 'Đến Bàn Check-in FCD đối diện FTU Shop để nhận thẻ ngày hội!';
+        }
       }
-    }
 
-    if (isInitial && this.stage.playerStart) {
-      this.player.x = this.stage.playerStart.x * 32;
-      this.player.y = this.stage.playerStart.y * 32;
-      this.player.direction = 'up';
+      if (isInitial && this.stage.playerStart) {
+        this.player.x = this.stage.playerStart.x * 32;
+        this.player.y = this.stage.playerStart.y * 32;
+        this.player.direction = 'up';
+      }
+      this.saveGameState(false);
     }
 
     // Switch BGM
@@ -873,8 +930,16 @@ class Game {
                        !isSolid(this.player.x + 6, newY + 28) &&
                        !isSolid(this.player.x + 22, newY + 28);
 
-      if (canMoveX && newX >= minX && newX <= maxX) this.player.x = newX;
-      if (canMoveY && newY >= minY && newY <= maxY) this.player.y = newY;
+      if (canMoveX && newX >= minX && newX <= maxX) {
+        this.player.x = newX;
+        this.hasMovedSinceSave = true;
+        this.lastMoveTime = Date.now();
+      }
+      if (canMoveY && newY >= minY && newY <= maxY) {
+        this.player.y = newY;
+        this.hasMovedSinceSave = true;
+        this.lastMoveTime = Date.now();
+      }
 
       this.player.animTimer++;
       if (this.player.animTimer > 8) {
@@ -884,6 +949,12 @@ class Game {
     } else {
       this.player.isMoving = false;
       this.player.animFrame = 0;
+
+      // Autosave exact standing position after standing still for 1.2s
+      if (this.hasMovedSinceSave && Date.now() - this.lastMoveTime > 1200) {
+        this.hasMovedSinceSave = false;
+        this.saveGameState(false);
+      }
     }
   }
 
@@ -1197,9 +1268,9 @@ class Game {
         id: 'stage2',
         title: 'Hội Trát 2: Hòa Nhịp',
         timeline: '23/10 – 25/10/2026',
-        desc: 'Tòa B FTU — Tham gia phòng Google Meet phỏng vấn trực tuyến và giải câu đố áo Happi truyền thống JPC.',
-        thumb: 'Image/happi-jpc.jpg',
-        fallbackIcon: '💻'
+        desc: 'Tòa B FTU — Tham gia phòng Google Meet phỏng vấn trực tuyến cùng Zashiki-warashi và vượt qua bộ câu hỏi thử thách JPC.',
+        thumb: 'Image/Zashiki Warashi.png',
+        fallbackIcon: '🏮'
       },
       {
         id: 'stage3_1',

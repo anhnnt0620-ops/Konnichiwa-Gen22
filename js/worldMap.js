@@ -238,6 +238,12 @@ class WorldMap {
     for (let c = 12; c <= 34; c++) {
       if (this.solidGrid[41]) this.solidGrid[41][c] = 1;
     }
+
+    // 7. Register Bia Đá FTU Pedestal Collision (col 27..28, row 22)
+    if (this.solidGrid[22]) {
+      this.solidGrid[22][27] = 1;
+      this.solidGrid[22][28] = 1;
+    }
     // Đảm bảo lối đi qua Cổng trường (c = 7..11, r = 40..42) hoàn toàn thông thoáng
     for (let r = 40; r <= 42; r++) {
       for (let c = 7; c <= 11; c++) {

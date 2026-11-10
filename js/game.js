@@ -139,8 +139,8 @@ class Game {
         return;
       }
 
-      // Check click on Bia Đá FTU (col 14, row 36)
-      if (Math.hypot(worldX - 14 * 32, worldY - 36 * 32) < 55) {
+      // Check click on Bia Đá FTU (col 28, row 22)
+      if (Math.hypot(worldX - 28 * 32, worldY - 22 * 32) < 65) {
         this.nearbyInteractable = { type: 'biada', data: { name: 'Bia Đá FTU' } };
         this.handleAction();
         return;
@@ -933,8 +933,8 @@ class Game {
       return;
     }
 
-    // Check Bia Đá FTU (col 14, row 36)
-    if (Math.hypot(px - 14 * 32, py - 36 * 32) < 70) {
+    // Check Bia Đá FTU (col 28, row 22 - Tâm điểm Sân trường giữa Tòa B và Nhà A)
+    if (Math.hypot(px - 28 * 32, py - 22 * 32) < 80) {
       this.nearbyInteractable = { type: 'biada', data: { name: 'Bia Đá FTU' } };
       return;
     }
@@ -2011,8 +2011,8 @@ class Game {
       targetX = 7.5 * 32;
       targetY = 4.5 * 32;
     } else if (this.nearbyInteractable.type === 'biada') {
-      targetX = 14 * 32;
-      targetY = 35 * 32;
+      targetX = 28 * 32;
+      targetY = 22 * 32 - 42;
     } else if (this.nearbyInteractable.type === 'stage_fcd') {
       targetX = 50.5 * 32;
       targetY = 20 * 32;

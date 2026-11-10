@@ -79,6 +79,9 @@ class Game {
     this.initParticles();
     this.setupImageLightbox();
     this.setupToast();
+    this.setupCanteenModal();
+    this.setupBiaDaModal();
+    this.setupVideoModal();
     this.setupStartScreen();
     this.setupCanvasInteraction();
     this.setupApplicationForm();
@@ -124,6 +127,29 @@ class Game {
             type: 'booth_jpc',
             data: { name: 'Gian Trại CLB Tiếng Nhật JPC' }
           };
+          this.handleAction();
+          return;
+        }
+      }
+
+      // Check click on Canteen (col 3..12, row 2..6)
+      if (worldX >= 3 * 32 && worldX <= 12 * 32 && worldY >= 2 * 32 && worldY <= 6 * 32) {
+        this.nearbyInteractable = { type: 'canteen', data: { name: 'Canteen FTU' } };
+        this.handleAction();
+        return;
+      }
+
+      // Check click on Bia Đá FTU (col 14, row 36)
+      if (Math.hypot(worldX - 14 * 32, worldY - 36 * 32) < 55) {
+        this.nearbyInteractable = { type: 'biada', data: { name: 'Bia Đá FTU' } };
+        this.handleAction();
+        return;
+      }
+
+      // Check click on Sân khấu FCD (STAGE 1 ONLY · col 48..53, row 17..25)
+      if (this.currentStageId === 'stage1') {
+        if (worldX >= 47 * 32 && worldX <= 54 * 32 && worldY >= 16 * 32 && worldY <= 26 * 32) {
+          this.nearbyInteractable = { type: 'stage_fcd', data: { name: 'Sân khấu FCD' } };
           this.handleAction();
           return;
         }
@@ -808,7 +834,7 @@ class Game {
       const minY = 16;
       const maxY = (world ? world.height : 1280) - 32;
 
-      const isSolid = (x, y) => world ? world.isSolid(x, y) : false;
+      const isSolid = (x, y) => world ? world.isSolid(x, y, this.currentStageId) : false;
 
       const canMoveX = !isSolid(newX + 6, this.player.y + 20) &&
                        !isSolid(newX + 22, this.player.y + 20) &&
@@ -900,6 +926,26 @@ class Game {
         }
       }
     }
+
+    // Check Canteen (West side North: col 3..12, row 2..5)
+    if (px >= 3 * 32 - 10 && px <= 12 * 32 + 10 && py >= 3.5 * 32 && py <= 7.5 * 32) {
+      this.nearbyInteractable = { type: 'canteen', data: { name: 'Canteen FTU' } };
+      return;
+    }
+
+    // Check Bia Đá FTU (col 14, row 36)
+    if (Math.hypot(px - 14 * 32, py - 36 * 32) < 70) {
+      this.nearbyInteractable = { type: 'biada', data: { name: 'Bia Đá FTU' } };
+      return;
+    }
+
+    // Check Sân khấu FCD (STAGE 1 ONLY · col 48..53, row 17..25)
+    if (this.currentStageId === 'stage1') {
+      if (px >= 44 * 32 && px <= 54 * 32 && py >= 16 * 32 && py <= 26 * 32) {
+        this.nearbyInteractable = { type: 'stage_fcd', data: { name: 'Sân khấu FCD' } };
+        return;
+      }
+    }
   }
 
   // Action button [A] or Space/Enter pressed
@@ -911,6 +957,21 @@ class Game {
 
     if (!this.nearbyInteractable) return;
     const { type, data } = this.nearbyInteractable;
+
+    if (type === 'canteen') {
+      this.openCanteenModal();
+      return;
+    }
+
+    if (type === 'biada') {
+      this.openBiaDaModal();
+      return;
+    }
+
+    if (type === 'stage_fcd') {
+      this.openFCDStageVideoModal();
+      return;
+    }
 
     if (type === 'booth_jpc') {
       if (this.currentStageId === 'stage1') {
@@ -1207,6 +1268,325 @@ class Game {
         const modal = document.getElementById('memory-modal');
         if (modal) modal.classList.add('hidden');
       };
+    }
+  }
+
+  /* ==========================================================================
+     CANTEEN FTU INTERACTION (CHỌN ĐỒ ĂN TIẾP SỨC TÂN BINH)
+     ========================================================================== */
+  setupCanteenModal() {
+    const modal = document.getElementById('canteen-modal');
+    const closeBtn = document.getElementById('btn-close-canteen');
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        if (modal) modal.classList.add('hidden');
+      };
+    }
+    if (modal) {
+      modal.onclick = (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+      };
+    }
+  }
+
+  openCanteenModal() {
+    const modal = document.getElementById('canteen-modal');
+    const list = document.getElementById('canteen-menu-list');
+    if (!modal || !list) return;
+
+    const MENU = [
+      {
+        id: 'com_suat',
+        icon: '🍱',
+        name: 'Cơm Suất Canteen FTU',
+        desc: 'Cơm sườn xào chua ngọt + trứng rán vàng ruộm + canh rau muống luộc dầm sấu chuẩn vị FTU!',
+        price: '35.000đ',
+        buff: 'Buff 100% Năng Lượng',
+        reaction: 'Cơm sườn xào chua ngọt chuẩn mẹ nấu! Năng lượng dồi dào sẵn sàng cùng JPC bùng nổ!'
+      },
+      {
+        id: 'bun_bo',
+        icon: '🍲',
+        name: 'Bún Bò Huế Chùa Láng',
+        desc: 'Nước dùng cay nồng thơm mùi sả ớt, thịt bò mềm và chả cua đầy đặn ấm bụng ngày hội!',
+        price: '40.000đ',
+        buff: 'Sưởi Ấm Tâm Hồn',
+        reaction: 'Tô bún bò cay thơm xuýt xoa, tiếp thêm sức mạnh chinh phục mọi vòng tuyển!'
+      },
+      {
+        id: 'banh_mi_chao',
+        icon: '🥖',
+        name: 'Bánh Mì Chảo Đặc Biệt',
+        desc: 'Pate gan béo ngậy, trứng ốp la lòng đào, xúc xích và nước sốt cà chua sóng sánh bánh mì giòn rụm.',
+        price: '35.000đ',
+        buff: 'No Căng Bụng Chạy Deadline',
+        reaction: 'Bánh mì giòn rụm chấm đẫm sốt pate béo ngậy, đúng chuẩn món tủ sinh viên K63!'
+      },
+      {
+        id: 'tra_tac',
+        icon: '🍹',
+        name: 'Trà Tắc Khổng Lồ 1 Lít',
+        desc: 'Trà tắc chua ngọt mát lạnh sảng khoái, giải nhiệt tức thì giữa không khí sôi động của FCD.',
+        price: '20.000đ',
+        buff: 'Giải Nhiệt Cực Đã',
+        reaction: 'Một ngụm trà tắc mát lạnh sảng khoái đánh tan mọi cơn khát ngày hội!'
+      },
+      {
+        id: 'cafe_sua',
+        icon: '☕',
+        name: 'Cà Phê Sữa Đá Sài Gòn',
+        desc: 'Hương cà phê thơm đậm đà, sữa đặc béo ngậy ngọt ngào, vũ khí chống ngủ gật số 1 FTU.',
+        price: '25.000đ',
+        buff: '+200% Tỉnh Táo Tập Trung',
+        reaction: 'Cà phê thơm nức tỉnh cả người! Tinh thần tập trung cao độ để nộp đơn ứng tuyển!'
+      }
+    ];
+
+    list.innerHTML = '';
+    MENU.forEach(dish => {
+      const card = document.createElement('div');
+      card.className = 'canteen-item-card';
+      card.innerHTML = `
+        <div class="canteen-item-icon">${dish.icon}</div>
+        <div class="canteen-item-body">
+          <div class="canteen-item-title">${dish.name}</div>
+          <p class="canteen-item-desc">${dish.desc}</p>
+          <div class="canteen-item-meta">
+            <span class="canteen-price">💵 ${dish.price}</span>
+            <span class="canteen-buff">✨ ${dish.buff}</span>
+          </div>
+        </div>
+        <button class="btn-eat-food">Ăn ngay ▶</button>
+      `;
+
+      const eatBtn = card.querySelector('.btn-eat-food');
+      if (eatBtn) {
+        eatBtn.onclick = () => {
+          this.eatFood(dish);
+        };
+      }
+      list.appendChild(card);
+    });
+
+    modal.classList.remove('hidden');
+    if (window.audioManager) window.audioManager.playBlip();
+  }
+
+  eatFood(dish) {
+    const modal = document.getElementById('canteen-modal');
+    if (modal) modal.classList.add('hidden');
+
+    if (window.audioManager) window.audioManager.playCollect();
+
+    this.triggerConfetti();
+
+    window.dialogueManager.startDialogue([
+      {
+        speaker: 'Bác Phục Vụ Canteen',
+        text: `Bác mang ra cho cháu món ${dish.name} nóng hổi thơm phức đây! Chúc cháu ăn thật ngon miệng nhé!`
+      },
+      {
+        speaker: this.playerName,
+        text: `Ngon tuyệt đỉnh! ${dish.reaction}`
+      },
+      {
+        speaker: 'Hệ Thống FTU',
+        text: `✨ [${dish.buff}] — Năng lượng đã được sạc đầy 100%! Bạn sẵn sàng cháy hết mình cùng JPC FTU!`
+      }
+    ]);
+
+    this.addMemory('Thưởng thức Canteen FTU', `Đã ghé Canteen nạp năng lượng với món ${dish.name} ngon tuyệt!`, 'Image/Logo.png');
+
+    if (window.showToast) {
+      window.showToast(`🍱 Yummy! Đã thưởng thức: ${dish.name}!`);
+    }
+  }
+
+  /* ==========================================================================
+     BIA ĐÁ FTU INTERACTION (KHẤN ĐỂ QUA MÔN & SĂN GPA 4.0)
+     ========================================================================== */
+  setupBiaDaModal() {
+    const modal = document.getElementById('biada-modal');
+    const closeBtn = document.getElementById('btn-close-biada');
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        if (modal) modal.classList.add('hidden');
+      };
+    }
+    if (modal) {
+      modal.onclick = (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+      };
+    }
+  }
+
+  openBiaDaModal() {
+    const modal = document.getElementById('biada-modal');
+    const list = document.getElementById('biada-prayer-list');
+    if (!modal || !list) return;
+
+    const PRAYERS = [
+      {
+        id: 'qua_mon',
+        icon: '🎓',
+        title: 'Cầu Qua Môn Điểm A (Không Tạch Môn)',
+        desc: '"Con thành tâm cầu khấn Bia Đá FTU che chở: Kinh tế vi mô, Kinh tế vĩ mô, Pháp luật đại cương, Toán cao cấp kỳ này đều điểm A, né sạch điểm F!"',
+        oracleBadge: 'Tín hiệu: 100% Qua Môn',
+        oracle: 'Bia Đá FTU đã chứng giám lòng thành! Tín hiệu vũ trụ truyền về: Điểm F đã biến mất, chỉ cần ôn luyện nghiêm túc và giữ vững tinh thần, điểm A sẽ về tay bạn!'
+      },
+      {
+        id: 'gpa_4',
+        icon: '🌟',
+        title: 'Cầu GPA 4.0 & Săn Học Bổng Khuyến Khích',
+        desc: '"Cầu mong kỳ học này GPA chạm đỉnh 4.0, săn trọn vẹn Học bổng Khuyến khích học tập của Trường Đại học Ngoại Thương!"',
+        oracleBadge: 'Tín hiệu: Học Bá FTU',
+        oracle: 'Ánh hào quang từ Bia Đá chiếu rọi! Bạn có tố chất trở thành Học Bá FTU xuất sắc! Hãy kiên trì học tập và bứt phá nhé!'
+      },
+      {
+        id: 'do_jpc',
+        icon: '🌸',
+        title: 'Cầu Trúng Tuyển JPC Gen 22',
+        desc: '"Con nguyện đem trọn nhiệt huyết thanh xuân, vượt qua 3 Vòng Tuyển quân để trở thành thành viên chính thức của đại gia đình JPC FTU!"',
+        oracleBadge: 'Tín hiệu: Chắc Suất Gen 22',
+        oracle: 'Búp bê Kokeshi và các Senpai JPC mỉm cười đón nhận ước nguyện của bạn! Cánh cổng JPC Gen 22 đang rộng mở chào đón bạn về nhà!'
+      },
+      {
+        id: 'ny_ftu',
+        icon: '💖',
+        title: 'Cầu Có Người Yêu Ở Ngoại Thương',
+        desc: '"Cầu cho con sớm tìm được một nửa định mệnh tại ngôi trường FTU Chùa Láng, cùng nhau đi dạo hồ Tây và ngắm hoàng hôn!"',
+        oracleBadge: 'Tín hiệu: Tơ Duyên Rực Rỡ',
+        oracle: 'Duyên lành đang tới rất gần! Hãy tự tin thể hiện cá tính trong ngày hội FCD và các hoạt động của JPC, người ấy sẽ sớm xuất hiện bên bạn!'
+      }
+    ];
+
+    list.innerHTML = '';
+    PRAYERS.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'biada-item-card';
+      card.innerHTML = `
+        <div class="biada-item-icon">${item.icon}</div>
+        <div class="biada-item-body">
+          <div class="biada-item-title">${item.title}</div>
+          <p class="biada-item-desc">${item.desc}</p>
+          <span class="biada-oracle-badge">${item.oracleBadge}</span>
+        </div>
+        <button class="btn-pray-stone">Khấn vái 🙏</button>
+      `;
+
+      const prayBtn = card.querySelector('.btn-pray-stone');
+      if (prayBtn) {
+        prayBtn.onclick = () => {
+          this.prayBiaDa(item);
+        };
+      }
+      list.appendChild(card);
+    });
+
+    modal.classList.remove('hidden');
+    if (window.audioManager) window.audioManager.playBlip();
+  }
+
+  prayBiaDa(item) {
+    const modal = document.getElementById('biada-modal');
+    if (modal) modal.classList.add('hidden');
+
+    if (window.audioManager) window.audioManager.playFanfare();
+
+    this.triggerConfetti();
+
+    window.dialogueManager.startDialogue([
+      {
+        speaker: 'Văn Bia FTU',
+        text: `Gió thoảng qua rặng cây Chùa Láng... Bia Đá FTU linh thiêng phát ra vầng sáng vàng kim ấm áp, lắng nghe trọn vẹn lời nguyện của ${this.playerName}!`
+      },
+      {
+        speaker: 'Lời Sấm Từ Bia Đá',
+        text: `${item.oracle}`
+      },
+      {
+        speaker: this.playerName,
+        text: 'Con cảm ơn Bia Đá FTU! Con nguyện sẽ chăm chỉ ôn tập và cháy hết mình cùng JPC Gen 22!'
+      }
+    ]);
+
+    this.addMemory('Khấn Bia Đá FTU', `Đã thành tâm gửi gắm ước nguyện: "${item.title}" trước Bia Đá linh thiêng!`, 'Image/Logo.png');
+
+    if (window.showToast) {
+      window.showToast(`⛩️ Đã khấn Bia Đá FTU thành công! Nhận buff may mắn!`);
+    }
+  }
+
+  /* ==========================================================================
+     SÂN KHẤU FCD - JPC FCD STAGE VIDEO CINEMA (XEM VIDEO TIẾT MỤC JPC)
+     ========================================================================== */
+  setupVideoModal() {
+    const modal = document.getElementById('video-modal');
+    const closeBtn = document.getElementById('btn-close-video');
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        this.closeFCDStageVideoModal();
+      };
+    }
+    if (modal) {
+      modal.onclick = (e) => {
+        if (e.target === modal) this.closeFCDStageVideoModal();
+      };
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const vidModal = document.getElementById('video-modal');
+        if (vidModal && !vidModal.classList.contains('hidden')) {
+          this.closeFCDStageVideoModal();
+        }
+      }
+    });
+  }
+
+  openFCDStageVideoModal() {
+    const modal = document.getElementById('video-modal');
+    const video = document.getElementById('fcd-stage-video');
+    if (!modal || !video) return;
+
+    // Pause game background music so video audio is clear
+    if (window.audioManager) {
+      window.audioManager.pauseBGM();
+    }
+
+    modal.classList.remove('hidden');
+
+    // Attempt video play
+    video.currentTime = 0;
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(err => {
+        console.log('Video autoplay prevented by browser policy, user can press play:', err);
+      });
+    }
+
+    this.addMemory(
+      'Sân khấu FCD — Stage JPC',
+      'Đã thưởng thức trọn vẹn tiết mục biểu diễn hoành tráng của CLB Tiếng Nhật JPC tại FCD 2026!',
+      'Image/Color/Vòng 1 - Color.png'
+    );
+
+    if (window.showToast) {
+      window.showToast('🎬 Đang xem Sân khấu biểu diễn của JPC tại FCD 2026!');
+    }
+  }
+
+  closeFCDStageVideoModal() {
+    const modal = document.getElementById('video-modal');
+    const video = document.getElementById('fcd-stage-video');
+    if (video) {
+      video.pause();
+    }
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+    // Resume game background music
+    if (window.audioManager) {
+      window.audioManager.resumeBGM();
     }
   }
 
@@ -1627,6 +2007,15 @@ class Game {
     } else if (this.nearbyInteractable.type === 'prop' && this.nearbyInteractable.data) {
       targetX = this.nearbyInteractable.data.x * 32 + 16;
       targetY = this.nearbyInteractable.data.y * 32 - 42;
+    } else if (this.nearbyInteractable.type === 'canteen') {
+      targetX = 7.5 * 32;
+      targetY = 4.5 * 32;
+    } else if (this.nearbyInteractable.type === 'biada') {
+      targetX = 14 * 32;
+      targetY = 35 * 32;
+    } else if (this.nearbyInteractable.type === 'stage_fcd') {
+      targetX = 50.5 * 32;
+      targetY = 20 * 32;
     }
 
     // Determine concise action verb
@@ -1635,6 +2024,12 @@ class Game {
       actionLabel = (this.nearbyInteractable.data && this.nearbyInteractable.data.id === 'npc_fcd_checkin') ? 'Check-in' : 'Trò chuyện';
     } else if (this.nearbyInteractable.type === 'booth_jpc') {
       actionLabel = 'Ghé Booth';
+    } else if (this.nearbyInteractable.type === 'canteen') {
+      actionLabel = 'Ăn Canteen';
+    } else if (this.nearbyInteractable.type === 'biada') {
+      actionLabel = 'Khấn Bia Đá';
+    } else if (this.nearbyInteractable.type === 'stage_fcd') {
+      actionLabel = 'Xem Stage JPC';
     } else if (this.nearbyInteractable.type === 'prop') {
       actionLabel = 'Kiểm tra';
     }

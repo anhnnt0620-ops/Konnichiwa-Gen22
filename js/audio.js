@@ -201,6 +201,16 @@ class AudioManager {
       this.bgmInterval = null;
     }
   }
+
+  pauseBGM() {
+    this.stopBGM();
+  }
+
+  resumeBGM() {
+    if (this.currentTrack && !this.isMuted) {
+      this.playBGM(this.currentTrack);
+    }
+  }
 }
 
 window.audioManager = new AudioManager();

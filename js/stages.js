@@ -167,14 +167,14 @@ const STAGE_DATA = {
   stage_final: {
     id: 'stage_final',
     name: 'CÔNG BỐ THÀNH VIÊN CHÍNH THỨC',
-    subtitle: 'Sân khấu FCD — Chào mừng bạn về nhà!',
+    subtitle: 'Sân Nhà D FTU — Chào mừng em về nhà!',
     bgm: 'stage_final',
     questSpot: { x: 46 * 32, y: 21 * 32 },
-    questText: 'Bước đến Sân khấu FCD bên cạnh Nhà D để nhận Thẻ Thành Viên Chính Thức JPC!',
+    questText: 'Bước đến Sân Nhà D FTU để gặp gỡ các Ban và nhận Thẻ Thành Viên Chính Thức JPC!',
     questTitle: 'Vinh Quang: Chào Mừng Về Nhà',
     timeline: 'Tháng 11/2026',
-    objective: 'Tiến tới Sân khấu FCD đón nhận trọn vẹn tình cảm chúc mừng từ 5 Ban và Chủ Nhiệm JPC FTU!',
-    location: 'Sân khấu FCD (cạnh Nhà D)',
+    objective: 'Tiến tới Sân Nhà D FTU đón nhận trọn vẹn tình cảm chúc mừng từ 5 Ban và Chủ Nhiệm JPC FTU!',
+    location: 'Sân Nhà D FTU',
     tip: 'Tận hưởng khoảnh khắc thanh xuân rực rỡ nhất cùng đại gia đình JPC!',
     props: [
       { type: 'prop_torii', x: 46, y: 20, label: 'Cổng Torii Vinh Quang' },

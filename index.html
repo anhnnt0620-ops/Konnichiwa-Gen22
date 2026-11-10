@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="Image/Logo.png">
-  <link rel="stylesheet" href="css/style.css?v=3.3">
+  <link rel="stylesheet" href="css/style.css?v=3.4">
 </head>
 <body>
 
@@ -481,6 +481,60 @@
 
   </div>
 
+  <!-- CANTEEN MODAL (CHỌN ĐỒ ĂN TIẾP SỨC TÂN BINH) -->
+  <div id="canteen-modal" class="modal-overlay hidden">
+    <div class="interactive-modal-card">
+      <div class="interactive-modal-header">
+        <div class="title-badge">KHÔNG GIAN ẨM THỰC FTU</div>
+        <h2>🍱 CANTEEN ĐẠI HỌC NGOẠI THƯƠNG</h2>
+        <p class="interactive-modal-sub">Chọn món ăn nóng hổi nạp đầy năng lượng để cùng JPC bùng nổ!</p>
+        <button class="modal-close-icon-btn" id="btn-close-canteen" title="Đóng">✕</button>
+      </div>
+      <div class="canteen-menu-list" id="canteen-menu-list">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- BIA ĐÁ FTU MODAL (KHẤN ĐỂ QUA MÔN & GPA 4.0) -->
+  <div id="biada-modal" class="modal-overlay hidden">
+    <div class="interactive-modal-card sacred-card">
+      <div class="interactive-modal-header">
+        <div class="title-badge">ĐỊA DANH LINH THIÊNG · FTU CHÙA LÁNG</div>
+        <h2>⛩️ BIA ĐÁ NGOẠI THƯƠNG</h2>
+        <p class="interactive-modal-sub">Thành tâm khấn nguyện qua môn, GPA 4.0 và trúng tuyển JPC Gen 22!</p>
+        <button class="modal-close-icon-btn" id="btn-close-biada" title="Đóng">✕</button>
+      </div>
+      <div class="biada-prayer-list" id="biada-prayer-list">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SÂN KHẤU FCD - JPC STAGE VIDEO CINEMA MODAL -->
+  <div id="video-modal" class="modal-overlay hidden">
+    <div class="video-cinema-box">
+      <div class="video-cinema-header">
+        <div class="video-cinema-title-group">
+          <span class="video-badge">🔴 SÂN KHẤU FCD</span>
+          <h3>TIẾT MỤC BIỂU DIỄN JPC GEN 22</h3>
+          <span class="video-sub">CLB Tiếng Nhật Trường ĐH Ngoại Thương · FTU Club's Day</span>
+        </div>
+        <button class="video-close-btn" id="btn-close-video" title="Đóng rạp phim [Esc]">✕</button>
+      </div>
+      <div class="video-wrapper">
+        <video id="fcd-stage-video" controls playsinline preload="metadata">
+          <source src="Video/JPC FCD STAGE.mov" type="video/quicktime">
+          <source src="Video/JPC FCD STAGE.mov" type="video/mp4">
+          Trình duyệt của bạn không hỗ trợ định dạng video này.
+        </video>
+      </div>
+      <div class="video-cinema-footer">
+        <span>🌸 Sân khấu bùng nổ đầy nhiệt huyết thanh xuân của CLB Tiếng Nhật JPC FTU!</span>
+      </div>
+    </div>
+  </div>
+
   <!-- IMAGE LIGHTBOX / ZOOM MODAL -->
   <div id="image-lightbox-modal" class="hidden" onclick="window.closeImageLightbox(event)">
     <div class="lightbox-content-box" onclick="event.stopPropagation()">
@@ -495,13 +549,13 @@
   <div id="game-toast" class="game-toast"></div>
 
   <!-- SCRIPTS -->
-  <script src="js/audio.js?v=3.3"></script>
-  <script src="js/sprites.js?v=3.3"></script>
-  <script src="js/worldMap.js?v=3.3"></script>
-  <script src="js/dialogue.js?v=3.3"></script>
-  <script src="js/minigames.js?v=3.3"></script>
-  <script src="js/stages.js?v=3.3"></script>
-  <script src="js/controls.js?v=3.3"></script>
-  <script src="js/game.js?v=3.3"></script>
+  <script src="js/audio.js?v=3.4"></script>
+  <script src="js/sprites.js?v=3.4"></script>
+  <script src="js/worldMap.js?v=3.4"></script>
+  <script src="js/dialogue.js?v=3.4"></script>
+  <script src="js/minigames.js?v=3.4"></script>
+  <script src="js/stages.js?v=3.4"></script>
+  <script src="js/controls.js?v=3.4"></script>
+  <script src="js/game.js?v=3.4"></script>
 </body>
 </html>

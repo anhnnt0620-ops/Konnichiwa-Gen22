@@ -212,8 +212,9 @@ class WorldMap {
       }
     });
 
-    // 5. Register Building Collisions
+    // 5. Register Building Collisions (STAGE_FCD is temporary for Stage 1 only)
     FTU_BUILDINGS.forEach(b => {
+      if (b.id === 'STAGE_FCD') return; // Do not register STAGE_FCD as permanent collision!
       const startR = Math.floor(b.y);
       const endR = Math.ceil(b.y + b.h);
       for (let r = startR; r < endR; r++) {
@@ -249,10 +250,19 @@ class WorldMap {
     this.buildMiniMap();
   }
 
-  isSolid(worldX, worldY) {
+  isSolid(worldX, worldY, currentStageId = 'stage1') {
     const col = Math.floor(worldX / this.tileSize);
     const row = Math.floor(worldY / this.tileSize);
     if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) return true;
+
+    // Sân khấu FCD chỉ tồn tại và cản trở di chuyển trong Vòng 1 (Stage 1 · FCD 18/10)!
+    // Hết vòng 1 là dẹp sân khấu, khu vực này trở thành sân gạch mở!
+    if (currentStageId === 'stage1') {
+      if (col >= 48 && col < 53 && row >= 17 && row < 25) {
+        return true;
+      }
+    }
+
     return this.solidGrid[row][col] === 1;
   }
 
@@ -383,9 +393,11 @@ class WorldMap {
       }
     }
 
-    // B. Draw FTU Buildings with Smooth Modern 2D Vector Styling
+    // B. Draw FTU Buildings with Smooth Modern 2D Vector Styling (Except STAGE_FCD which is temporary)
     FTU_BUILDINGS.forEach(b => {
-      this.drawModernBuilding(ctx, b, false);
+      if (b.id !== 'STAGE_FCD') {
+        this.drawModernBuilding(ctx, b, false);
+      }
     });
 
     // C. Draw Permanent Bia Đá FTU
@@ -400,7 +412,7 @@ class WorldMap {
     this.preRenderedCanvas = c;
   }
 
-  // Pre-render temporary FCD Festival Booths (Only for Stage 1 · FCD 18/10)
+  // Pre-render temporary FCD Festival Booths & Sân khấu FCD (Only for Stage 1 · FCD 18/10)
   buildFCDBoothsCanvas() {
     const scale = 2; // HiDPI 2x supersampling
     const c = document.createElement('canvas');
@@ -410,6 +422,13 @@ class WorldMap {
     ctx.imageSmoothingEnabled = true;
     ctx.scale(scale, scale);
     this.drawFCDBooths(ctx, false);
+
+    // Sân khấu FCD chỉ dựng trong Vòng 1 (Stage 1), hết vòng 1 là dẹp luôn!
+    const stageB = FTU_BUILDINGS.find(b => b.id === 'STAGE_FCD');
+    if (stageB) {
+      this.drawFCDStage(ctx, stageB, false);
+    }
+
     this.fcdBoothsCanvas = c;
   }
 
@@ -1136,7 +1155,10 @@ class WorldMap {
     // 1. Building Name Signboards (Alviona)
     FTU_BUILDINGS.forEach(b => {
       if (b.id === 'STAGE_FCD') {
-        this.renderFCDStageSignboard(ctx, b);
+        // Sân khấu FCD chỉ có ở Vòng 1, hết Vòng 1 là dẹp luôn!
+        if (currentStageId === 'stage1') {
+          this.renderFCDStageSignboard(ctx, b);
+        }
       } else {
         this.renderBuildingSignboard(ctx, b);
       }
@@ -1206,7 +1228,7 @@ class WorldMap {
       if (b.id === 'D' || b.id === 'A' || b.id === 'B') {
         ctx.fillStyle = '#d32f2f'; // Primary buildings: Nhà A, B, D
       } else if (b.id === 'STAGE_FCD') {
-        ctx.fillStyle = '#8e24aa'; // Sân khấu FCD
+        return; // Temporary building for Stage 1 only (drawn dynamically in renderMiniMapToCanvas)
       } else if (b.id === 'VJCBI') {
         ctx.fillStyle = '#e67e22'; // VJCBI
       } else {
@@ -1251,6 +1273,17 @@ class WorldMap {
 
     // Draw pre-rendered mini map
     ctx.drawImage(this.miniMapCanvas, 0, 0, w, h);
+
+    // Draw Sân khấu FCD marker on minimap ONLY during stage1
+    if (currentStageId === 'stage1') {
+      const stageB = FTU_BUILDINGS.find(b => b.id === 'STAGE_FCD');
+      if (stageB) {
+        const scaleX = w / this.width;
+        const scaleY = h / this.height;
+        ctx.fillStyle = '#8e24aa';
+        ctx.fillRect(stageB.x * this.tileSize * scaleX, stageB.y * this.tileSize * scaleY, stageB.w * this.tileSize * scaleX, stageB.h * this.tileSize * scaleY);
+      }
+    }
 
     const scaleX = w / this.width;
     const scaleY = h / this.height;

@@ -640,6 +640,82 @@ class WorldMap {
   // Draw Temporary FCD Festival Booths (Chỉ xuất hiện trong Vòng 1 / FCD 18/10)
   drawFCDBooths(ctx, drawSign = true) {
     // ========================================================================
+    // 1. CỔNG CHÀO TÂN SINH VIÊN & BÀN CHECK-IN FCD (ĐỐI DIỆN FTU SHOP · HÀNG 30.5-31.5)
+    // ========================================================================
+    const fcdGateX = 7.5 * this.tileSize;
+    const fcdGateY = 30.5 * this.tileSize;
+    const fcdGateW = 5.5 * this.tileSize; // 176px spanning road
+    const fcdGateH = 42;
+
+    // A. Thảm đỏ check-in chào đón trên đường
+    ctx.fillStyle = 'rgba(230, 57, 70, 0.18)';
+    ctx.fillRect(fcdGateX + 16, fcdGateY + 12, fcdGateW - 32, 28);
+
+    // B. Cột cổng chào 2 bên (Màu đỏ thắm viền vàng)
+    ctx.fillStyle = '#b92b45';
+    ctx.fillRect(fcdGateX + 4, fcdGateY, 10, fcdGateH);
+    ctx.fillRect(fcdGateX + fcdGateW - 14, fcdGateY, 10, fcdGateH);
+
+    ctx.fillStyle = '#ffd778';
+    ctx.fillRect(fcdGateX + 2, fcdGateY + fcdGateH - 4, 14, 4);
+    ctx.fillRect(fcdGateX + fcdGateW - 16, fcdGateY + fcdGateH - 4, 14, 4);
+    ctx.fillRect(fcdGateX + 2, fcdGateY, 14, 4);
+    ctx.fillRect(fcdGateX + fcdGateW - 16, fcdGateY, 14, 4);
+
+    // C. Chùm bóng bay trang trí 2 bên cột (Pastel hồng & vàng kim)
+    const drawBalloonCluster = (bx, by) => {
+      const colors = ['#ff8da1', '#ffd778', '#ffccd5', '#e63946', '#ffffff'];
+      const offsets = [
+        [-5, -6, 4.5], [5, -8, 4.5], [0, -14, 5], [-7, -18, 4.2], [6, -17, 4.2]
+      ];
+      offsets.forEach(([ox, oy, r], idx) => {
+        ctx.fillStyle = colors[idx % colors.length];
+        ctx.beginPath();
+        ctx.ellipse(bx + ox, by + oy, r, r * 1.25, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      });
+      // Dây bóng
+      ctx.strokeStyle = '#ffd778';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(bx, by - 4);
+      ctx.lineTo(bx, by + 6);
+      ctx.stroke();
+    };
+    drawBalloonCluster(fcdGateX + 9, fcdGateY - 2);
+    drawBalloonCluster(fcdGateX + fcdGateW - 9, fcdGateY - 2);
+
+    // D. Bàn Check-in FCD (Kê bên phải cổng chào, phía đông đường)
+    const deskX = fcdGateX + fcdGateW - 32;
+    const deskY = fcdGateY + 16;
+    ctx.fillStyle = '#fffdf8';
+    ctx.beginPath();
+    ctx.roundRect(deskX - 10, deskY, 44, 20, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#cf9f3f';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Khăn trải bàn đỏ trung tâm bàn check-in
+    ctx.fillStyle = '#b92b45';
+    ctx.fillRect(deskX + 2, deskY, 20, 20);
+
+    // Laptop check-in & danh sách tân sinh viên
+    ctx.fillStyle = '#37474f';
+    ctx.fillRect(deskX + 6, deskY + 4, 12, 8);
+    ctx.fillStyle = '#90caf9';
+    ctx.fillRect(deskX + 7, deskY + 5, 10, 6);
+    // Tài liệu check-in
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(deskX - 6, deskY + 5, 8, 10);
+    ctx.fillStyle = '#cf9f3f';
+    ctx.fillRect(deskX - 4, deskY + 7, 4, 1.5);
+    ctx.fillRect(deskX - 4, deskY + 10, 4, 1.5);
+
+    // ========================================================================
     // 2. DÃY BOOTH KHỐI CLB CHUYÊN MÔN (Dọc phía Bắc Sân Trung Tâm, dưới Tòa B)
     // ========================================================================
     const cmX = 18 * this.tileSize;
@@ -792,6 +868,38 @@ class WorldMap {
 
   // Live Vector Signboards for FCD Festival Booths (Razor-sharp, never blurry)
   renderFCDBoothsSignboards(ctx) {
+    // 0. CỔNG CHÀO TÂN SINH VIÊN · CHECK-IN FCD (Alviona)
+    const fcdGateX = 7.5 * this.tileSize;
+    const fcdGateY = 30.5 * this.tileSize;
+    const fcdGateW = 5.5 * this.tileSize;
+
+    ctx.fillStyle = '#b92b45';
+    ctx.beginPath();
+    ctx.roundRect(fcdGateX, fcdGateY - 8, fcdGateW, 22, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 8px "Alviona", "Cinzel", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('★ CỔNG CHÀO TÂN SINH VIÊN · CHECK-IN FCD ★', fcdGateX + fcdGateW / 2, fcdGateY + 6);
+
+    // Nhãn bàn Check-in FCD (Montserrat)
+    const deskX = fcdGateX + fcdGateW - 32;
+    const deskY = fcdGateY + 16;
+    ctx.fillStyle = 'rgba(34, 7, 10, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(deskX - 16, deskY - 14, 56, 13, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 0.9;
+    ctx.stroke();
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 7.5px "Montserrat", sans-serif';
+    ctx.fillText('BÀN CHECK-IN FCD', deskX + 12, deskY - 5);
+
     // 1. Banner khối CLB chuyên môn (Montserrat)
     const cmX = 18 * this.tileSize;
     const cmY = 17 * this.tileSize;
@@ -861,29 +969,34 @@ class WorldMap {
     ctx.textAlign = 'start';
   }
 
-  // Draw Welcome Arch at Cổng Tân Sinh Viên FTU
+  // Draw Gate at Cổng Trường ĐH Ngoại Thương
   drawEntranceArch(ctx, drawSign = true) {
-    const ax = 10.5 * this.tileSize;
+    const ax = 10 * this.tileSize;
     const ay = 41 * this.tileSize;
-    const aw = 150;
+    const aw = 168;
     const ah = 44;
 
     ctx.fillStyle = '#5c1216';
-    ctx.fillRect(ax + 4, ay, 8, ah);
-    ctx.fillRect(ax + aw - 12, ay, 8, ah);
+    ctx.fillRect(ax + 4, ay, 10, ah);
+    ctx.fillRect(ax + aw - 14, ay, 10, ah);
+
+    // Decorative columns
+    ctx.fillStyle = '#cf9f3f';
+    ctx.fillRect(ax + 2, ay, 14, 4);
+    ctx.fillRect(ax + aw - 16, ay, 14, 4);
 
     if (drawSign) {
       this.renderEntranceArchSignboard(ctx);
     }
   }
 
-  // Live Vector Signboard for Cổng Tân Sinh Viên
+  // Live Vector Signboard for Cổng Trường ĐH Ngoại Thương
   renderEntranceArchSignboard(ctx) {
-    const ax = 10.5 * this.tileSize;
+    const ax = 10 * this.tileSize;
     const ay = 41 * this.tileSize;
-    const aw = 150;
+    const aw = 168;
 
-    // Top Welcome Sign
+    // Top Signboard
     ctx.fillStyle = '#b92b45';
     ctx.beginPath();
     ctx.roundRect(ax, ay - 8, aw, 22, 6);
@@ -895,7 +1008,7 @@ class WorldMap {
     ctx.fillStyle = '#ffd778';
     ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
     ctx.textAlign = 'center';
-    ctx.fillText('CỔNG CHÀO TÂN SINH VIÊN · FTU', ax + aw / 2, ay + 6);
+    ctx.fillText('TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG', ax + aw / 2, ay + 6);
     ctx.textAlign = 'start';
   }
 

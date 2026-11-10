@@ -219,9 +219,9 @@ class Game {
     setTimeout(() => {
       const guardNpc = this.stage?.npcs?.find(n => n.id === 'npc_guard');
       const openingDialogues = guardNpc?.dialogues || [
-        { speaker: 'Bác Bảo Vệ', text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương!' },
-        { speaker: 'Bác Bảo Vệ', text: 'Hôm nay 18/10, tại FTU có Ngày hội các Câu lạc bộ - FCD đó! Cháu có thể đến sân nhà D để khám phá các CLB của trường mình nhé!' },
-        { speaker: 'Bác Bảo Vệ', text: 'Cháu đi thẳng vào Sân Nhà D, nhìn sang dãy booth bên trái (phía Tây Bia Đá FTU) sẽ thấy Gian Trại JPC màu đỏ thắm rất nổi bật để điền đơn Vòng 1 nhé!' }
+        { speaker: 'Bác Bảo Vệ FTU', text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương!' },
+        { speaker: 'Bác Bảo Vệ FTU', text: 'Hôm nay 18/10, tại FTU diễn ra Ngày hội các Câu lạc bộ - FTU Club\'s Day (FCD) rộn ràng lắm đấy!' },
+        { speaker: 'Bác Bảo Vệ FTU', text: 'Cháu đi thẳng theo con đường này, qua FTU Shop sẽ thấy Cổng chào Ngày hội và bàn Check-in FCD nhé. Hãy tới đó check-in lấy thẻ tham gia hội chợ nha!' }
       ];
       window.dialogueManager.startDialogue(openingDialogues);
     }, 400);
@@ -375,6 +375,15 @@ class Game {
     this.currentStageId = stageId;
     this.stage = STAGE_DATA[stageId];
     if (!this.stage) return;
+
+    if (stageId === 'stage1') {
+      this.stage1CheckedIn = false;
+      this.stage1MetSenpai = false;
+      if (this.stage) {
+        this.stage.questSpot = { x: 10 * 32, y: 31 * 32 };
+        this.stage.questText = 'Đi qua FTU Shop đến Cổng chào Ngày hội để Check-in vào FCD!';
+      }
+    }
 
     if (isInitial && this.stage.playerStart) {
       this.player.x = this.stage.playerStart.x * 32;
@@ -707,6 +716,27 @@ class Game {
     const { type, data } = this.nearbyInteractable;
 
     if (type === 'booth_jpc') {
+      if (this.currentStageId === 'stage1') {
+        if (!this.stage1CheckedIn) {
+          window.dialogueManager.startDialogue([
+            {
+              speaker: 'Senpai JPC',
+              text: 'Chào em! Em hãy ghé qua Cổng chào Ngày hội đối diện FTU Shop để check-in lấy thẻ tham gia FCD trước đã nhé!'
+            }
+          ]);
+          return;
+        }
+        if (!this.stage1MetSenpai) {
+          window.dialogueManager.startDialogue([
+            {
+              speaker: 'Senpai JPC',
+              text: 'Chào em! Chị Senpai đón tiếp đang đứng ở lối vào Sân Nhà D đợi em đấy, em gặp chị ấy trên đường trước nhé!'
+            }
+          ]);
+          return;
+        }
+      }
+
       // Interactive JPC Booth: Trigger dialogue & open application form!
       const deptName = this.player.selectedDeptName || 'Ban Chuyên Môn';
       window.dialogueManager.startDialogue([
@@ -722,11 +752,61 @@ class Game {
         this.openApplicationForm();
       });
     } else if (type === 'npc') {
-      if (this.currentStageId === 'stage1' && data.id === 'npc_jpc_booth') {
-        window.dialogueManager.startDialogue(data.dialogues, () => {
-          this.openApplicationForm();
-        });
-        return;
+      if (this.currentStageId === 'stage1') {
+        if (data.id === 'npc_guard') {
+          window.dialogueManager.startDialogue(data.dialogues, () => {
+            if (!this.stage1CheckedIn && this.stage) {
+              this.stage.questSpot = { x: 10 * 32, y: 31 * 32 };
+              this.stage.questText = 'Đi qua FTU Shop đến Cổng chào Ngày hội để Check-in vào FCD!';
+            }
+            this.updateHUD();
+          });
+          return;
+        }
+
+        if (data.id === 'npc_fcd_checkin') {
+          const checkinDialogues = this.stage1CheckedIn ? [
+            {
+              speaker: 'BTC Check-in FCD',
+              text: 'Em đã check-in thành công rồi nhé! Hãy đi thẳng tiếp vào trong trường để tham gia ngày hội!'
+            }
+          ] : data.dialogues;
+
+          window.dialogueManager.startDialogue(checkinDialogues, () => {
+            if (!this.stage1CheckedIn) {
+              this.stage1CheckedIn = true;
+              if (window.audioManager) window.audioManager.playFanfare();
+              if (this.stage) {
+                this.stage.questSpot = { x: 11.5 * 32, y: 24.5 * 32 };
+                this.stage.questText = 'Gặp Senpai JPC trên đường vào Sân Nhà D!';
+              }
+              this.updateHUD();
+            }
+          });
+          return;
+        }
+
+        if (data.id === 'npc_senpai_road') {
+          const senpaiDialogues = this.stage1MetSenpai ? [
+            {
+              speaker: 'Senpai JPC',
+              text: 'Gian Trại JPC màu đỏ thắm ở ngay góc Sân Nhà D đằng kia nhé! Em mau vào bàn đăng ký để điền đơn Vòng 1 nha!'
+            }
+          ] : data.dialogues;
+
+          window.dialogueManager.startDialogue(senpaiDialogues, () => {
+            if (!this.stage1MetSenpai) {
+              this.stage1MetSenpai = true;
+              if (window.audioManager) window.audioManager.playBlip();
+              if (this.stage) {
+                this.stage.questSpot = { x: 15 * 32, y: 22 * 32 };
+                this.stage.questText = 'Đến Gian Trại JPC (màu đỏ tại Sân Nhà D) để điền đơn Vòng 1!';
+              }
+              this.updateHUD();
+            }
+          });
+          return;
+        }
       }
 
       if (this.currentStageId === 'stage2' && (data.id === 'npc_app_a' || data.id === 'npc_app_b')) {
@@ -1224,13 +1304,13 @@ class Game {
     // Position neatly above interactable target without colliding with name tags
     if (this.nearbyInteractable.type === 'npc' && this.nearbyInteractable.data) {
       targetX = this.nearbyInteractable.data.x * 32 + 16;
-      targetY = this.nearbyInteractable.data.y * 32 - 48;
+      targetY = this.nearbyInteractable.data.y * 32 - 52;
     } else if (this.nearbyInteractable.type === 'booth_jpc') {
-      targetX = 17 * 32;
-      targetY = 22.5 * 32 - 48;
+      targetX = 15 * 32 + 16;
+      targetY = 20 * 32;
     } else if (this.nearbyInteractable.type === 'prop' && this.nearbyInteractable.data) {
       targetX = this.nearbyInteractable.data.x * 32 + 16;
-      targetY = this.nearbyInteractable.data.y * 32 - 40;
+      targetY = this.nearbyInteractable.data.y * 32 - 42;
     }
 
     // Determine concise action verb

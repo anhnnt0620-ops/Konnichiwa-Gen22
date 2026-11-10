@@ -5,14 +5,14 @@ const STAGE_DATA = {
     name: 'HỘI TRÁT 1: KHAI NHÃN (01/10 – 20/10)',
     subtitle: 'Sân Nhà D FTU — Ngày Hội FCD (18/10) · Điền Đơn Vòng 1',
     bgm: 'stage1',
-    playerStart: { x: 11, y: 38 }, // Cổng trường Chùa Láng
-    questSpot: { x: 17 * 32, y: 22.5 * 32 }, // Trước Gian trại JPC Sân Nhà D
-    questText: 'Đến Sân Nhà D (phía Tây Bia đá FTU), gặp Senpai tại Gian trại JPC màu đỏ để điền đơn Vòng 1!',
+    playerStart: { x: 12, y: 41 }, // Cổng trường Chùa Láng (dưới Cổng Trường ĐH Ngoại Thương)
+    questSpot: { x: 10 * 32, y: 31 * 32 }, // Cổng chào & Bàn Check-in FCD đối diện FTU Shop
+    questText: 'Đi qua FTU Shop đến Cổng chào Ngày hội để Check-in vào FCD!',
     questTitle: 'Hội Trát 1: Khai Nhãn',
     timeline: '01/10 – 20/10/2026 · FTU Club Day: 18/10',
-    objective: 'Đến Sân Nhà D (phía Tây Bia Đá FTU), gặp Senpai đứng trước Gian Trại JPC màu đỏ thắm để nhận và niêm phong lá đơn đăng ký gia nhập Gen 22.',
-    location: 'Gian Trại JPC · Dãy Booth Sân Nhà D FTU',
-    tip: 'Đi theo vệt hoa anh đào phát sáng dưới chân Kokeshi của bạn để đến thẳng Gian Trại JPC!',
+    objective: 'Đi qua FTU Shop đến Cổng chào Tân Sinh Viên để check-in vào Ngày hội FCD, sau đó gặp Senpai JPC trên đường và ghé Gian Trại JPC điền đơn Vòng 1.',
+    location: 'Cổng chào FCD & Gian Trại JPC Sân Nhà D FTU',
+    tip: 'Đi theo vệt hoa anh đào phát sáng dưới chân Kokeshi để check-in và gặp Senpai JPC!',
     props: [
       { type: 'prop_boba', x: 19, y: 22, label: 'Trà sữa FCD' }
     ],
@@ -20,27 +20,41 @@ const STAGE_DATA = {
     npcs: [
       {
         id: 'npc_guard',
-        name: 'Bác Bảo Vệ',
+        name: 'Bác Bảo Vệ FTU',
         sprite: 'npc_president',
         x: 6.5,
         y: 37.5,
         avatarIcon: '👴',
         dialogues: [
-          { speaker: 'Bác Bảo Vệ', text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương!' },
-          { speaker: 'Bác Bảo Vệ', text: 'Hôm nay 18/10, tại FTU có Ngày hội các Câu lạc bộ - FCD đó! Cháu có thể đến sân nhà D để khám phá các CLB của trường mình nhé!' },
-          { speaker: 'Bác Bảo Vệ', text: 'Cháu đi thẳng vào Sân Nhà D, nhìn sang dãy booth bên trái (phía Tây Bia Đá FTU) sẽ thấy Gian Trại JPC màu đỏ thắm rất nổi bật để điền đơn Vòng 1 nhé!' }
+          { speaker: 'Bác Bảo Vệ FTU', text: 'Chào mừng cháu đến với Trường Đại học Ngoại Thương!' },
+          { speaker: 'Bác Bảo Vệ FTU', text: 'Hôm nay 18/10, tại FTU diễn ra Ngày hội các Câu lạc bộ - FTU Club\'s Day (FCD) rộn ràng lắm đấy!' },
+          { speaker: 'Bác Bảo Vệ FTU', text: 'Cháu đi thẳng theo con đường này, qua FTU Shop sẽ thấy Cổng chào Ngày hội và bàn Check-in FCD nhé. Hãy tới đó check-in lấy thẻ tham gia hội chợ nha!' }
         ]
       },
       {
-        id: 'npc_jpc_booth',
+        id: 'npc_fcd_checkin',
+        name: 'BTC Check-in FCD',
+        sprite: 'npc_president',
+        x: 10.5,
+        y: 31,
+        avatarIcon: '📋',
+        dialogues: [
+          { speaker: 'BTC Check-in FCD', text: 'Chào mừng tân sinh viên đến với Ngày hội Chào Tân Sinh Viên - FTU Club\'s Day (FCD) 2026!' },
+          { speaker: 'BTC Check-in FCD', text: 'Anh/chị đã đóng dấu check-in vào ngày hội FCD cho em rồi nhé! Chúc em có một ngày hội bùng nổ và sớm tìm được ngôi nhà chung CLB phù hợp!' }
+        ]
+      },
+      {
+        id: 'npc_senpai_road',
         name: 'Senpai JPC',
         sprite: 'npc_senpai',
-        x: 17,
-        y: 22.5,
+        x: 11.5,
+        y: 24.5,
         avatarIcon: '🌸',
         dialogues: [
-          { speaker: 'Senpai JPC', text: 'Konnichiwa! Chào mừng em đến với Gian trại CLB Tiếng Nhật JPC tại Sân Nhà D FTU!' },
-          { speaker: 'Senpai JPC', text: 'Hôm nay ngày 18/10 là ngày hội FCD bùng nổ, và Vòng 1 Khai Nhãn (01/10 – 20/10) đang mở đơn chào đón Gen 22. Hãy viết nên ước mơ của em nhé!' }
+          { speaker: 'Senpai JPC', text: 'Konnichiwa! Chào mừng em đến với FTU Club\'s Day (FCD)!' },
+          { speaker: 'Senpai JPC', text: 'Chị là Senpai từ CLB Tiếng Nhật Trường ĐH Ngoại Thương - JPC FTU đây.' },
+          { speaker: 'Senpai JPC', text: 'Hôm nay JPC đang mở đợt tuyển quân Gen 22 với rất nhiều cơ hội bùng nổ và tỏa sáng!' },
+          { speaker: 'Senpai JPC', text: 'Gian Trại JPC màu đỏ thắm của bọn chị ở ngay góc Sân Nhà D đằng kia. Em hãy mau vào Booth JPC điền đơn ứng tuyển Vòng 1 nhé!' }
         ]
       }
     ]

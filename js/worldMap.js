@@ -701,10 +701,10 @@ class WorldMap {
     // ========================================================================
     // 1. CỔNG CHÀO TÂN SINH VIÊN (BẮC NGANG ĐẠI LỘ · HÀNG 34.5)
     // ========================================================================
-    const fcdGateX = 7.5 * this.tileSize;
+    const fcdGateX = 7 * this.tileSize;
     const fcdGateY = 34.5 * this.tileSize;
-    const fcdGateW = 5 * this.tileSize; // 160px spanning road
-    const fcdGateH = 42;
+    const fcdGateW = 6 * this.tileSize; // 192px spanning main avenue
+    const fcdGateH = 44;
 
     // A. Thảm đỏ check-in chào đón trên đường
     ctx.fillStyle = 'rgba(230, 57, 70, 0.18)';
@@ -956,9 +956,9 @@ class WorldMap {
 
   // Live Vector Signboard for Cổng Chào Tân Sinh Viên FCD
   renderFCDGateSignboard(ctx) {
-    const fcdGateX = 7.5 * this.tileSize;
+    const fcdGateX = 7 * this.tileSize;
     const fcdGateY = 34.5 * this.tileSize;
-    const fcdGateW = 5 * this.tileSize;
+    const fcdGateW = 6 * this.tileSize;
 
     ctx.fillStyle = '#b92b45';
     ctx.beginPath();
@@ -968,10 +968,18 @@ class WorldMap {
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
+    const text = '★ CỔNG CHÀO TÂN SINH VIÊN ★';
+    const maxW = fcdGateW - 24; // 168px - chừa lề an toàn rộng rãi 12px mỗi bên
+    let fSize = 8.5;
+    ctx.font = `bold ${fSize}px "Montserrat", -apple-system, sans-serif`;
+    while (ctx.measureText(text).width > maxW && fSize > 6) {
+      fSize -= 0.4;
+      ctx.font = `bold ${fSize}px "Montserrat", -apple-system, sans-serif`;
+    }
+
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 8.5px "Montserrat", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('★ CỔNG CHÀO TÂN SINH VIÊN · FCD 2026 ★', fcdGateX + fcdGateW / 2, fcdGateY + 6);
+    ctx.fillText(text, fcdGateX + fcdGateW / 2, fcdGateY + 6);
     ctx.textAlign = 'start';
   }
 
@@ -1149,10 +1157,18 @@ class WorldMap {
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
+    const text = 'TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG';
+    const maxW = aw - 18;
+    let fSize = 8.5;
+    ctx.font = `bold ${fSize}px "Montserrat", -apple-system, sans-serif`;
+    while (ctx.measureText(text).width > maxW && fSize > 6) {
+      fSize -= 0.4;
+      ctx.font = `bold ${fSize}px "Montserrat", -apple-system, sans-serif`;
+    }
+
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 8.5px "Montserrat", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG', ax + aw / 2, ay + 6);
+    ctx.fillText(text, ax + aw / 2, ay + 6);
     ctx.textAlign = 'start';
   }
 

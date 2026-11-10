@@ -4,12 +4,13 @@
    Phong cách 2D hiện đại, thanh lịch theo jpc-ftu
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&subset=vietnamese&display=swap');
 
-/* LOCAL FONTS FROM /Font */
+/* LOCAL OFFICIAL MONTSERRAT VARIABLE FONT (Weights 100-900 & Full Vietnamese Glyph Set) */
 @font-face {
   font-family: 'Montserrat';
-  src: url('../Font/Montserrat.ttf') format('truetype');
+  src: url('../Font/Montserrat.ttf') format('truetype-variations'),
+       url('../Font/Montserrat.ttf') format('truetype');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -18,7 +19,7 @@
 @font-face {
   font-family: 'Montserrat';
   src: url('../Font/Montserrat.ttf') format('truetype');
-  font-weight: normal;
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
@@ -42,7 +43,7 @@
 @font-face {
   font-family: 'Montserrat';
   src: url('../Font/Montserrat.ttf') format('truetype');
-  font-weight: bold;
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -51,6 +52,14 @@
   font-family: 'Montserrat';
   src: url('../Font/Montserrat.ttf') format('truetype');
   font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../Font/Montserrat.ttf') format('truetype');
+  font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
@@ -2040,44 +2049,151 @@ html, body {
 }
 
 /* ==========================================================================
-   TITLE SCREEN CONTINUE GAME BUTTON
+   TITLE SCREEN ACTION BUTTONS (TIẾP TỤC & BẮT ĐẦU HÀNH TRÌNH MỚI)
+   Ngang hàng nhau (flex row), Tiếp tục sáng hơn / rực rỡ, Bắt đầu mới trầm hơn
    ========================================================================== */
-.continue-game-box {
+.title-action-container {
   width: 100%;
-  max-width: 380px;
-  margin: 0 auto 14px auto;
-  text-align: center;
+  max-width: 680px;
+  margin: 18px auto 8px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
-.btn-continue {
-  width: 100%;
-  background: linear-gradient(135deg, #ffb300, #ff8f00, #cf9f3f) !important;
-  color: #1a0800 !important;
-  font-size: 15px !important;
-  font-weight: 800 !important;
-  letter-spacing: 1px !important;
-  padding: 13px 20px !important;
-  border: 2px solid #fffdf8 !important;
-  border-radius: 8px !important;
-  box-shadow: 0 6px 20px rgba(255, 179, 0, 0.45) !important;
+.title-action-buttons-row {
   display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+
+/* NÚT TIẾP TỤC HÀNH TRÌNH: Màu sáng hơn, rực rỡ nổi bật nhất */
+.btn-continue {
+  flex: 1 1 50%;
+  max-width: 320px;
+  background: linear-gradient(135deg, #ffe082 0%, #ffca28 35%, #ffb300 70%, #ffa000 100%) !important;
+  color: #240508 !important;
+  font-family: var(--font-title) !important;
+  font-size: 14.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px !important;
+  padding: 13px 20px !important;
+  border: 2px solid #fff8e1 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(255, 179, 0, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.75) !important;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  text-decoration: none;
 }
 
 .btn-continue:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 26px rgba(255, 179, 0, 0.6) !important;
+  filter: brightness(1.06);
+  box-shadow: 0 8px 28px rgba(255, 179, 0, 0.75), inset 0 1px 2px rgba(255, 255, 255, 0.9) !important;
 }
 
+.btn-continue:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+/* NÚT BẮT ĐẦU HÀNH TRÌNH MỚI: Mặc định là gold-btn; khi có nút Tiếp tục bên cạnh thì đổi sang màu trầm hơn */
+.btn-launch {
+  flex: 1 1 50%;
+  max-width: 340px;
+  padding: 13px 24px !important;
+  font-family: var(--font-title) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  border-radius: 10px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  margin-bottom: 0 !important;
+}
+
+/* Khi KHÔNG có nút tiếp tục (người chơi mới), nút Bắt đầu tự căn giữa và mở rộng */
+.title-action-buttons-row .btn-launch:only-child,
+.title-action-buttons-row .btn-continue.hidden + .btn-launch {
+  max-width: 420px;
+  width: 100%;
+}
+
+/* Khi ĐI KÈM NÚT TIẾP TỤC: Nút Bắt đầu mới có màu trầm hơn, thanh lịch và cân xứng */
+.btn-launch.has-continue {
+  background: linear-gradient(135deg, rgba(140, 29, 44, 0.85) 0%, rgba(92, 18, 22, 0.95) 50%, rgba(50, 10, 13, 0.98) 100%) !important;
+  color: #fff2cc !important;
+  border: 1.5px solid rgba(255, 215, 120, 0.5) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+  font-weight: 700 !important;
+}
+
+.btn-launch.has-continue:hover {
+  background: linear-gradient(135deg, rgba(185, 43, 69, 0.95) 0%, rgba(120, 24, 30, 0.98) 50%, rgba(61, 12, 15, 1) 100%) !important;
+  border-color: #ffd778 !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(185, 43, 69, 0.45) !important;
+}
+
+/* THÔNG TIN TIẾN ĐỘ ĐÃ LƯU: Căn giữa, thanh lịch bên dưới 2 nút */
 .continue-game-meta {
-  margin-top: 6px;
   font-size: 12px;
-  color: var(--gold-bright);
-  font-weight: 600;
+  color: #ffd778;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  padding: 5px 14px;
+  background: rgba(255, 215, 120, 0.08);
+  border: 1px dashed rgba(255, 215, 120, 0.35);
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+  max-width: 90%;
+}
+
+.continue-game-meta b {
+  color: #fff;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .title-action-buttons-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-continue, .btn-launch {
+    width: 100%;
+    max-width: 340px;
+  }
+}
+
+@media (max-height: 520px) {
+  .title-action-container {
+    margin: 8px auto 4px auto;
+    gap: 6px;
+  }
+  .title-action-buttons-row {
+    gap: 10px;
+  }
+  .btn-continue, .btn-launch {
+    padding: 8px 16px !important;
+    font-size: 12px !important;
+  }
+  .continue-game-meta {
+    font-size: 10.5px !important;
+    padding: 3px 10px !important;
+  }
 }
 
 /* ==========================================================================

@@ -10,13 +10,12 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>JPC FTU — Hành Trình FCD & Tuyển Gen 22</title>
-  <link rel="preload" href="Font/Alviona.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="Font/Montserrat.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&subset=vietnamese&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="Image/Logo.png">
-  <link rel="stylesheet" href="css/style.css?v=3.4">
+  <link rel="stylesheet" href="css/style.css?v=3.5">
 </head>
 <body>
 
@@ -166,16 +165,20 @@
           </div>
         </div>
 
-        <!-- CONTINUE SAVED GAME BOX -->
-        <div id="continue-game-box" class="continue-game-box hidden">
-          <button id="btn-continue-game" class="btn-continue">
-            <span>▶ TIẾP TỤC HÀNH TRÌNH</span>
-          </button>
-          <div id="continue-game-meta" class="continue-game-meta"></div>
+        <!-- ACTION BUTTONS ROW (TIẾP TỤC & BẮT ĐẦU HÀNH TRÌNH MỚI) -->
+        <div class="title-action-container">
+          <div class="title-action-buttons-row" id="title-action-buttons-row">
+            <button id="btn-continue-game" class="btn-continue hidden" type="button">
+              <span>▶ TIẾP TỤC HÀNH TRÌNH</span>
+            </button>
+            <button class="gold-btn btn-launch" id="btn-start-game" type="button">
+              <span>BẮT ĐẦU HÀNH TRÌNH MỚI CÙNG JPC</span>
+            </button>
+          </div>
+          <div id="continue-game-meta" class="continue-game-meta hidden"></div>
         </div>
 
-        <button class="gold-btn btn-launch" id="btn-start-game">BẮT ĐẦU HÀNH TRÌNH MỚI CÙNG JPC</button>
-        <div class="title-hint">💡 Hãy chơi theo phong crack của mình nhé!</div>
+        <div class="title-hint">💡 Hãy chơi theo phong cách của mình nhé!</div>
       </div>
     </div>
 

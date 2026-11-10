@@ -364,7 +364,6 @@ class Game {
 
   setupStartScreen() {
     const startBtn = document.getElementById('btn-start-game');
-    const continueBox = document.getElementById('continue-game-box');
     const continueBtn = document.getElementById('btn-continue-game');
     const continueMeta = document.getElementById('continue-game-meta');
     const nameInput = document.getElementById('input-player-name');
@@ -373,18 +372,46 @@ class Game {
 
     // Check for saved game progress
     const saved = this.loadSavedGameState();
-    if (saved && continueBox) {
-      continueBox.classList.remove('hidden');
-      const savedStageName = STAGE_DATA[saved.currentStageId]?.name || 'Hội Trát 1: Khai Nhãn';
-      const saveTime = saved.lastSaved ? new Date(saved.lastSaved).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-      if (continueMeta) {
-        continueMeta.textContent = `Tiến độ đã lưu: ${saved.playerName || 'Kouhai'} (${saved.selectedDeptName || ''}) • ${savedStageName} ${saveTime ? '• ' + saveTime : ''}`;
-      }
+    if (saved && saved.currentStageId) {
       if (continueBtn) {
+        continueBtn.classList.remove('hidden');
         continueBtn.addEventListener('click', () => {
           this.continueSavedGame();
         });
       }
+      if (startBtn) {
+        startBtn.classList.add('has-continue');
+      }
+      if (continueMeta) {
+        continueMeta.classList.remove('hidden');
+        const savedStageName = STAGE_DATA[saved.currentStageId]?.name || 'Hội Trát 1: Khai Nhãn';
+        const saveTime = saved.lastSaved ? new Date(saved.lastSaved).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+        continueMeta.innerHTML = `💾 <b>Tiến độ đã lưu:</b> ${saved.playerName || 'Kouhai'} (${saved.selectedDeptName || 'Chưa chọn ban'}) • ${savedStageName} ${saveTime ? '• ' + saveTime : ''}`;
+      }
+
+      // Pre-select previously saved Kokeshi & player name
+      if (saved.selectedDept) {
+        kokeshiCards.forEach(c => {
+          if (c.dataset.dept === saved.selectedDept) {
+            c.classList.add('active');
+            const activeTag = c.querySelector('.kokeshi-tag');
+            if (activeTag) activeTag.textContent = 'ĐÃ CHỌN';
+            this.player.selectedDept = saved.selectedDept;
+            this.player.selectedDeptName = saved.selectedDeptName;
+          } else {
+            c.classList.remove('active');
+            const tag = c.querySelector('.kokeshi-tag');
+            if (tag) tag.textContent = 'CHỌN';
+          }
+        });
+      }
+      if (saved.playerName && nameInput) {
+        nameInput.value = saved.playerName;
+      }
+    } else {
+      if (continueBtn) continueBtn.classList.add('hidden');
+      if (continueMeta) continueMeta.classList.add('hidden');
+      if (startBtn) startBtn.classList.remove('has-continue');
     }
 
     // Handle Kokeshi Selection for 5 Departments
@@ -2099,8 +2126,9 @@ window.addEventListener('DOMContentLoaded', () => {
   const game = new Game();
   if (document.fonts) {
     Promise.all([
-      document.fonts.load('bold 12px Alviona'),
+      document.fonts.load('bold 12px Montserrat'),
       document.fonts.load('bold 10px Montserrat'),
+      document.fonts.load('600 14px Montserrat'),
       document.fonts.load('14px Montserrat'),
       document.fonts.ready
     ]).then(() => {

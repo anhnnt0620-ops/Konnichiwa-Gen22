@@ -534,7 +534,7 @@ class WorldMap {
     const h = b.h * this.tileSize;
     const roofHeight = Math.round(h * 0.52);
 
-    ctx.font = 'bold 12px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 12px "Montserrat", -apple-system, sans-serif';
     const textW = Math.max(50, Math.round(ctx.measureText(b.name).width + 18));
     const signX = x + Math.floor(w / 2) - textW / 2;
     const signY = y + roofHeight - 17;
@@ -637,7 +637,7 @@ class WorldMap {
     ctx.stroke();
 
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 10px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 10px "Montserrat", -apple-system, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('★ SÂN KHẤU FCD ★', signX + textW / 2, signY + 14);
     ctx.textAlign = 'start';
@@ -678,7 +678,7 @@ class WorldMap {
 
     // FTU Monogram / Crest
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 12px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 12px "Montserrat", -apple-system, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('FTU', biaX, biaY + 3);
 
@@ -691,7 +691,7 @@ class WorldMap {
     ctx.lineWidth = 1;
     ctx.stroke();
     ctx.fillStyle = '#ffd778';
-    ctx.font = 'bold 9.5px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 9.5px "Montserrat", -apple-system, sans-serif';
     ctx.fillText('★ BIA ĐÁ FTU ★', biaX, biaY - 21);
     ctx.textAlign = 'start';
   }
@@ -1004,7 +1004,7 @@ class WorldMap {
     const jpcW = 2 * this.tileSize + 8;
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 16px "Alviona", "Cinzel", serif';
+    ctx.font = 'bold 16px "Montserrat", -apple-system, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('JPC', jpcX + jpcW / 2, jpcY + 24);
 

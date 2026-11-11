@@ -7,14 +7,17 @@ class MinigameManager {
     this.onFinishCallback = null;
     this.timer = null;
     this.animFrame = null;
+    this.init();
   }
 
   init() {
+    if (typeof document === 'undefined') return;
     this.modal = document.getElementById('minigame-modal');
     this.container = document.getElementById('minigame-container');
   }
 
   start(gameType, onFinish) {
+    this.init();
     this.onFinishCallback = onFinish;
     this.activeGame = gameType;
 
@@ -28,8 +31,8 @@ class MinigameManager {
       return;
     }
 
-    this.modal.classList.remove('hidden');
-    this.container.innerHTML = '';
+    if (this.modal) this.modal.classList.remove('hidden');
+    if (this.container) this.container.innerHTML = '';
 
     if (gameType === 'stage1') {
       this.runStage1Game();
@@ -39,7 +42,13 @@ class MinigameManager {
   }
 
   finish(success = true) {
+    const cb = this.onFinishCallback;
+    const finishedGame = this.activeGame;
+    this.onFinishCallback = null;
+    this.activeGame = null;
+
     this.cleanup();
+    this.init();
     if (window.audioManager) {
       window.audioManager.playFanfare();
     }
@@ -48,13 +57,18 @@ class MinigameManager {
     if (compModal) compModal.classList.add('hidden');
     const tenguModal = document.getElementById('tengu-battle-modal');
     if (tenguModal) tenguModal.classList.add('hidden');
+    if (this.modal) this.modal.classList.add('hidden');
 
-    setTimeout(() => {
-      this.modal.classList.add('hidden');
-      if (this.onFinishCallback) {
-        this.onFinishCallback(success);
-      }
-    }, 600);
+    const invokeCb = () => {
+      if (this.modal) this.modal.classList.add('hidden');
+      if (cb) cb(success);
+    };
+
+    if (finishedGame === 'stage2' || finishedGame === 'stage3_1') {
+      invokeCb();
+    } else {
+      setTimeout(invokeCb, 600);
+    }
   }
 
   cleanup() {
@@ -433,7 +447,8 @@ class MinigameManager {
     }
 
     this.cleanup();
-    this.modal.classList.add('hidden');
+    this.init();
+    if (this.modal) this.modal.classList.add('hidden');
     tenguModal.classList.remove('hidden');
 
     const lobbyScreen = document.getElementById('tengu-lobby-screen');

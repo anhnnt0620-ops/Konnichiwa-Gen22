@@ -82,6 +82,9 @@ class Game {
 
   init() {
     window.gameInstance = this;
+    if (window.minigameManager && typeof window.minigameManager.init === 'function') {
+      window.minigameManager.init();
+    }
     this.resizeCanvas();
     this.initParticles();
     this.setupImageLightbox();
@@ -1036,23 +1039,35 @@ class Game {
     requestAnimationFrame(this.gameLoop.bind(this));
   }
 
-  update(delta) {
-    // If dialogue or modal is open, pause movement
-    if (window.dialogueManager && window.dialogueManager.active) return;
-    const modalIdsToBlock = [
+  isBlockingModalOpen() {
+    const modalIds = [
+      'title-screen',
       'application-modal',
       'reward-modal',
       'minigame-modal',
       'tengu-battle-modal',
       'computer-interview-modal',
+      'transition-modal',
+      'quest-detail-modal',
+      'memory-modal',
+      'celebration-modal',
       'server-monitor-modal',
       'canteen-modal',
-      'biada-modal'
+      'biada-modal',
+      'video-modal',
+      'image-lightbox-modal'
     ];
-    for (const id of modalIdsToBlock) {
+    for (const id of modalIds) {
       const el = document.getElementById(id);
-      if (el && !el.classList.contains('hidden')) return;
+      if (el && el.classList && !el.classList.contains('hidden')) return true;
     }
+    return false;
+  }
+
+  update(delta) {
+    // If dialogue or modal is open, pause movement
+    if (window.dialogueManager && window.dialogueManager.active) return;
+    if (this.isBlockingModalOpen()) return;
 
     this.handleMovement();
     this.updateCamera();
@@ -1249,6 +1264,7 @@ class Game {
 
   // Action button [A] or Space/Enter pressed
   handleAction() {
+    if (this.isBlockingModalOpen()) return;
     if (window.dialogueManager && window.dialogueManager.active) {
       window.dialogueManager.advance();
       return;

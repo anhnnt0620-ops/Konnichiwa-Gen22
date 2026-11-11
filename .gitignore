@@ -24,10 +24,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Environment files (local configs)
+# Environment & build artifacts (never commit generated secrets/sealed bundles)
 .env
 /.env
 /.env.*
+/env-config.js
+/_site/
 .master-state.json
 database.rules.json.bak
 

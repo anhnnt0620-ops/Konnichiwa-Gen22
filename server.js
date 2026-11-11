@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { exec } = require('child_process');
+const { createServerSigningKeyPair, sealForClientPublicKey } = require('./scripts/crypto-seal');
+
+const SERVER_SIGNING_KEYS = createServerSigningKeyPair();
 
 // Load .env cleanly without external dependencies
 function loadEnvFile() {
@@ -229,21 +232,13 @@ function handleApiRequest(req, res, pathname, urlObj) {
   if (pathname === '/env-config.js') {
     const remoteAddr = (req.socket && req.socket.remoteAddress) || '';
     const isLocalLoopback = remoteAddr === '127.0.0.1' || remoteAddr === '::1' || remoteAddr === '::ffff:127.0.0.1';
-    const firebaseClientConfig = {
-      apiKey: ENV_VARS.VITE_FIREBASE_API_KEY || '',
-      authDomain: ENV_VARS.VITE_FIREBASE_AUTH_DOMAIN || '',
-      projectId: ENV_VARS.VITE_FIREBASE_PROJECT_ID || '',
-      storageBucket: ENV_VARS.VITE_FIREBASE_STORAGE_BUCKET || '',
-      messagingSenderId: ENV_VARS.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-      appId: ENV_VARS.VITE_FIREBASE_APP_ID || '',
-      measurementId: ENV_VARS.VITE_FIREBASE_MEASUREMENT_ID || '',
-      databaseURL: ENV_VARS.VITE_FIREBASE_DATABASE_URL || getFirebaseDatabaseUrl()
-    };
+    const hasSealedVault = Boolean(ENV_VARS.VITE_FIREBASE_API_KEY && ENV_VARS.VITE_FIREBASE_PROJECT_ID);
     const jsBody =
-      `window.__FIREBASE_ENV__ = ${JSON.stringify(firebaseClientConfig)};\n` +
       `window.__MASTER_SERVER_INFO__ = ${JSON.stringify({
         ...MASTER_INFO,
         clientIsMaster: isLocalLoopback,
+        hasSealedVault,
+        sealEndpoint: hasSealedVault ? '/api/env-seal' : null,
         serverTime: Date.now()
       })};\n`;
     res.writeHead(200, {
@@ -255,11 +250,41 @@ function handleApiRequest(req, res, pathname, urlObj) {
     return true;
   }
 
+  if (pathname === '/api/env-seal' && req.method === 'POST') {
+    readJsonBody(req).then((body) => {
+      if (!ENV_VARS.VITE_FIREBASE_API_KEY || !ENV_VARS.VITE_FIREBASE_PROJECT_ID) {
+        sendJSON(res, 404, { ok: false, error: 'Firebase vault not configured on Master Server' });
+        return;
+      }
+      const firebaseClientConfig = {
+        apiKey: ENV_VARS.VITE_FIREBASE_API_KEY || '',
+        authDomain: ENV_VARS.VITE_FIREBASE_AUTH_DOMAIN || '',
+        projectId: ENV_VARS.VITE_FIREBASE_PROJECT_ID || '',
+        storageBucket: ENV_VARS.VITE_FIREBASE_STORAGE_BUCKET || '',
+        messagingSenderId: ENV_VARS.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+        appId: ENV_VARS.VITE_FIREBASE_APP_ID || '',
+        measurementId: ENV_VARS.VITE_FIREBASE_MEASUREMENT_ID || '',
+        databaseURL: ENV_VARS.VITE_FIREBASE_DATABASE_URL || getFirebaseDatabaseUrl()
+      };
+      try {
+        const envelope = sealForClientPublicKey(firebaseClientConfig, {
+          clientPublicKeySpkiB64: body.clientPublicKeySpki,
+          clientNonce: body.clientNonce,
+          signingKeyPair: SERVER_SIGNING_KEYS
+        });
+        sendJSON(res, 200, { ok: true, envelope });
+      } catch (err) {
+        sendJSON(res, 400, { ok: false, error: err.message || 'Invalid sealing request' });
+      }
+    });
+    return true;
+  }
+
   if (pathname === '/api/health') {
     sendJSON(res, 200, {
       ok: true,
       master: MASTER_INFO,
-      firebaseProjectId: ENV_VARS.VITE_FIREBASE_PROJECT_ID || null,
+      hasFirebase: Boolean(ENV_VARS.VITE_FIREBASE_API_KEY && ENV_VARS.VITE_FIREBASE_PROJECT_ID),
       serversCount: Object.keys(masterStore.servers).length,
       playersCount: Object.keys(masterStore.players).length,
       serverTime: Date.now()
@@ -511,9 +536,30 @@ const server = http.createServer((req, res) => {
 
   const filePath = path.join(__dirname, decodedUrl);
 
-  // Security: prevent path traversal & never expose .env over HTTP
+  // Security: prevent path traversal & never expose .env, server state, scripts, git metadata, or config over HTTP
+  const relPath = path.relative(__dirname, filePath).replace(/\\/g, '/');
   const baseName = path.basename(filePath);
-  if (!filePath.startsWith(__dirname) || baseName.startsWith('.env') || baseName === '.master-state.json') {
+  const blockedExact = new Set([
+    '.master-state.json',
+    'server.js',
+    'package.json',
+    'package-lock.json',
+    'firebase-config.json',
+    'firebase.json',
+    '.firebaserc',
+    'database.rules.json'
+  ]);
+  const isBlocked =
+    !filePath.startsWith(__dirname) ||
+    relPath.startsWith('..') ||
+    baseName.startsWith('.env') ||
+    blockedExact.has(baseName) ||
+    relPath.startsWith('.git/') ||
+    relPath.startsWith('.github/') ||
+    relPath.startsWith('scripts/') ||
+    relPath.startsWith('node_modules/');
+
+  if (isBlocked) {
     res.writeHead(403, { 'Content-Type': 'text/plain; charset=UTF-8' });
     res.end('403 Forbidden');
     return;

@@ -227,6 +227,8 @@ function handleApiRequest(req, res, pathname, urlObj) {
   }
 
   if (pathname === '/env-config.js') {
+    const remoteAddr = (req.socket && req.socket.remoteAddress) || '';
+    const isLocalLoopback = remoteAddr === '127.0.0.1' || remoteAddr === '::1' || remoteAddr === '::ffff:127.0.0.1';
     const firebaseClientConfig = {
       apiKey: ENV_VARS.VITE_FIREBASE_API_KEY || '',
       authDomain: ENV_VARS.VITE_FIREBASE_AUTH_DOMAIN || '',
@@ -241,6 +243,7 @@ function handleApiRequest(req, res, pathname, urlObj) {
       `window.__FIREBASE_ENV__ = ${JSON.stringify(firebaseClientConfig)};\n` +
       `window.__MASTER_SERVER_INFO__ = ${JSON.stringify({
         ...MASTER_INFO,
+        clientIsMaster: isLocalLoopback,
         serverTime: Date.now()
       })};\n`;
     res.writeHead(200, {
@@ -265,6 +268,7 @@ function handleApiRequest(req, res, pathname, urlObj) {
   }
 
   if (pathname === '/api/sync/state' && req.method === 'GET') {
+    pruneStaleQueueAndRooms();
     const now = Date.now();
     masterStore.servers[MASTER_INFO.serverKey].lastSeen = now;
     sendJSON(res, 200, {
@@ -273,6 +277,7 @@ function handleApiRequest(req, res, pathname, urlObj) {
       servers: masterStore.servers,
       players: masterStore.players,
       stageCompletions: masterStore.stageCompletions,
+      bossRooms: masterStore.bossRooms,
       serverTime: now
     });
     return true;
@@ -349,12 +354,20 @@ function handleApiRequest(req, res, pathname, urlObj) {
         updatedAt: now
       };
 
-      // Find an active waiting bossRoom that doesn't already have this dept filled by another human
+      // First check if player already sits in an active waiting room, else find open slot for this dept
       let assignedRoom = null;
       for (const room of Object.values(masterStore.bossRooms)) {
-        if (room.status === 'matching' && room.slots && !room.slots[dept]) {
+        if (room.status === 'matching' && room.slots && room.slots[dept]?.playerId === playerId) {
           assignedRoom = room;
           break;
+        }
+      }
+      if (!assignedRoom) {
+        for (const room of Object.values(masterStore.bossRooms)) {
+          if (room.status === 'matching' && room.slots && !room.slots[dept]) {
+            assignedRoom = room;
+            break;
+          }
         }
       }
 
@@ -365,6 +378,7 @@ function handleApiRequest(req, res, pathname, urlObj) {
           status: 'matching', // matching | fighting | victory | failed
           hostId: playerId,
           masterServerKey: MASTER_INFO.serverKey,
+          masterReady: false,
           createdAt: now,
           updatedAt: now,
           tenguHp: 100,
@@ -376,6 +390,7 @@ function handleApiRequest(req, res, pathname, urlObj) {
         masterStore.bossRooms[roomId] = assignedRoom;
       }
 
+      const prevReady = !!(assignedRoom.slots[dept]?.playerId === playerId && assignedRoom.slots[dept]?.ready);
       assignedRoom.slots[dept] = {
         playerId,
         playerName: playerName || 'Kouhai Gen 22',
@@ -384,7 +399,8 @@ function handleApiRequest(req, res, pathname, urlObj) {
         serverKey: serverKey || MASTER_INFO.serverKey,
         serverLabel: serverLabel || MASTER_INFO.serverLabel,
         isHuman: true,
-        joinedAt: now
+        ready: prevReady,
+        joinedAt: assignedRoom.slots[dept]?.joinedAt || now
       };
       assignedRoom.updatedAt = now;
 
@@ -414,8 +430,13 @@ function handleApiRequest(req, res, pathname, urlObj) {
         return;
       }
 
-      if (type === 'start_battle' && payload) {
+      if (type === 'toggle_ready' && payload && ALL_DEPTS.includes(payload.dept)) {
+        if (room.slots && room.slots[payload.dept]) {
+          room.slots[payload.dept].ready = !!payload.ready;
+        }
+      } else if (type === 'start_battle' && payload) {
         room.status = 'fighting';
+        room.masterReady = true;
         room.slots = payload.slots || room.slots;
         room.questions = payload.questions || room.questions;
         room.tenguHp = 100;

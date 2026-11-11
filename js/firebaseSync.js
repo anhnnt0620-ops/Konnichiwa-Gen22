@@ -17,7 +17,8 @@ class FirebaseSyncManager {
       },
       servers: {},
       players: {},
-      stageCompletions: {}
+      stageCompletions: {},
+      bossRooms: {}
     };
 
     this.localRooms = {};
@@ -78,15 +79,15 @@ class FirebaseSyncManager {
       ? window.location.hostname
       : 'localhost';
 
-    const isMaster = !!(masterMeta && masterMeta.isMaster) || hostname === 'localhost' || hostname === '127.0.0.1';
-    const rawKey = (masterMeta && masterMeta.serverKey)
+    const isMaster = hostname === 'localhost' || hostname === '127.0.0.1' || !!(masterMeta && masterMeta.clientIsMaster === true);
+    const rawKey = (isMaster && masterMeta && masterMeta.serverKey)
       ? masterMeta.serverKey
       : ('sv_' + host.toLowerCase().replace(/[^a-z0-9_-]/g, '_'));
 
-    let serverLabel = masterMeta && masterMeta.serverLabel ? masterMeta.serverLabel : `Máy Chủ (${host})`;
+    let serverLabel = (isMaster && masterMeta && masterMeta.serverLabel) ? masterMeta.serverLabel : `Máy Khách (${host})`;
     if (hostname.includes('github.io')) serverLabel = 'Máy Chủ GitHub Pages';
     else if (hostname.includes('web.app') || hostname.includes('firebaseapp.com')) serverLabel = 'Máy Chủ Firebase Hosting';
-    else if (isMaster && !masterMeta) serverLabel = `Máy Chủ Mẹ (${host})`;
+    else if (isMaster && (!masterMeta || !masterMeta.serverLabel)) serverLabel = `Máy Chủ Mẹ (${host})`;
 
     return {
       serverKey: rawKey,
@@ -269,6 +270,7 @@ class FirebaseSyncManager {
               ...this.cachedTelemetry.stageCompletions,
               ...(data.stageCompletions || {})
             };
+            this.cachedTelemetry.bossRooms = { ...this.cachedTelemetry.bossRooms, ...(data.bossRooms || {}) };
           }
         }
       } catch (_) {}
@@ -286,6 +288,9 @@ class FirebaseSyncManager {
           if (val.players) this.cachedTelemetry.players = { ...this.cachedTelemetry.players, ...val.players };
           if (val.stageCompletions) {
             this.cachedTelemetry.stageCompletions = { ...this.cachedTelemetry.stageCompletions, ...val.stageCompletions };
+          }
+          if (val.bossRooms) {
+            this.cachedTelemetry.bossRooms = { ...this.cachedTelemetry.bossRooms, ...val.bossRooms };
           }
         }
       } catch (_) {}
@@ -312,18 +317,28 @@ class FirebaseSyncManager {
     const fb = window.JPCFirebase;
     if (fb && fb.rtdbReady && fb.db && fb.sdk) {
       try {
-        const { ref, get, set, onValue } = fb.sdk;
+        const { ref, get, set } = fb.sdk;
         const roomsSnap = await get(ref(fb.db, 'jpc_gen22/bossRooms'));
         let targetRoom = null;
         const now = Date.now();
 
         if (roomsSnap.exists()) {
-          const rooms = roomsSnap.val() || {};
-          for (const room of Object.values(rooms)) {
-            if (room && room.status === 'matching' && now - (room.updatedAt || 0) < 90000) {
-              if (!room.slots || !room.slots[profile.dept]) {
+          const rooms = Object.values(roomsSnap.val() || {});
+          for (const room of rooms) {
+            if (room && room.status === 'matching' && now - (room.updatedAt || 0) < 600000) {
+              if (room.slots && room.slots[profile.dept]?.playerId === profile.playerId) {
                 targetRoom = room;
                 break;
+              }
+            }
+          }
+          if (!targetRoom) {
+            for (const room of rooms) {
+              if (room && room.status === 'matching' && now - (room.updatedAt || 0) < 600000) {
+                if (!room.slots || !room.slots[profile.dept]) {
+                  targetRoom = room;
+                  break;
+                }
               }
             }
           }
@@ -336,6 +351,7 @@ class FirebaseSyncManager {
             status: 'matching',
             hostId: profile.playerId,
             masterServerKey: this.serverInfo.isMaster ? this.serverInfo.serverKey : 'firebase-cloud',
+            masterReady: false,
             createdAt: now,
             updatedAt: now,
             tenguHp: 100,
@@ -347,7 +363,9 @@ class FirebaseSyncManager {
         }
 
         if (!targetRoom.slots) targetRoom.slots = {};
-        targetRoom.slots[profile.dept] = { ...profile, joinedAt: now };
+        const prevReady = !!(targetRoom.slots[profile.dept]?.playerId === profile.playerId && targetRoom.slots[profile.dept]?.ready);
+        targetRoom.slots[profile.dept] = { ...profile, ready: prevReady, joinedAt: targetRoom.slots[profile.dept]?.joinedAt || now };
+        if (this.serverInfo.isMaster) targetRoom.masterServerKey = this.serverInfo.serverKey;
         targetRoom.updatedAt = now;
 
         await set(ref(fb.db, `jpc_gen22/bossRooms/${targetRoom.roomId}`), targetRoom);
@@ -384,12 +402,13 @@ class FirebaseSyncManager {
       status: 'matching',
       hostId: profile.playerId,
       masterServerKey: this.serverInfo.serverKey,
+      masterReady: false,
       createdAt: now,
       updatedAt: now,
       tenguHp: 100,
       currentQIdx: 0,
       questionStartedAt: now,
-      slots: { [profile.dept]: { ...profile, joinedAt: now } },
+      slots: { [profile.dept]: { ...profile, ready: false, joinedAt: now } },
       history: []
     };
     this.localRooms[roomId] = room;
@@ -437,7 +456,41 @@ class FirebaseSyncManager {
 
   async pushRoomUpdate(room, mode, actionType = '', payload = null) {
     if (!room) return room;
-    room.updatedAt = Date.now();
+    const now = Date.now();
+
+    if (actionType === 'toggle_ready' && payload && room.slots && room.slots[payload.dept]) {
+      room.slots[payload.dept].ready = !!payload.ready;
+    } else if (actionType === 'start_battle' && payload) {
+      room.status = 'fighting';
+      room.masterReady = true;
+      room.slots = payload.slots || room.slots;
+      room.questions = payload.questions || room.questions;
+      room.tenguHp = 100;
+      room.currentQIdx = 0;
+      room.questionStartedAt = now;
+      room.history = [];
+    } else if (actionType === 'solve_question' && payload && room.status === 'fighting' && room.currentQIdx === payload.qIdx) {
+      room.tenguHp = Math.max(0, (room.tenguHp ?? 100) - 20);
+      room.history = Array.isArray(room.history) ? room.history : [];
+      room.history.push({ ...payload, isFinalBlow: payload.qIdx === 4, ok: true });
+      if (payload.qIdx >= 4) {
+        room.status = room.tenguHp <= 0 ? 'victory' : 'failed';
+      } else {
+        room.currentQIdx += 1;
+        room.questionStartedAt = now;
+      }
+    } else if (actionType === 'timeout_question' && payload && room.status === 'fighting' && room.currentQIdx === payload.qIdx) {
+      room.history = Array.isArray(room.history) ? room.history : [];
+      room.history.push({ ...payload, isFinalBlow: payload.qIdx === 4, ok: false });
+      if (payload.qIdx >= 4) {
+        room.status = 'failed';
+      } else {
+        room.currentQIdx += 1;
+        room.questionStartedAt = now;
+      }
+    }
+
+    room.updatedAt = now;
     this.localRooms[room.roomId] = room;
 
     if (this.channel) {
@@ -446,14 +499,14 @@ class FirebaseSyncManager {
       } catch (_) {}
     }
 
-    if (mode === 'firebase' && window.JPCFirebase?.rtdbReady && window.JPCFirebase?.sdk) {
+    if ((mode === 'firebase' || window.JPCFirebase?.rtdbReady) && window.JPCFirebase?.rtdbReady && window.JPCFirebase?.sdk) {
       try {
         const { ref, set } = window.JPCFirebase.sdk;
         await set(ref(window.JPCFirebase.db, `jpc_gen22/bossRooms/${room.roomId}`), room);
       } catch (_) {}
     }
 
-    if (mode === 'master' && this.masterServerUrl && actionType) {
+    if (this.masterServerUrl && actionType && mode !== 'local') {
       try {
         const res = await fetch(`${this.masterServerUrl}/api/matchmaking/action`, {
           method: 'POST',

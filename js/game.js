@@ -1630,15 +1630,23 @@ class Game {
     const saveUrlBtn = document.getElementById('btn-save-master-url');
     const urlInput = document.getElementById('input-master-url');
 
+    const closeMonitor = () => {
+      if (modal) modal.classList.add('hidden');
+      if (this.serverMonitorTimer) {
+        clearInterval(this.serverMonitorTimer);
+        this.serverMonitorTimer = null;
+      }
+    };
+
     if (pill) {
-      pill.onclick = () => this.openServerMonitorModal();
+      pill.onclick = () => this.openServerMonitorModal(false);
     }
     if (closeBtn && modal) {
-      closeBtn.onclick = () => modal.classList.add('hidden');
+      closeBtn.onclick = closeMonitor;
     }
     if (modal) {
       modal.onclick = (e) => {
-        if (e.target === modal) modal.classList.add('hidden');
+        if (e.target === modal) closeMonitor();
       };
     }
     if (saveUrlBtn && urlInput) {
@@ -1646,7 +1654,7 @@ class Game {
         if (window.firebaseSync) {
           window.firebaseSync.setCustomMasterServerUrl(urlInput.value);
           this.saveGameState(false);
-          setTimeout(() => this.openServerMonitorModal(), 400);
+          setTimeout(() => this.openServerMonitorModal(false), 400);
         }
       };
     }
@@ -1655,25 +1663,48 @@ class Game {
     }
   }
 
-  async openServerMonitorModal() {
+  async openServerMonitorModal(isAutoRefresh = false) {
     const modal = document.getElementById('server-monitor-modal');
     const summaryEl = document.getElementById('server-status-summary');
     const serversEl = document.getElementById('server-nodes-list');
     const playersEl = document.getElementById('server-players-list');
+    const roomsEl = document.getElementById('server-rooms-list');
     const urlInput = document.getElementById('input-master-url');
     if (!modal) return;
 
-    modal.classList.remove('hidden');
+    if (!isAutoRefresh) {
+      modal.classList.remove('hidden');
+      if (this.serverMonitorTimer) {
+        clearInterval(this.serverMonitorTimer);
+      }
+      this.serverMonitorTimer = setInterval(() => {
+        if (!modal.classList.contains('hidden')) {
+          this.openServerMonitorModal(true);
+        } else {
+          clearInterval(this.serverMonitorTimer);
+          this.serverMonitorTimer = null;
+        }
+      }, 2000);
+    }
+
     const sync = window.firebaseSync;
     if (!sync) return;
 
-    if (urlInput && !urlInput.value) {
+    if (!isAutoRefresh && urlInput && !urlInput.value) {
       urlInput.value = sync.masterServerUrl || '';
     }
 
-    sync.syncGameProgress(this, false);
+    if (!isAutoRefresh) {
+      sync.syncGameProgress(this, false);
+    }
     const data = await sync.fetchGlobalTelemetry();
     const fb = window.JPCFirebase;
+
+    const esc = (val) => String(val ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
 
     const servers = Object.values(data.servers || {});
     const players = Object.values(data.players || {});
@@ -1700,8 +1731,8 @@ class Game {
         ? '<div class="server-node-item">Chưa có máy chủ nào được ghi nhận.</div>'
         : servers.map(sv => `
             <div class="server-node-item">
-              <div><strong>${sv.isMaster ? '👑 ' : '🌐 '}${sv.serverLabel || sv.serverKey}</strong></div>
-              <div class="server-node-meta">${sv.origin || 'local'} · Hoạt động: ${sv.lastSeen ? new Date(sv.lastSeen).toLocaleTimeString() : 'Vừa xong'}</div>
+              <div><strong>${sv.isMaster ? '👑 ' : '🌐 '}${esc(sv.serverLabel || sv.serverKey)}</strong></div>
+              <div class="server-node-meta">${esc(sv.origin || 'local')} · Hoạt động: ${sv.lastSeen ? new Date(sv.lastSeen).toLocaleTimeString() : 'Vừa xong'}</div>
             </div>
           `).join('');
     }
@@ -1713,11 +1744,84 @@ class Game {
             const doneCount = Array.isArray(p.completedStages) ? p.completedStages.length : 0;
             return `
               <div class="server-node-item">
-                <div><strong>${p.playerName}</strong> (${p.selectedDeptName || p.selectedDept})</div>
-                <div class="server-node-meta">Vòng: <b>${p.currentStageId}</b> · Xong: ${doneCount}/5 · ${p.serverLabel || p.serverKey}</div>
+                <div><strong>${esc(p.playerName)}</strong> (${esc(p.selectedDeptName || p.selectedDept)})</div>
+                <div class="server-node-meta">Vòng: <b>${esc(p.currentStageId)}</b> · Xong: ${doneCount}/5 · ${esc(p.serverLabel || p.serverKey)}</div>
               </div>
             `;
           }).join('');
+    }
+
+    if (roomsEl) {
+      const mergedRooms = { ...(sync.localRooms || {}), ...(data.bossRooms || {}) };
+      const rooms = Object.values(mergedRooms)
+        .filter(r => r && r.roomId)
+        .sort((a, b) => {
+          const rank = (s) => (s === 'matching' ? 0 : (s === 'fighting' ? 1 : 2));
+          const diff = rank(a.status) - rank(b.status);
+          return diff !== 0 ? diff : (b.updatedAt || 0) - (a.updatedAt || 0);
+        });
+
+      const statusLabel = {
+        matching: '⏳ Đang chờ ghép & Sẵn sàng',
+        fighting: '⚔️ Đang chiến đấu Tengu',
+        victory: '🎉 Đã chiến thắng',
+        failed: '⚠️ Thất bại'
+      };
+
+      if (rooms.length === 0) {
+        roomsEl.innerHTML = '<div class="server-node-item">Chưa có phòng Hội Trát 3.1 nào đang mở.</div>';
+      } else {
+        roomsEl.innerHTML = rooms.map(r => {
+          const slotsList = Object.values(r.slots || {});
+          const readyCount = slotsList.filter(m => m.ready).length;
+          const memberSummary = slotsList.length > 0
+            ? slotsList.map(m => `${esc(m.playerName || m.dept)} (${m.ready ? '✅' : '⏳'})`).join(' · ')
+            : 'Chưa có thành viên';
+
+          let actionHtml = '';
+          if (r.status === 'matching') {
+            actionHtml = sync.serverInfo.isMaster
+              ? `<button type="button" class="server-room-ready-btn" data-room-ready="${esc(r.roomId)}">👑 BẤM SẴN SÀNG VÀO GAME 3.1 ▶</button>`
+              : '<button type="button" class="server-room-ready-btn" disabled>⏳ Chờ Máy Chủ Mẹ</button>';
+          }
+
+          return `
+            <div class="server-room-card">
+              <div class="server-room-info">
+                <div><strong>${esc(r.roomId)}</strong> · ${statusLabel[r.status] || esc(r.status)}</div>
+                <div class="server-node-meta">${slotsList.length}/5 Ban (${readyCount} sẵn sàng): ${memberSummary}</div>
+              </div>
+              ${actionHtml}
+            </div>
+          `;
+        }).join('');
+
+        roomsEl.querySelectorAll('[data-room-ready]').forEach(btn => {
+          btn.onclick = async () => {
+            const roomId = btn.getAttribute('data-room-ready');
+            const room = mergedRooms[roomId];
+            const s31 = window.JPCStage31;
+            if (!room || room.status !== 'matching' || !s31) return;
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Đang mở đấu trường...';
+
+            const humanInRoom = Object.values(room.slots || {}).find(m => m && m.isHuman && m.playerId === sync.playerId);
+            const anchorDept = humanInRoom ? humanInRoom.dept : null;
+            const resolvedSlots = s31.buildFullSlots(room.slots || {});
+            const questions = s31.generateCrossBanQuestions(resolvedSlots, anchorDept);
+            const pushMode = (fb && fb.rtdbReady)
+              ? 'firebase'
+              : (sync.masterOnline ? 'master' : 'local');
+
+            await sync.pushRoomUpdate(room, pushMode, 'start_battle', {
+              slots: resolvedSlots,
+              questions
+            });
+            await this.openServerMonitorModal(true);
+          };
+        });
+      }
     }
   }
 

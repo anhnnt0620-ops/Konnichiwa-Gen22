@@ -2918,6 +2918,56 @@ html, body {
   margin-top: 2px;
 }
 
+.server-rooms-section {
+  background: rgba(25, 6, 8, 0.78);
+  border: 1.5px solid rgba(255, 215, 120, 0.35);
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.server-rooms-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: var(--gold-bright);
+  font-family: var(--font-title);
+}
+
+.server-room-card {
+  background: rgba(55, 14, 18, 0.85);
+  border: 1px solid rgba(255, 215, 120, 0.3);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.server-room-info {
+  font-size: 11px;
+  color: #fff;
+  line-height: 1.4;
+}
+
+.server-room-ready-btn {
+  background: linear-gradient(135deg, #ffd778, #e6a817);
+  color: #2b070a;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.server-room-ready-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 /* ==========================================================================
    STAGE 3.1: PHÁ PHONG — TENGU 5-BAN CO-OP BOSS ARENA MODAL
    ========================================================================== */
@@ -3032,6 +3082,31 @@ html, body {
   border-color: #66bb6a;
 }
 
+.tengu-lobby-slot.open {
+  border-style: dashed;
+  opacity: 0.78;
+}
+
+.tengu-slot-ready-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  margin-top: 2px;
+}
+
+.tengu-slot-ready-badge.ready {
+  background: rgba(102, 187, 106, 0.22);
+  color: #a5d6a7;
+  border: 1px solid rgba(102, 187, 106, 0.55);
+}
+
+.tengu-slot-ready-badge.waiting {
+  background: rgba(255, 193, 7, 0.16);
+  color: #ffe082;
+  border: 1px solid rgba(255, 193, 7, 0.45);
+}
+
 .tengu-lobby-slot img {
   width: 44px;
   height: 44px;
@@ -3078,6 +3153,19 @@ html, body {
   font-size: 11.5px;
   color: #ffe082;
   font-weight: 600;
+}
+
+.tengu-lobby-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#btn-tengu-start-now:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
 }
 
 /* Active Boss Battle */

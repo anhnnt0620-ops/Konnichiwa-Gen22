@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&subset=vietnamese&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="Image/Logo.png">
-  <link rel="stylesheet" href="css/style.css?v=5.0">
+  <link rel="stylesheet" href="css/style.css?v=6.0">
 </head>
 <body>
 
@@ -423,9 +423,10 @@
           </div>
 
           <div class="tengu-lobby-footer">
-            <div class="tengu-match-status" id="tengu-match-status">🔍 Đang tìm kiếm người chơi ở các ban khác trên Firebase & Máy Chủ Mẹ...</div>
+            <div class="tengu-match-status" id="tengu-match-status">🔍 Đang ghép tổ đội 5 Ban... Đợi Máy Chủ Mẹ bấm Sẵn Sàng để vào Game 3.1!</div>
             <div class="tengu-lobby-actions">
-              <button type="button" class="gold-btn" id="btn-tengu-start-now">⚔️ BẮT ĐẦU ĐÁNH TENGU NGAY ▶</button>
+              <button type="button" class="action-save-btn" id="btn-tengu-ready-toggle">🙋 TÔI SẴN SÀNG</button>
+              <button type="button" class="gold-btn" id="btn-tengu-start-now">👑 MÁY CHỦ SẴN SÀNG · VÀO GAME 3.1 ▶</button>
             </div>
           </div>
         </div>
@@ -539,6 +540,11 @@
             <h4>👥 Người Chơi &amp; Tiến Độ Các Vòng</h4>
             <div id="server-players-list" class="server-scroll-list"></div>
           </div>
+        </div>
+
+        <div class="server-rooms-section">
+          <h4>⚔️ Phòng Chờ Hội Trát 3.1 (Máy Chủ Bấm Sẵn Sàng Để Vào Game)</h4>
+          <div id="server-rooms-list" class="server-scroll-list"></div>
         </div>
       </div>
     </div>
@@ -702,15 +708,15 @@
 
   <!-- SCRIPTS -->
   <script src="env-config.js" onerror="this.remove()"></script>
-  <script src="js/audio.js?v=5.0"></script>
-  <script src="js/sprites.js?v=5.0"></script>
-  <script src="js/worldMap.js?v=5.0"></script>
-  <script src="js/dialogue.js?v=5.0"></script>
-  <script src="js/firebaseSync.js?v=5.0"></script>
-  <script src="js/minigames.js?v=5.0"></script>
-  <script src="js/stages.js?v=5.0"></script>
-  <script src="js/controls.js?v=5.0"></script>
-  <script src="js/game.js?v=5.0"></script>
-  <script type="module" src="./firebase.js?v=5.0"></script>
+  <script src="js/audio.js?v=6.0"></script>
+  <script src="js/sprites.js?v=6.0"></script>
+  <script src="js/worldMap.js?v=6.0"></script>
+  <script src="js/dialogue.js?v=6.0"></script>
+  <script src="js/firebaseSync.js?v=6.0"></script>
+  <script src="js/minigames.js?v=6.0"></script>
+  <script src="js/stages.js?v=6.0"></script>
+  <script src="js/controls.js?v=6.0"></script>
+  <script src="js/game.js?v=6.0"></script>
+  <script type="module" src="./firebase.js?v=6.0"></script>
 </body>
 </html>

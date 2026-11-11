@@ -1,4 +1,187 @@
 // Minigames for JPC Journey
+// Shared Stage 3.1 cross-Ban helpers (available to both MinigameManager and Master Monitor UI)
+window.JPCStage31 = window.JPCStage31 || (() => {
+  const DEPTS = [
+    { key: 'chuyenmon', short: 'BCM', name: 'Ban Chuyên Môn', img: 'Image/Kokeshi 5 Ban/kokeshi-chuyenmon.png' },
+    { key: 'doingoai', short: 'BĐN', name: 'Ban Đối Ngoại', img: 'Image/Kokeshi 5 Ban/kokeshi-doingoai.png' },
+    { key: 'tochuc', short: 'BTC', name: 'Ban Tổ Chức', img: 'Image/Kokeshi 5 Ban/kokeshi-tochuc.png' },
+    { key: 'thongtin', short: 'BTT', name: 'Ban Thông Tin', img: 'Image/Kokeshi 5 Ban/kokeshi-thongtin.png' },
+    { key: 'nhansu', short: 'BNS', name: 'Ban Nhân Sự', img: 'Image/Kokeshi 5 Ban/kokeshi-nhansu.png' }
+  ];
+
+  const ALLY_PROFILES = {
+    chuyenmon: [
+      { playerName: 'Minh Nhật (K63)', serverLabel: 'SV-ChùaLáng' },
+      { playerName: 'Hải Yến (BCM)', serverLabel: 'SV-Tokyo' }
+    ],
+    doingoai: [
+      { playerName: 'Khánh Linh (BĐN)', serverLabel: 'SV-HồGươm' },
+      { playerName: 'Gia Bảo (K64)', serverLabel: 'SV-Osaka' }
+    ],
+    tochuc: [
+      { playerName: 'Tuấn Kiệt (BTC)', serverLabel: 'SV-NhàB' },
+      { playerName: 'Phương Anh (K63)', serverLabel: 'SV-Kyoto' }
+    ],
+    thongtin: [
+      { playerName: 'Hà Vy (BTT)', serverLabel: 'SV-NhàD' },
+      { playerName: 'Đức Anh (K64)', serverLabel: 'SV-FCD' }
+    ],
+    nhansu: [
+      { playerName: 'Thảo Nhi (BNS)', serverLabel: 'SV-VJCBI' },
+      { playerName: 'Quốc Huy (K63)', serverLabel: 'SV-Sakura' }
+    ]
+  };
+
+  const QUESTION_BANK = {
+    chuyenmon: [
+      {
+        prompt: 'Tên đầy đủ viết tắt của CLB Tiếng Nhật JPC là (FTU) _________ Club.',
+        answer: 'Japanese',
+        accept: ['japanese'],
+        clue: '_ _ _ _ _ _ _ _ (8 chữ cái tiếng Anh)'
+      },
+      {
+        prompt: 'Loại búp bê gỗ truyền thống Nhật Bản đại diện cho 5 ban của JPC gọi là _________.',
+        answer: 'Kokeshi',
+        accept: ['kokeshi'],
+        clue: '_ _ _ _ _ _ _ (7 chữ cái)'
+      },
+      {
+        prompt: 'Câu chào tiếng Nhật xuất hiện trong tên chiến dịch chào tân Gen 22 là _________ Gen 22.',
+        answer: 'Konnichiwa',
+        accept: ['konnichiwa'],
+        clue: '_ _ _ _ _ _ _ _ _ _ (10 chữ cái)'
+      }
+    ],
+    nhansu: [
+      {
+        prompt: 'Slogan gắn kết nổi tiếng của JPC: "_________ Ichie — Nhất kỳ nhất hội".',
+        answer: 'Ichigo',
+        accept: ['ichigo', 'ichigo ichie'],
+        clue: '_ _ _ _ _ _ (6 chữ cái)'
+      },
+      {
+        prompt: 'Với các thành viên, JPC không chỉ là một CLB mà còn là một mái nhà _________ tại Ngoại Thương.',
+        answer: 'Gia đình',
+        accept: ['gia dinh', 'gia đình', 'am ap', 'ấm áp'],
+        clue: '_ _ _ / _ _ _ _ (2 tiếng)'
+      }
+    ],
+    thongtin: [
+      {
+        prompt: 'Chiếc áo khoác lễ hội truyền thống đầy kiêu hãnh trong các ấn phẩm của JPC gọi là áo _________.',
+        answer: 'Happi',
+        accept: ['happi'],
+        clue: '_ _ _ _ _ (5 chữ cái)'
+      },
+      {
+        prompt: 'Nhân vật dễ thương từng xuất hiện trong bộ câu hỏi Phỏng Vấn Vòng 2 rất được nhà JPC yêu thích là _________.',
+        answer: 'Chiikawa',
+        accept: ['chiikawa'],
+        clue: '_ _ _ _ _ _ _ _ (8 chữ cái)'
+      }
+    ],
+    tochuc: [
+      {
+        prompt: 'Ngày hội các Câu lạc bộ thường niên tại FTU vào 18/10 viết tắt là _________ (FTU Club\'s Day).',
+        answer: 'FCD',
+        accept: ['fcd', 'ftu club day', 'ftu clubs day'],
+        clue: '_ _ _ (3 chữ cái viết tắt)'
+      },
+      {
+        prompt: 'Thử thách Hội Trát 3.1 hợp lực tổ đội đánh bại Tengu mang tên _________.',
+        answer: 'Phá Phong',
+        accept: ['pha phong', 'phá phong'],
+        clue: '_ _ _ / _ _ _ _ _ (2 tiếng)'
+      }
+    ],
+    doingoai: [
+      {
+        prompt: 'Trường Đại học Ngoại Thương — mái nhà chung của đại gia đình JPC — viết tắt là _________.',
+        answer: 'FTU',
+        accept: ['ftu'],
+        clue: '_ _ _ (3 chữ cái)'
+      },
+      {
+        prompt: 'Con đường huyền thoại gắn liền với Đại học Ngoại Thương Hà Nội tại số 91 là phố _________.',
+        answer: 'Chùa Láng',
+        accept: ['chua lang', 'chùa láng'],
+        clue: '_ _ _ _ / _ _ _ _ (2 tiếng)'
+      }
+    ]
+  };
+
+  const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  const buildFullSlots = (existingSlots = {}) => {
+    const filled = {};
+    DEPTS.forEach(d => {
+      if (existingSlots && existingSlots[d.key] && existingSlots[d.key].isHuman) {
+        filled[d.key] = { ...existingSlots[d.key] };
+      } else {
+        const bot = pickRandom(ALLY_PROFILES[d.key]);
+        filled[d.key] = {
+          playerId: 'ally_' + d.key,
+          playerName: bot.playerName,
+          dept: d.key,
+          deptName: d.name,
+          serverKey: 'cross_' + d.key,
+          serverLabel: bot.serverLabel,
+          isHuman: false,
+          ready: true
+        };
+      }
+    });
+    return filled;
+  };
+
+  // Derangement: NO department ever gets assigned its own department's question!
+  // Guarantee Câu 5 (mấu chốt cuối cùng) is cross-ban assigned to a human player.
+  const generateCrossBanQuestions = (slots, finalDept = 'chuyenmon') => {
+    const deptKeys = DEPTS.map(d => d.key);
+    const shift = 1 + Math.floor(Math.random() * 4);
+    const pairs = deptKeys.map((srcKey, idx) => ({
+      sourceDept: srcKey,
+      assignedDept: deptKeys[(idx + shift) % deptKeys.length]
+    }));
+
+    const anchorDept = deptKeys.includes(finalDept)
+      ? finalDept
+      : (Object.keys(slots || {}).find(k => slots[k]?.isHuman) || deptKeys[0]);
+    const myPairIdx = pairs.findIndex(p => p.assignedDept === anchorDept);
+    if (myPairIdx !== -1 && myPairIdx !== 4) {
+      const tmp = pairs[4];
+      pairs[4] = pairs[myPairIdx];
+      pairs[myPairIdx] = tmp;
+    }
+
+    return pairs.map((p, idx) => {
+      const pool = QUESTION_BANK[p.sourceDept];
+      const chosen = pickRandom(pool);
+      const srcMeta = DEPTS.find(d => d.key === p.sourceDept);
+      const asnMeta = DEPTS.find(d => d.key === p.assignedDept);
+      return {
+        qNum: idx + 1,
+        sourceDept: p.sourceDept,
+        sourceName: srcMeta.name,
+        sourceShort: srcMeta.short,
+        assignedDept: p.assignedDept,
+        assignedName: asnMeta.name,
+        assignedShort: asnMeta.short,
+        assigneePlayerName: slots[p.assignedDept]?.playerName || asnMeta.name,
+        assigneeIsHuman: !!slots[p.assignedDept]?.isHuman,
+        prompt: chosen.prompt,
+        answer: chosen.answer,
+        accept: chosen.accept,
+        clue: chosen.clue,
+        isFinalDecisive: idx === 4
+      };
+    });
+  };
+
+  return { DEPTS, ALLY_PROFILES, QUESTION_BANK, buildFullSlots, generateCrossBanQuestions };
+})();
+
 class MinigameManager {
   constructor() {
     this.container = null;
@@ -457,118 +640,11 @@ class MinigameManager {
     const lobbyGrid = document.getElementById('tengu-party-lobby-grid');
     const matchStatusEl = document.getElementById('tengu-match-status');
     const syncBadgeEl = document.getElementById('tengu-sync-badge');
+    const readyToggleBtn = document.getElementById('btn-tengu-ready-toggle');
     const startNowBtn = document.getElementById('btn-tengu-start-now');
     const closeBtn = document.getElementById('btn-close-tengu-modal');
 
-    const DEPTS = [
-      { key: 'chuyenmon', short: 'BCM', name: 'Ban Chuyên Môn', img: 'Image/Kokeshi 5 Ban/kokeshi-chuyenmon.png' },
-      { key: 'doingoai', short: 'BĐN', name: 'Ban Đối Ngoại', img: 'Image/Kokeshi 5 Ban/kokeshi-doingoai.png' },
-      { key: 'tochuc', short: 'BTC', name: 'Ban Tổ Chức', img: 'Image/Kokeshi 5 Ban/kokeshi-tochuc.png' },
-      { key: 'thongtin', short: 'BTT', name: 'Ban Thông Tin', img: 'Image/Kokeshi 5 Ban/kokeshi-thongtin.png' },
-      { key: 'nhansu', short: 'BNS', name: 'Ban Nhân Sự', img: 'Image/Kokeshi 5 Ban/kokeshi-nhansu.png' }
-    ];
-
-    const ALLY_PROFILES = {
-      chuyenmon: [
-        { playerName: 'Minh Nhật (K63)', serverLabel: 'SV-ChùaLáng' },
-        { playerName: 'Hải Yến (BCM)', serverLabel: 'SV-Tokyo' }
-      ],
-      doingoai: [
-        { playerName: 'Khánh Linh (BĐN)', serverLabel: 'SV-HồGươm' },
-        { playerName: 'Gia Bảo (K64)', serverLabel: 'SV-Osaka' }
-      ],
-      tochuc: [
-        { playerName: 'Tuấn Kiệt (BTC)', serverLabel: 'SV-NhàB' },
-        { playerName: 'Phương Anh (K63)', serverLabel: 'SV-Kyoto' }
-      ],
-      thongtin: [
-        { playerName: 'Hà Vy (BTT)', serverLabel: 'SV-NhàD' },
-        { playerName: 'Đức Anh (K64)', serverLabel: 'SV-FCD' }
-      ],
-      nhansu: [
-        { playerName: 'Thảo Nhi (BNS)', serverLabel: 'SV-VJCBI' },
-        { playerName: 'Quốc Huy (K63)', serverLabel: 'SV-Sakura' }
-      ]
-    };
-
-    const QUESTION_BANK = {
-      chuyenmon: [
-        {
-          prompt: 'Tên đầy đủ viết tắt của CLB Tiếng Nhật JPC là (FTU) _________ Club.',
-          answer: 'Japanese',
-          accept: ['japanese'],
-          clue: '_ _ _ _ _ _ _ _ (8 chữ cái tiếng Anh)'
-        },
-        {
-          prompt: 'Loại búp bê gỗ truyền thống Nhật Bản đại diện cho 5 ban của JPC gọi là _________.',
-          answer: 'Kokeshi',
-          accept: ['kokeshi'],
-          clue: '_ _ _ _ _ _ _ (7 chữ cái)'
-        },
-        {
-          prompt: 'Câu chào tiếng Nhật xuất hiện trong tên chiến dịch chào tân Gen 22 là _________ Gen 22.',
-          answer: 'Konnichiwa',
-          accept: ['konnichiwa'],
-          clue: '_ _ _ _ _ _ _ _ _ _ (10 chữ cái)'
-        }
-      ],
-      nhansu: [
-        {
-          prompt: 'Slogan gắn kết nổi tiếng của JPC: "_________ Ichie — Nhất kỳ nhất hội".',
-          answer: 'Ichigo',
-          accept: ['ichigo', 'ichigo ichie'],
-          clue: '_ _ _ _ _ _ (6 chữ cái)'
-        },
-        {
-          prompt: 'Với các thành viên, JPC không chỉ là một CLB mà còn là một mái nhà _________ tại Ngoại Thương.',
-          answer: 'Gia đình',
-          accept: ['gia dinh', 'gia đình', 'am ap', 'ấm áp'],
-          clue: '_ _ _ / _ _ _ _ (2 tiếng)'
-        }
-      ],
-      thongtin: [
-        {
-          prompt: 'Chiếc áo khoác lễ hội truyền thống đầy kiêu hãnh trong các ấn phẩm của JPC gọi là áo _________.',
-          answer: 'Happi',
-          accept: ['happi'],
-          clue: '_ _ _ _ _ (5 chữ cái)'
-        },
-        {
-          prompt: 'Nhân vật dễ thương từng xuất hiện trong bộ câu hỏi Phỏng Vấn Vòng 2 rất được nhà JPC yêu thích là _________.',
-          answer: 'Chiikawa',
-          accept: ['chiikawa'],
-          clue: '_ _ _ _ _ _ _ _ (8 chữ cái)'
-        }
-      ],
-      tochuc: [
-        {
-          prompt: 'Ngày hội các Câu lạc bộ thường niên tại FTU vào 18/10 viết tắt là _________ (FTU Club\'s Day).',
-          answer: 'FCD',
-          accept: ['fcd', 'ftu club day', 'ftu clubs day'],
-          clue: '_ _ _ (3 chữ cái viết tắt)'
-        },
-        {
-          prompt: 'Thử thách Hội Trát 3.1 hợp lực tổ đội đánh bại Tengu mang tên _________.',
-          answer: 'Phá Phong',
-          accept: ['pha phong', 'phá phong'],
-          clue: '_ _ _ / _ _ _ _ _ (2 tiếng)'
-        }
-      ],
-      doingoai: [
-        {
-          prompt: 'Trường Đại học Ngoại Thương — mái nhà chung của đại gia đình JPC — viết tắt là _________.',
-          answer: 'FTU',
-          accept: ['ftu'],
-          clue: '_ _ _ (3 chữ cái)'
-        },
-        {
-          prompt: 'Con đường huyền thoại gắn liền với Đại học Ngoại Thương Hà Nội tại số 91 là phố _________.',
-          answer: 'Chùa Láng',
-          accept: ['chua lang', 'chùa láng'],
-          clue: '_ _ _ _ / _ _ _ _ (2 tiếng)'
-        }
-      ]
-    };
+    const { DEPTS, buildFullSlots, generateCrossBanQuestions } = window.JPCStage31;
 
     const normalizeAnswer = (text) => {
       return String(text || '')
@@ -607,72 +683,6 @@ class MinigameManager {
       if (resultScreen) resultScreen.classList.toggle('hidden', phase !== 'result');
     };
 
-    const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-    const buildFullSlots = (existingSlots = {}) => {
-      const filled = {};
-      DEPTS.forEach(d => {
-        if (existingSlots[d.key] && existingSlots[d.key].isHuman) {
-          filled[d.key] = { ...existingSlots[d.key] };
-        } else {
-          const bot = pickRandom(ALLY_PROFILES[d.key]);
-          filled[d.key] = {
-            playerId: 'ally_' + d.key,
-            playerName: bot.playerName,
-            dept: d.key,
-            deptName: d.name,
-            serverKey: 'cross_' + d.key,
-            serverLabel: bot.serverLabel,
-            isHuman: false
-          };
-        }
-      });
-      return filled;
-    };
-
-    // Derangement: NO department ever gets assigned its own department's question!
-    // Guarantee Câu 5 (mấu chốt cuối cùng) is cross-ban assigned to a human player (prefer local player if solo/lead)
-    const generateCrossBanQuestions = (slots) => {
-      const deptKeys = DEPTS.map(d => d.key);
-      // Cyclic shift guarantees assignedDept !== sourceDept for all 5 depts!
-      const shift = 1 + Math.floor(Math.random() * 4); // 1..4 so never 0
-      const pairs = deptKeys.map((srcKey, idx) => {
-        const assignedKey = deptKeys[(idx + shift) % deptKeys.length];
-        return { sourceDept: srcKey, assignedDept: assignedKey };
-      });
-
-      // Move pair whose assignedDept matches local player's dept to LAST index (index 4 = Câu 5 Mấu chốt!)
-      const myPairIdx = pairs.findIndex(p => p.assignedDept === myDept);
-      if (myPairIdx !== -1 && myPairIdx !== 4) {
-        const tmp = pairs[4];
-        pairs[4] = pairs[myPairIdx];
-        pairs[myPairIdx] = tmp;
-      }
-
-      return pairs.map((p, idx) => {
-        const pool = QUESTION_BANK[p.sourceDept];
-        const chosen = pickRandom(pool);
-        const srcMeta = DEPTS.find(d => d.key === p.sourceDept);
-        const asnMeta = DEPTS.find(d => d.key === p.assignedDept);
-        return {
-          qNum: idx + 1,
-          sourceDept: p.sourceDept,
-          sourceName: srcMeta.name,
-          sourceShort: srcMeta.short,
-          assignedDept: p.assignedDept,
-          assignedName: asnMeta.name,
-          assignedShort: asnMeta.short,
-          assigneePlayerName: slots[p.assignedDept]?.playerName || asnMeta.name,
-          assigneeIsHuman: !!slots[p.assignedDept]?.isHuman,
-          prompt: chosen.prompt,
-          answer: chosen.answer,
-          accept: chosen.accept,
-          clue: chosen.clue,
-          isFinalDecisive: idx === 4
-        };
-      });
-    };
-
     const renderLobbySlots = (slots = {}) => {
       if (!lobbyGrid) return;
       lobbyGrid.innerHTML = '';
@@ -680,12 +690,21 @@ class MinigameManager {
         const member = slots[d.key];
         const isYou = member && member.playerId === myPlayerId;
         const slotEl = document.createElement('div');
-        slotEl.className = `tengu-lobby-slot ${isYou ? 'you' : (member ? 'matched' : '')}`;
+        slotEl.className = `tengu-lobby-slot ${isYou ? 'you' : (member ? 'matched' : 'open')}`;
+
+        let readyBadgeHtml = '<div class="tengu-slot-ready-badge waiting">⏳ Ô trống (tự ghép khi vào)</div>';
+        if (member) {
+          readyBadgeHtml = member.ready
+            ? '<div class="tengu-slot-ready-badge ready">✅ Đã sẵn sàng</div>'
+            : '<div class="tengu-slot-ready-badge waiting">⏳ Chờ sẵn sàng</div>';
+        }
+
         slotEl.innerHTML = `
           <img src="${d.img}" alt="${d.name}">
           <div class="tengu-slot-dept">${d.name}</div>
-          <div class="tengu-slot-player">${member ? member.playerName : 'Đang tìm...'}${isYou ? ' (Bạn)' : ''}</div>
-          <div class="tengu-slot-server">${member ? '🌐 ' + member.serverLabel : '⏳ Hàng chờ'}</div>
+          <div class="tengu-slot-player">${member ? member.playerName : 'Chờ thành viên...'}${isYou ? ' (Bạn)' : ''}</div>
+          <div class="tengu-slot-server">${member ? '🌐 ' + member.serverLabel : '📡 Hàng chờ liên máy chủ'}</div>
+          ${readyBadgeHtml}
         `;
         lobbyGrid.appendChild(slotEl);
       });
@@ -970,22 +989,87 @@ class MinigameManager {
       }
     };
 
-    const startBossBattle = () => {
-      if (this.tenguMatchTimer) {
-        clearInterval(this.tenguMatchTimer);
-        this.tenguMatchTimer = null;
-      }
-      resolvedSlots = buildFullSlots(roomState ? roomState.slots : {
+    const canControlStart = (room) => {
+      if (sync && sync.serverInfo && sync.serverInfo.isMaster) return true;
+      if (!sync || roomMode === 'local') return true;
+      return false;
+    };
+
+    const syncLobbyUI = (room) => {
+      const slots = (room && room.slots) ? room.slots : {
         [myDept]: {
           playerId: myPlayerId,
           playerName: myName,
           dept: myDept,
           deptName: myDeptObj.name,
           serverLabel: myServerLabel,
-          isHuman: true
+          isHuman: true,
+          ready: false
         }
-      });
-      questionsList = generateCrossBanQuestions(resolvedSlots);
+      };
+      renderLobbySlots(slots);
+
+      const members = DEPTS.map(d => slots[d.key]).filter(Boolean);
+      const readyCount = members.filter(m => m.ready).length;
+      const myMember = slots[myDept];
+      const isMeReady = !!(myMember && myMember.playerId === myPlayerId && myMember.ready);
+      const isMasterControl = canControlStart(room);
+
+      if (readyToggleBtn) {
+        readyToggleBtn.classList.toggle('is-ready', isMeReady);
+        readyToggleBtn.textContent = isMeReady ? '✅ BẠN ĐÃ SẴN SÀNG' : '🙋 TÔI SẴN SÀNG';
+      }
+
+      if (startNowBtn) {
+        startNowBtn.disabled = !isMasterControl;
+        if (isMasterControl) {
+          startNowBtn.textContent = roomMode === 'local'
+            ? '👑 SẴN SÀNG · VÀO GAME 3.1 ▶'
+            : '👑 MÁY CHỦ SẴN SÀNG · VÀO GAME 3.1 ▶';
+        } else {
+          startNowBtn.textContent = '⏳ CHỜ MÁY CHỦ BẤM SẴN SÀNG...';
+        }
+      }
+
+      if (matchStatusEl) {
+        if (room && room.status === 'fighting') {
+          matchStatusEl.textContent = '⚔️ Máy Chủ Mẹ đã bấm Sẵn Sàng! Đang tiến vào đấu trường Tengu!';
+        } else if (isMasterControl) {
+          matchStatusEl.textContent = `👥 Đã vào phòng: ${members.length}/5 Ban (${readyCount} đã sẵn sàng). Bấm SẴN SÀNG khi muốn bắt đầu Game 3.1!`;
+        } else {
+          matchStatusEl.textContent = `⏳ Phòng chờ liên máy chủ (${members.length}/5 Ban · ${readyCount} sẵn sàng). Đợi Máy Chủ Mẹ bấm SẴN SÀNG để vào Game 3.1...`;
+        }
+      }
+    };
+
+    const startBossBattle = () => {
+      if (!canControlStart(roomState)) {
+        if (matchStatusEl) {
+          matchStatusEl.textContent = '⏳ Chỉ Máy Chủ Mẹ mới có quyền bấm Sẵn Sàng để bắt đầu Game 3.1!';
+        }
+        return;
+      }
+      if (this.tenguMatchTimer) {
+        clearInterval(this.tenguMatchTimer);
+        this.tenguMatchTimer = null;
+      }
+      const existingSlots = roomState ? { ...(roomState.slots || {}) } : {
+        [myDept]: {
+          playerId: myPlayerId,
+          playerName: myName,
+          dept: myDept,
+          deptName: myDeptObj.name,
+          serverLabel: myServerLabel,
+          isHuman: true,
+          ready: true
+        }
+      };
+      if (existingSlots[myDept] && existingSlots[myDept].playerId === myPlayerId) {
+        existingSlots[myDept] = { ...existingSlots[myDept], ready: true };
+      }
+
+      resolvedSlots = buildFullSlots(existingSlots);
+      questionsList = generateCrossBanQuestions(resolvedSlots, myDept);
       currentQIdx = 0;
       tenguHp = 100;
       battleHistory = [];
@@ -1031,6 +1115,23 @@ class MinigameManager {
       };
     }
 
+    if (readyToggleBtn) {
+      readyToggleBtn.onclick = () => {
+        if (!roomState || roomState.status !== 'matching') return;
+        const curr = !!(roomState.slots?.[myDept]?.ready);
+        if (roomState.slots && roomState.slots[myDept]) {
+          roomState.slots[myDept].ready = !curr;
+        }
+        syncLobbyUI(roomState);
+        if (sync && (roomMode === 'firebase' || roomMode === 'master')) {
+          sync.pushRoomUpdate(roomState, roomMode, 'toggle_ready', {
+            dept: myDept,
+            ready: !curr
+          });
+        }
+      };
+    }
+
     if (startNowBtn) startNowBtn.onclick = () => startBossBattle();
 
     const winBtn = document.getElementById('btn-tengu-victory-continue');
@@ -1058,6 +1159,10 @@ class MinigameManager {
     }
 
     const startMatchmaking = async () => {
+      if (this.tenguUnsubscribe) {
+        this.tenguUnsubscribe();
+        this.tenguUnsubscribe = null;
+      }
       showPhase('lobby');
       const initialSlots = {
         [myDept]: {
@@ -1066,10 +1171,12 @@ class MinigameManager {
           dept: myDept,
           deptName: myDeptObj.name,
           serverLabel: myServerLabel,
-          isHuman: true
+          isHuman: true,
+          ready: false
         }
       };
-      renderLobbySlots(initialSlots);
+      roomState = { roomId: 'pending', status: 'matching', hostId: myPlayerId, slots: initialSlots };
+      syncLobbyUI(roomState);
 
       if (sync) {
         try {
@@ -1085,12 +1192,12 @@ class MinigameManager {
               ? '🔥 Phòng Liên Máy Chủ (Firebase)'
               : (roomMode === 'master' ? '👑 Phòng Máy Chủ Mẹ' : '🌐 Tổ Đội Liên Máy Chủ');
           }
-          renderLobbySlots(buildFullSlotsPreview(roomState.slots));
+          syncLobbyUI(roomState);
 
           this.tenguUnsubscribe = sync.subscribeBossRoom(roomState.roomId, roomMode, (updatedRoom) => {
             roomState = updatedRoom;
             if (updatedRoom.status === 'matching') {
-              renderLobbySlots(buildFullSlotsPreview(updatedRoom.slots));
+              syncLobbyUI(updatedRoom);
               return;
             }
             if (updatedRoom.status === 'fighting' && Array.isArray(updatedRoom.questions)) {
@@ -1109,7 +1216,7 @@ class MinigameManager {
                 updateHPUI();
                 showPhase('fight');
                 renderActiveQuestion();
-              } else if (updatedRoom.currentQIdx > currentQIdx && !qLocked && !battleFinished) {
+              } else if (updatedRoom.currentQIdx > currentQIdx && !battleFinished) {
                 if (this.tenguTickTimer) clearInterval(this.tenguTickTimer);
                 if (this.tenguAllyTimer) clearTimeout(this.tenguAllyTimer);
                 tenguHp = updatedRoom.tenguHp;
@@ -1128,40 +1235,6 @@ class MinigameManager {
           });
         } catch (_) {}
       }
-
-      // Countdown auto-matchmaking (4 seconds -> fills open slots with random cross-server allies & enters battle)
-      let countdown = 4;
-      if (matchStatusEl) {
-        matchStatusEl.textContent = `🔍 Đang ghép ngẫu nhiên đủ 5 Ban liên máy chủ (${countdown}s)...`;
-      }
-      if (this.tenguMatchTimer) clearInterval(this.tenguMatchTimer);
-      this.tenguMatchTimer = setInterval(() => {
-        countdown--;
-        if (countdown > 0) {
-          if (matchStatusEl) {
-            matchStatusEl.textContent = `🔍 Đang ghép ngẫu nhiên đủ 5 Ban liên máy chủ (${countdown}s)...`;
-          }
-        } else {
-          clearInterval(this.tenguMatchTimer);
-          this.tenguMatchTimer = null;
-          const preview = buildFullSlots(roomState ? roomState.slots : initialSlots);
-          renderLobbySlots(preview);
-          if (matchStatusEl) {
-            matchStatusEl.textContent = '✅ Tổ đội 5 Ban đã sẵn sàng! Chuẩn bị tiến công Tengu!';
-          }
-          setTimeout(() => {
-            if (!tenguModal.classList.contains('hidden')) startBossBattle();
-          }, 500);
-        }
-      }, 1000);
-    };
-
-    const buildFullSlotsPreview = (slots = {}) => {
-      const merged = {};
-      DEPTS.forEach(d => {
-        if (slots[d.key]) merged[d.key] = slots[d.key];
-      });
-      return merged;
     };
 
     startMatchmaking();

@@ -680,16 +680,50 @@ class Game {
     const descElem = document.getElementById('transition-desc');
     const proceedBtn = document.getElementById('btn-transition-proceed');
 
-    if (targetStageId === 'stage2') {
-      if (titleElem) titleElem.textContent = 'VÀI NGÀY SAU ĐÓ...';
-      if (subElem) subElem.textContent = 'Ngày 23 tháng 10 năm 2026';
-      if (descElem) {
-        descElem.innerHTML = `
+    const transitionMap = {
+      stage2: {
+        title: 'VÀI NGÀY SAU ĐÓ...',
+        sub: 'Ngày 23 tháng 10 năm 2026',
+        desc: `
           Sau những ngày ngóng trông hồi hộp, lá đơn của bạn đã xuất sắc chinh phục được Hội đồng tuyển sinh JPC.<br>
           Chào mừng <b>${this.playerName}</b> chính thức bước tiếp vào <b>Vòng 2: Hòa Nhịp (Phỏng Vấn Online)</b>!
-        `;
+        `,
+        btn: 'BƯỚC VÀO PHÒNG PHỎNG VẤN ONLINE ▶'
+      },
+      stage3_1: {
+        title: 'VÀI NGÀY SAU ĐÓ...',
+        sub: 'Ngày 27 tháng 10 năm 2026 · Hội Trát 3.1',
+        desc: `
+          Vượt qua vòng Phỏng vấn Online ấn tượng, <b>${this.playerName}</b> đã chính thức mở khóa chặng thử thách đồng đội tại <b>Nhà Thể Chất FTU</b>!<br>
+          Chào mừng bước vào <b>Hội Trát 3.1: Phá Phong (27/10 – 03/11)</b> — cùng Tổ đội 5 Ban liên máy chủ hợp lực giải 5 câu Nhân Sư đánh bại <b>Tengu</b>!
+        `,
+        btn: 'CHUYỂN CẢNH TỚI NHÀ THỂ CHẤT FTU (VÒNG 3.1) ▶'
+      },
+      stage3_2: {
+        title: 'CHẶNG ĐƯỜNG MỚI...',
+        sub: 'Ngày 08 tháng 11 năm 2026 · Hội Trát 3.2',
+        desc: `
+          Phong ấn Tengu đã bị phá tan! <b>${this.playerName}</b> tiếp tục bước vào <b>Hội Trát 3.2: Chân Diện (08/11 – 09/11)</b>.<br>
+          Hãy di chuyển tới không gian trà đạo <b>Trường VJCBI</b> để trải lòng cùng Ban Điều Hành JPC!
+        `,
+        btn: 'CHUYỂN CẢNH TỚI TRƯỜNG VJCBI (VÒNG 3.2) ▶'
+      },
+      stage_final: {
+        title: 'KHOẢNH KHẮC VINH QUANG!',
+        sub: 'Tháng 11 năm 2026 · Kết Nạp Thành Viên Gen 22',
+        desc: `
+          Chúc mừng <b>${this.playerName}</b> đã chinh phục trọn vẹn 4 Hội Trát! Sân Nhà D FTU đang rợp bóng hoa anh đào đón em chính thức về nhà cùng đại gia đình <b>JPC FTU</b>!
+        `,
+        btn: 'TIẾN VÀO SÂN KHẤU KẾT NẠP JPC ▶'
       }
-      if (proceedBtn) proceedBtn.textContent = 'BƯỚC VÀO PHÒNG PHỎNG VẤN ONLINE ▶';
+    };
+
+    const cfg = transitionMap[targetStageId];
+    if (cfg) {
+      if (titleElem) titleElem.textContent = cfg.title;
+      if (subElem) subElem.textContent = cfg.sub;
+      if (descElem) descElem.innerHTML = cfg.desc;
+      if (proceedBtn) proceedBtn.textContent = cfg.btn;
     }
 
     if (window.audioManager) window.audioManager.playFanfare();
@@ -784,6 +818,8 @@ class Game {
 
     if (!preserveState) {
       this.currentZone = 'campus';
+      this.shownInteriorIntro = false;
+      this.nearbyInteractable = null;
     }
 
     if (!this.unlockedStages.includes(stageId)) {
@@ -800,10 +836,11 @@ class Game {
         }
       }
 
-      if (isInitial && this.stage.playerStart) {
+      if ((isInitial || this.stage.repositionOnTransition) && this.stage.playerStart) {
         this.player.x = this.stage.playerStart.x * 32;
         this.player.y = this.stage.playerStart.y * 32;
-        this.player.direction = 'up';
+        this.player.direction = this.stage.playerStart.direction || 'up';
+        this.updateCamera();
       }
       this.saveGameState(false);
     }
@@ -828,6 +865,9 @@ class Game {
         }
       ]);
     } else if (stageId === 'stage3_1') {
+      if (!preserveState && window.showToast) {
+        window.showToast('🌸 Chuyển cảnh Hội Trát 3.1: Phá Phong! Đi lên Nhà Thể Chất FTU phía Bắc để ghép 5 Ban đánh Tengu!');
+      }
       window.dialogueManager.startDialogue([
         {
           speaker: 'Hội Trát 3.1: Phá Phong',
@@ -839,6 +879,9 @@ class Game {
         }
       ]);
     } else if (stageId === 'stage3_2') {
+      if (!preserveState && window.showToast) {
+        window.showToast('🍵 Chuyển cảnh Hội Trát 3.2: Chân Diện! Tiến vào Trường VJCBI gặp Ban Điều Hành!');
+      }
       window.dialogueManager.startDialogue([
         {
           speaker: 'Hội Trát 3.2: Chân Diện',
@@ -870,6 +913,7 @@ class Game {
     const questBadge = document.getElementById('quest-badge');
     const questDate = document.getElementById('quest-date');
     const questHudName = document.getElementById('quest-hud-name');
+    const questHudHint = document.getElementById('quest-hud-hint');
 
     const stageMap = {
       stage1: { badge: 'FTU CLUB DAY · GEN 22', qBadge: 'VÒNG 1', date: '01/10 – 20/10' },
@@ -888,6 +932,12 @@ class Game {
     if (questBadge) questBadge.textContent = cur.qBadge;
     if (questDate) questDate.textContent = cur.date;
     if (questHudName) questHudName.textContent = this.stage ? (this.stage.questTitle || this.stage.name) : 'Hành trình JPC';
+    if (questHudHint) {
+      const interiorHint = (this.currentZone === 'nha_the_chat_interior' && this.currentStageId === 'stage3_1')
+        ? 'Nói chuyện với Trưởng Nhóm hoặc chạm Đài Tengu giữa sân để ghép 5 Ban!'
+        : '';
+      questHudHint.textContent = interiorHint || (this.stage && this.stage.questText) || 'Nhấn Chi tiết nhiệm vụ để xem hướng dẫn.';
+    }
   }
 
   // Sakura petals particle system
@@ -1338,23 +1388,27 @@ class Game {
       window.dialogueManager.startDialogue(data.dialogues, () => {
         if (this.currentStageId === 'stage2' && data.id === 'npc_interviewer') {
           window.minigameManager.start('stage2', (success) => {
+            if (!success) return;
             this.stageProgress.stage2.completed = true;
             if (!this.completedStages.includes('stage2')) this.completedStages.push('stage2');
             if (!this.unlockedStages.includes('stage3_1')) this.unlockedStages.push('stage3_1');
             this.addMemory('Hội trát 2: Hòa Nhịp', 'Hòa nhịp trái tim cùng đồng đội tại Giảng đường B201 FTU!', 'Image/Color/Vòng 2 - Color.png');
             this.saveGameState(false);
-            this.loadStage('stage3_1');
+            this.triggerConfetti();
+            this.showTransitionScreen('stage3_1');
           });
         } else if (this.currentStageId === 'stage3_1' && data.id === 'npc_leader') {
           this.startStage31TenguBattle();
         } else if (this.currentStageId === 'stage3_2' && data.id === 'npc_mentor_heart') {
           window.minigameManager.start('stage3_2', (success) => {
+            if (!success) return;
             this.stageProgress.stage3_2.completed = true;
             if (!this.completedStages.includes('stage3_2')) this.completedStages.push('stage3_2');
             if (!this.unlockedStages.includes('stage_final')) this.unlockedStages.push('stage_final');
             this.addMemory('Hội trát 3.2: Chân Diện', 'Tỏa sáng chân diện tại không gian văn hóa VJCC Ngoại Thương!', 'Image/Color/Vòng 3.2 - Color.png');
             this.saveGameState(false);
-            this.loadStage('stage_final');
+            this.triggerConfetti();
+            this.showTransitionScreen('stage_final');
           });
         } else if (this.currentStageId === 'stage_final' && data.id === 'npc_final_president') {
           if (!this.completedStages.includes('stage_final')) this.completedStages.push('stage_final');
@@ -1397,8 +1451,10 @@ class Game {
       this.currentZone = 'campus';
       this.player.x = 42 * 32;
       this.player.y = 6 * 32;
+      this.updateCamera();
       this.saveGameState(false);
-      this.loadStage('stage3_2');
+      this.triggerConfetti();
+      this.showTransitionScreen('stage3_2');
     });
   }
 

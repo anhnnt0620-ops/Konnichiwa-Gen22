@@ -23,13 +23,16 @@ class MinigameManager {
       return;
     }
 
+    if (gameType === 'stage3_1') {
+      this.runStage31Game();
+      return;
+    }
+
     this.modal.classList.remove('hidden');
     this.container.innerHTML = '';
 
     if (gameType === 'stage1') {
       this.runStage1Game();
-    } else if (gameType === 'stage3_1') {
-      this.runStage31Game();
     } else if (gameType === 'stage3_2') {
       this.runStage32Game();
     }
@@ -43,6 +46,8 @@ class MinigameManager {
 
     const compModal = document.getElementById('computer-interview-modal');
     if (compModal) compModal.classList.add('hidden');
+    const tenguModal = document.getElementById('tengu-battle-modal');
+    if (tenguModal) tenguModal.classList.add('hidden');
 
     setTimeout(() => {
       this.modal.classList.add('hidden');
@@ -55,8 +60,18 @@ class MinigameManager {
   cleanup() {
     if (this.timer) clearInterval(this.timer);
     if (this.animFrame) cancelAnimationFrame(this.animFrame);
+    if (this.tenguTickTimer) clearInterval(this.tenguTickTimer);
+    if (this.tenguAllyTimer) clearTimeout(this.tenguAllyTimer);
+    if (this.tenguMatchTimer) clearInterval(this.tenguMatchTimer);
+    if (this.tenguUnsubscribe) {
+      this.tenguUnsubscribe();
+      this.tenguUnsubscribe = null;
+    }
     this.timer = null;
     this.animFrame = null;
+    this.tenguTickTimer = null;
+    this.tenguAllyTimer = null;
+    this.tenguMatchTimer = null;
   }
 
   // MINIGAME 1: KHAI NHÃN - NIÊM PHONG PHONG THƯ (Rhythm Tap)
@@ -407,149 +422,734 @@ class MinigameManager {
     startQuiz();
   }
 
-  // MINIGAME 3.1: PHÁ PHONG - BỨT PHÁ TEAMWORK (Catch Ideas)
+  // =========================================================================
+  // MINIGAME 3.1: PHÁ PHONG — TỔ ĐỘI 5 BAN LIÊN MÁY CHỦ ĐÁNH TENGU (NHÂN SƯ CHÉO BAN)
+  // =========================================================================
   runStage31Game() {
-    this.container.innerHTML = `
-      <div class="mg-header">
-        <h3>HỘI TRÁT 3.1: PHÁ PHONG</h3>
-        <p>Di chuyển giỏ hứng để thu thập các ý tưởng sáng tạo cùng đồng đội!</p>
-      </div>
-      <div class="mg-stage3-arena" id="catch-arena">
-        <div class="basket" id="player-basket">🤝 TEAM</div>
-      </div>
-      <div class="mg-score-bar">
-        <span>Ý tưởng: <b id="idea-count">0/6</b></span>
-        <span>Thời gian: <b id="mg-time">20s</b></span>
-      </div>
-      <div class="catch-controls">
-        <button class="pixel-btn" id="btn-move-left">◀ TRÁI</button>
-        <button class="pixel-btn" id="btn-move-right">PHẢI ▶</button>
-      </div>
-    `;
+    const tenguModal = document.getElementById('tengu-battle-modal');
+    if (!tenguModal) {
+      this.finish(true);
+      return;
+    }
 
-    const arena = document.getElementById('catch-arena');
-    const basket = document.getElementById('player-basket');
-    const countElem = document.getElementById('idea-count');
-    const timeElem = document.getElementById('mg-time');
+    this.cleanup();
+    this.modal.classList.add('hidden');
+    tenguModal.classList.remove('hidden');
 
-    const arenaW = arena.clientWidth || 340;
-    let basketX = Math.floor(arenaW / 2) - 35;
-    let score = 0;
-    const targetScore = 6;
-    let timeLeft = 20;
-    let items = [];
+    const lobbyScreen = document.getElementById('tengu-lobby-screen');
+    const fightScreen = document.getElementById('tengu-fight-screen');
+    const resultScreen = document.getElementById('tengu-result-screen');
+    const lobbyGrid = document.getElementById('tengu-party-lobby-grid');
+    const matchStatusEl = document.getElementById('tengu-match-status');
+    const syncBadgeEl = document.getElementById('tengu-sync-badge');
+    const startNowBtn = document.getElementById('btn-tengu-start-now');
+    const closeBtn = document.getElementById('btn-close-tengu-modal');
 
-    // Keyboard support for PC
-    const onKey = (e) => {
-      const currentW = arena.clientWidth || 340;
-      if (e.key === 'ArrowLeft' || e.key === 'a') basketX = Math.max(10, basketX - 25);
-      if (e.key === 'ArrowRight' || e.key === 'd') basketX = Math.min(currentW - 80, basketX + 25);
-      basket.style.left = `${basketX}px`;
+    const DEPTS = [
+      { key: 'chuyenmon', short: 'BCM', name: 'Ban Chuyên Môn', img: 'Image/Kokeshi 5 Ban/kokeshi-chuyenmon.png' },
+      { key: 'doingoai', short: 'BĐN', name: 'Ban Đối Ngoại', img: 'Image/Kokeshi 5 Ban/kokeshi-doingoai.png' },
+      { key: 'tochuc', short: 'BTC', name: 'Ban Tổ Chức', img: 'Image/Kokeshi 5 Ban/kokeshi-tochuc.png' },
+      { key: 'thongtin', short: 'BTT', name: 'Ban Thông Tin', img: 'Image/Kokeshi 5 Ban/kokeshi-thongtin.png' },
+      { key: 'nhansu', short: 'BNS', name: 'Ban Nhân Sự', img: 'Image/Kokeshi 5 Ban/kokeshi-nhansu.png' }
+    ];
+
+    const ALLY_PROFILES = {
+      chuyenmon: [
+        { playerName: 'Minh Nhật (K63)', serverLabel: 'SV-ChùaLáng' },
+        { playerName: 'Hải Yến (BCM)', serverLabel: 'SV-Tokyo' }
+      ],
+      doingoai: [
+        { playerName: 'Khánh Linh (BĐN)', serverLabel: 'SV-HồGươm' },
+        { playerName: 'Gia Bảo (K64)', serverLabel: 'SV-Osaka' }
+      ],
+      tochuc: [
+        { playerName: 'Tuấn Kiệt (BTC)', serverLabel: 'SV-NhàB' },
+        { playerName: 'Phương Anh (K63)', serverLabel: 'SV-Kyoto' }
+      ],
+      thongtin: [
+        { playerName: 'Hà Vy (BTT)', serverLabel: 'SV-NhàD' },
+        { playerName: 'Đức Anh (K64)', serverLabel: 'SV-FCD' }
+      ],
+      nhansu: [
+        { playerName: 'Thảo Nhi (BNS)', serverLabel: 'SV-VJCBI' },
+        { playerName: 'Quốc Huy (K63)', serverLabel: 'SV-Sakura' }
+      ]
     };
-    window.addEventListener('keydown', onKey);
 
-    // Touch controls
-    document.getElementById('btn-move-left').addEventListener('click', () => {
-      basketX = Math.max(10, basketX - 35);
-      basket.style.left = `${basketX}px`;
-    });
-    document.getElementById('btn-move-right').addEventListener('click', () => {
-      const currentW = arena.clientWidth || 340;
-      basketX = Math.min(currentW - 80, basketX + 35);
-      basket.style.left = `${basketX}px`;
-    });
-
-    // Drag / Touch directly in arena
-    arena.addEventListener('touchmove', (e) => {
-      const rect = arena.getBoundingClientRect();
-      const currentW = arena.clientWidth || 340;
-      const touchX = e.touches[0].clientX - rect.left - 30;
-      basketX = Math.max(10, Math.min(currentW - 70, touchX));
-      basket.style.left = `${basketX}px`;
-    });
-    arena.addEventListener('mousemove', (e) => {
-      if (e.buttons > 0) {
-        const rect = arena.getBoundingClientRect();
-        const currentW = arena.clientWidth || 340;
-        const mouseX = e.clientX - rect.left - 30;
-        basketX = Math.max(10, Math.min(currentW - 70, mouseX));
-        basket.style.left = `${basketX}px`;
-      }
-    });
-
-    // Spawn falling items
-    const spawnTimer = setInterval(() => {
-      if (score >= targetScore) return;
-      const el = document.createElement('div');
-      el.className = 'falling-item';
-      const isGood = Math.random() > 0.25;
-      el.innerHTML = isGood ? (Math.random() > 0.5 ? '💡' : '🧋') : '⚡';
-      el.dataset.type = isGood ? 'good' : 'bad';
-      const currentW = arena.clientWidth || 340;
-      el.style.left = `${Math.floor(Math.random() * (currentW - 40))}px`;
-      el.style.top = '0px';
-      arena.appendChild(el);
-      items.push({ elem: el, y: 0, speed: 2 + Math.random() * 2 });
-    }, 800);
-
-    // Game loop
-    const updateGame = () => {
-      for (let i = items.length - 1; i >= 0; i--) {
-        const it = items[i];
-        it.y += it.speed;
-        it.elem.style.top = `${it.y}px`;
-
-        // Collision with basket
-        const bRect = basket.getBoundingClientRect();
-        const iRect = it.elem.getBoundingClientRect();
-
-        if (
-          iRect.bottom >= bRect.top &&
-          iRect.top <= bRect.bottom &&
-          iRect.right >= bRect.left &&
-          iRect.left <= bRect.right
-        ) {
-          if (it.elem.dataset.type === 'good') {
-            score++;
-            countElem.textContent = `${score}/${targetScore}`;
-            if (window.audioManager) window.audioManager.playCollect();
-          } else {
-            if (window.audioManager) window.audioManager.playHit(false);
-          }
-          it.elem.remove();
-          items.splice(i, 1);
-
-          if (score >= targetScore) {
-            clearInterval(spawnTimer);
-            window.removeEventListener('keydown', onKey);
-            this.container.querySelector('.mg-header p').innerHTML = '<span style="color:#70e000; font-weight:bold;">Đột phá thành công! Sản phẩm teamwork tuyệt vời ngoài mong đợi!</span>';
-            this.finish(true);
-            return;
-          }
-          continue;
+    const QUESTION_BANK = {
+      chuyenmon: [
+        {
+          prompt: 'Tên đầy đủ viết tắt của CLB Tiếng Nhật JPC là (FTU) _________ Club.',
+          answer: 'Japanese',
+          accept: ['japanese'],
+          clue: '_ _ _ _ _ _ _ _ (8 chữ cái tiếng Anh)'
+        },
+        {
+          prompt: 'Loại búp bê gỗ truyền thống Nhật Bản đại diện cho 5 ban của JPC gọi là _________.',
+          answer: 'Kokeshi',
+          accept: ['kokeshi'],
+          clue: '_ _ _ _ _ _ _ (7 chữ cái)'
+        },
+        {
+          prompt: 'Câu chào tiếng Nhật xuất hiện trong tên chiến dịch chào tân Gen 22 là _________ Gen 22.',
+          answer: 'Konnichiwa',
+          accept: ['konnichiwa'],
+          clue: '_ _ _ _ _ _ _ _ _ _ (10 chữ cái)'
         }
-
-        // Out of bounds
-        if (it.y > arena.clientHeight) {
-          it.elem.remove();
-          items.splice(i, 1);
+      ],
+      nhansu: [
+        {
+          prompt: 'Slogan gắn kết nổi tiếng của JPC: "_________ Ichie — Nhất kỳ nhất hội".',
+          answer: 'Ichigo',
+          accept: ['ichigo', 'ichigo ichie'],
+          clue: '_ _ _ _ _ _ (6 chữ cái)'
+        },
+        {
+          prompt: 'Với các thành viên, JPC không chỉ là một CLB mà còn là một mái nhà _________ tại Ngoại Thương.',
+          answer: 'Gia đình',
+          accept: ['gia dinh', 'gia đình', 'am ap', 'ấm áp'],
+          clue: '_ _ _ / _ _ _ _ (2 tiếng)'
         }
-      }
-      this.animFrame = requestAnimationFrame(updateGame);
+      ],
+      thongtin: [
+        {
+          prompt: 'Chiếc áo khoác lễ hội truyền thống đầy kiêu hãnh trong các ấn phẩm của JPC gọi là áo _________.',
+          answer: 'Happi',
+          accept: ['happi'],
+          clue: '_ _ _ _ _ (5 chữ cái)'
+        },
+        {
+          prompt: 'Nhân vật dễ thương từng xuất hiện trong bộ câu hỏi Phỏng Vấn Vòng 2 rất được nhà JPC yêu thích là _________.',
+          answer: 'Chiikawa',
+          accept: ['chiikawa'],
+          clue: '_ _ _ _ _ _ _ _ (8 chữ cái)'
+        }
+      ],
+      tochuc: [
+        {
+          prompt: 'Ngày hội các Câu lạc bộ thường niên tại FTU vào 18/10 viết tắt là _________ (FTU Club\'s Day).',
+          answer: 'FCD',
+          accept: ['fcd', 'ftu club day', 'ftu clubs day'],
+          clue: '_ _ _ (3 chữ cái viết tắt)'
+        },
+        {
+          prompt: 'Thử thách Hội Trát 3.1 hợp lực tổ đội đánh bại Tengu mang tên _________.',
+          answer: 'Phá Phong',
+          accept: ['pha phong', 'phá phong'],
+          clue: '_ _ _ / _ _ _ _ _ (2 tiếng)'
+        }
+      ],
+      doingoai: [
+        {
+          prompt: 'Trường Đại học Ngoại Thương — mái nhà chung của đại gia đình JPC — viết tắt là _________.',
+          answer: 'FTU',
+          accept: ['ftu'],
+          clue: '_ _ _ (3 chữ cái)'
+        },
+        {
+          prompt: 'Con đường huyền thoại gắn liền với Đại học Ngoại Thương Hà Nội tại số 91 là phố _________.',
+          answer: 'Chùa Láng',
+          accept: ['chua lang', 'chùa láng'],
+          clue: '_ _ _ _ / _ _ _ _ (2 tiếng)'
+        }
+      ]
     };
-    updateGame();
 
-    // Timer countdown
-    this.timer = setInterval(() => {
-      timeLeft--;
-      timeElem.textContent = `${timeLeft}s`;
-      if (timeLeft <= 0) {
-        clearInterval(spawnTimer);
-        window.removeEventListener('keydown', onKey);
-        // Automatically give pass so user doesn't get stuck
+    const normalizeAnswer = (text) => {
+      return String(text || '')
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
+
+    const game = window.gameInstance;
+    const sync = window.firebaseSync;
+    const myPlayerId = sync ? sync.playerId : ('local_' + Math.random().toString(36).slice(2, 8));
+    const myDept = (game && game.player && game.player.selectedDept) ? game.player.selectedDept : 'chuyenmon';
+    const myDeptObj = DEPTS.find(d => d.key === myDept) || DEPTS[0];
+    const myName = (game && game.playerName) ? game.playerName : 'Kouhai Gen 22';
+    const myServerLabel = sync ? sync.serverInfo.serverLabel : 'Máy Chủ Cục Bộ';
+
+    let roomState = null;
+    let roomMode = 'local';
+    let resolvedSlots = {};
+    let questionsList = [];
+    let currentQIdx = 0;
+    let tenguHp = 100;
+    let questionStartTime = Date.now();
+    let battleHistory = [];
+    let qLocked = false;
+    let battleFinished = false;
+
+    const showPhase = (phase) => {
+      if (lobbyScreen) lobbyScreen.classList.toggle('hidden', phase !== 'lobby');
+      if (fightScreen) fightScreen.classList.toggle('hidden', phase !== 'fight');
+      if (resultScreen) resultScreen.classList.toggle('hidden', phase !== 'result');
+    };
+
+    const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    const buildFullSlots = (existingSlots = {}) => {
+      const filled = {};
+      DEPTS.forEach(d => {
+        if (existingSlots[d.key] && existingSlots[d.key].isHuman) {
+          filled[d.key] = { ...existingSlots[d.key] };
+        } else {
+          const bot = pickRandom(ALLY_PROFILES[d.key]);
+          filled[d.key] = {
+            playerId: 'ally_' + d.key,
+            playerName: bot.playerName,
+            dept: d.key,
+            deptName: d.name,
+            serverKey: 'cross_' + d.key,
+            serverLabel: bot.serverLabel,
+            isHuman: false
+          };
+        }
+      });
+      return filled;
+    };
+
+    // Derangement: NO department ever gets assigned its own department's question!
+    // Guarantee Câu 5 (mấu chốt cuối cùng) is cross-ban assigned to a human player (prefer local player if solo/lead)
+    const generateCrossBanQuestions = (slots) => {
+      const deptKeys = DEPTS.map(d => d.key);
+      // Cyclic shift guarantees assignedDept !== sourceDept for all 5 depts!
+      const shift = 1 + Math.floor(Math.random() * 4); // 1..4 so never 0
+      const pairs = deptKeys.map((srcKey, idx) => {
+        const assignedKey = deptKeys[(idx + shift) % deptKeys.length];
+        return { sourceDept: srcKey, assignedDept: assignedKey };
+      });
+
+      // Move pair whose assignedDept matches local player's dept to LAST index (index 4 = Câu 5 Mấu chốt!)
+      const myPairIdx = pairs.findIndex(p => p.assignedDept === myDept);
+      if (myPairIdx !== -1 && myPairIdx !== 4) {
+        const tmp = pairs[4];
+        pairs[4] = pairs[myPairIdx];
+        pairs[myPairIdx] = tmp;
+      }
+
+      return pairs.map((p, idx) => {
+        const pool = QUESTION_BANK[p.sourceDept];
+        const chosen = pickRandom(pool);
+        const srcMeta = DEPTS.find(d => d.key === p.sourceDept);
+        const asnMeta = DEPTS.find(d => d.key === p.assignedDept);
+        return {
+          qNum: idx + 1,
+          sourceDept: p.sourceDept,
+          sourceName: srcMeta.name,
+          sourceShort: srcMeta.short,
+          assignedDept: p.assignedDept,
+          assignedName: asnMeta.name,
+          assignedShort: asnMeta.short,
+          assigneePlayerName: slots[p.assignedDept]?.playerName || asnMeta.name,
+          assigneeIsHuman: !!slots[p.assignedDept]?.isHuman,
+          prompt: chosen.prompt,
+          answer: chosen.answer,
+          accept: chosen.accept,
+          clue: chosen.clue,
+          isFinalDecisive: idx === 4
+        };
+      });
+    };
+
+    const renderLobbySlots = (slots = {}) => {
+      if (!lobbyGrid) return;
+      lobbyGrid.innerHTML = '';
+      DEPTS.forEach(d => {
+        const member = slots[d.key];
+        const isYou = member && member.playerId === myPlayerId;
+        const slotEl = document.createElement('div');
+        slotEl.className = `tengu-lobby-slot ${isYou ? 'you' : (member ? 'matched' : '')}`;
+        slotEl.innerHTML = `
+          <img src="${d.img}" alt="${d.name}">
+          <div class="tengu-slot-dept">${d.name}</div>
+          <div class="tengu-slot-player">${member ? member.playerName : 'Đang tìm...'}${isYou ? ' (Bạn)' : ''}</div>
+          <div class="tengu-slot-server">${member ? '🌐 ' + member.serverLabel : '⏳ Hàng chờ'}</div>
+        `;
+        lobbyGrid.appendChild(slotEl);
+      });
+    };
+
+    const updateHPUI = () => {
+      const hpVal = document.getElementById('tengu-hp-value');
+      const segs = document.querySelectorAll('#tengu-hp-segments .hp-seg');
+      const activeCount = Math.round(tenguHp / 20);
+      if (hpVal) hpVal.textContent = `${tenguHp}% / 100% HP`;
+      segs.forEach((seg, idx) => {
+        seg.classList.toggle('active', idx < activeCount);
+      });
+    };
+
+    const renderPartyStrip = (q) => {
+      const strip = document.getElementById('tengu-battle-party-strip');
+      if (!strip || !q) return;
+      strip.innerHTML = '';
+      DEPTS.forEach(d => {
+        const member = resolvedSlots[d.key];
+        const isSource = q.sourceDept === d.key;
+        const isAssigned = q.assignedDept === d.key;
+        const chip = document.createElement('div');
+        chip.className = `tengu-party-chip ${isAssigned ? 'assigned-dept' : (isSource ? 'source-dept' : '')}`;
+        const tag = isAssigned ? '🎯 TRẢ LỜI' : (isSource ? '📜 CHỦ ĐỀ' : d.short);
+        chip.innerHTML = `
+          <img src="${d.img}" alt="${d.short}">
+          <div class="tengu-party-chip-meta">
+            <div class="tengu-party-chip-dept">${tag} · ${d.short}</div>
+            <div class="tengu-party-chip-name">${member ? member.playerName : d.short}</div>
+          </div>
+        `;
+        strip.appendChild(chip);
+      });
+    };
+
+    const showHitVfx = (dmgText = '-20% HP!') => {
+      const wrap = document.getElementById('tengu-boss-visual-wrap');
+      const dmg = document.getElementById('tengu-dmg-float');
+      if (dmg) {
+        dmg.textContent = dmgText;
+        dmg.classList.remove('hidden');
+      }
+      if (wrap) {
+        wrap.classList.remove('hit');
+        void wrap.offsetWidth;
+        wrap.classList.add('hit');
+      }
+      setTimeout(() => {
+        if (dmg) dmg.classList.add('hidden');
+      }, 650);
+    };
+
+    const finishQuestion = async (ok, solverName, submittedText, elapsedSec) => {
+      if (qLocked || battleFinished) return;
+      qLocked = true;
+
+      if (this.tenguTickTimer) clearInterval(this.tenguTickTimer);
+      if (this.tenguAllyTimer) clearTimeout(this.tenguAllyTimer);
+      this.tenguTickTimer = null;
+      this.tenguAllyTimer = null;
+
+      const q = questionsList[currentQIdx];
+      const feedbackEl = document.getElementById('tengu-combat-feedback');
+
+      if (ok) {
+        tenguHp = Math.max(0, tenguHp - 20);
+        updateHPUI();
+        showHitVfx(q.isFinalDecisive ? '⚡ -20% KẾT LIỄU!' : '-20% HP!');
+        if (window.audioManager) window.audioManager.playHit(true);
+        if (feedbackEl) {
+          feedbackEl.style.color = '#81c784';
+          feedbackEl.textContent = `⚔️ CHÍNH XÁC (${elapsedSec.toFixed(1)}s)! ${solverName} gây -20% HP lên Tengu!`;
+        }
+      } else {
+        if (window.audioManager) window.audioManager.playHit(false);
+        if (feedbackEl) {
+          feedbackEl.style.color = '#ff8a80';
+          feedbackEl.textContent = `⌛ HẾT GIỜ 10s! Đáp án đúng là "${q.answer}" — Tengu chặn được đòn này!`;
+        }
+      }
+
+      battleHistory.push({
+        qNum: q.qNum,
+        sourceName: q.sourceName,
+        assignedName: q.assignedName,
+        solverName,
+        answer: q.answer,
+        ok,
+        elapsedSec,
+        isFinal: q.isFinalDecisive
+      });
+
+      if (roomState && sync && (roomMode === 'firebase' || roomMode === 'master')) {
+        sync.pushRoomUpdate(
+          roomState,
+          roomMode,
+          ok ? 'solve_question' : 'timeout_question',
+          {
+            qIdx: currentQIdx,
+            solvedBy: solverName,
+            solvedDept: q.assignedDept,
+            sourceDept: q.sourceDept,
+            assignedName: solverName,
+            assignedDept: q.assignedDept,
+            answer: submittedText || q.answer,
+            correctAnswer: q.answer,
+            timeUsed: elapsedSec
+          }
+        );
+      }
+
+      setTimeout(() => {
+        if (battleFinished) return;
+        if (currentQIdx >= questionsList.length - 1) {
+          renderResultScreen();
+        } else {
+          currentQIdx++;
+          renderActiveQuestion();
+        }
+      }, 750);
+    };
+
+    const renderActiveQuestion = () => {
+      if (battleFinished) return;
+      qLocked = false;
+      const q = questionsList[currentQIdx];
+      if (!q) return;
+
+      const counterEl = document.getElementById('tengu-q-counter');
+      const boxEl = document.getElementById('tengu-riddle-box');
+      const assignBanner = document.getElementById('tengu-cross-assign-banner');
+      const questionEl = document.getElementById('tengu-riddle-question');
+      const clueEl = document.getElementById('tengu-riddle-clue');
+      const allyBanner = document.getElementById('tengu-ally-banner');
+      const answerInput = document.getElementById('tengu-answer-input');
+      const submitBtn = document.getElementById('tengu-submit-btn');
+      const feedbackEl = document.getElementById('tengu-combat-feedback');
+      const timerSecEl = document.getElementById('tengu-timer-sec');
+      const timerPill = document.getElementById('tengu-timer-pill');
+      const timerBar = document.getElementById('tengu-timer-bar-fill');
+
+      const assignee = resolvedSlots[q.assignedDept];
+      const isMyTurn = q.assignedDept === myDept;
+      const isOtherHumanTurn = assignee && assignee.isHuman && assignee.playerId !== myPlayerId;
+
+      if (counterEl) {
+        counterEl.textContent = q.isFinalDecisive ? `⚡ CÂU ${q.qNum}/5 · MẤU CHỐT!` : `CÂU ${q.qNum} / 5 (-20% HP)`;
+      }
+      if (boxEl) boxEl.classList.toggle('final-blow', !!q.isFinalDecisive);
+
+      if (assignBanner) {
+        const whoText = isMyTurn ? `${assignee.playerName} (${q.assignedName} · BẠN)` : `${assignee.playerName} (${q.assignedName})`;
+        assignBanner.textContent = q.isFinalDecisive
+          ? `⚡ MẤU CHỐT KẾT LIỄU: Câu hỏi của [${q.sourceName}] ➔ 🎯 Chỉ định [${whoText}] tung đòn cuối!`
+          : `📜 Câu hỏi của [${q.sourceName}] ➔ 🎯 Chỉ định [${whoText}] trả lời`;
+      }
+
+      if (questionEl) questionEl.textContent = q.prompt;
+      if (clueEl) clueEl.textContent = `🔮 Gợi ý Nhân Sư: ${q.clue}`;
+      if (feedbackEl) feedbackEl.textContent = '';
+
+      renderPartyStrip(q);
+
+      if (allyBanner) {
+        if (isMyTurn) {
+          allyBanner.classList.add('hidden');
+        } else if (isOtherHumanTurn) {
+          allyBanner.classList.remove('hidden');
+          allyBanner.textContent = `🌐 Đang chờ người chơi ${assignee.playerName} (${assignee.serverLabel}) nhập đáp án...`;
+        } else {
+          allyBanner.classList.remove('hidden');
+          allyBanner.textContent = `⌨️ Đồng đội ${assignee.playerName} (${assignee.serverLabel}) đang suy nghĩ... Bạn có thể nhập hỗ trợ sớm hơn!`;
+        }
+      }
+
+      if (answerInput) {
+        answerInput.value = '';
+        answerInput.disabled = isOtherHumanTurn;
+        answerInput.placeholder = isMyTurn
+          ? 'Nhập từ còn thiếu (-20% HP)...'
+          : (isOtherHumanTurn ? `Chờ ${assignee.playerName} (${q.assignedShort}) trả lời...` : 'Hỗ trợ đồng đội nhập đáp án để đánh nhanh hơn...');
+        if (!isOtherHumanTurn) {
+          setTimeout(() => answerInput.focus(), 40);
+        }
+      }
+      if (submitBtn) {
+        submitBtn.disabled = isOtherHumanTurn;
+        submitBtn.textContent = isMyTurn
+          ? (q.isFinalDecisive ? '⚡ ĐÒN KẾT LIỄU' : '⚔️ TUNG ĐÒN')
+          : '🤝 HỖ TRỢ SỚM';
+      }
+
+      // 10.0-Second Countdown Loop
+      const DURATION_MS = 10000;
+      questionStartTime = Date.now();
+      if (this.tenguTickTimer) clearInterval(this.tenguTickTimer);
+
+      this.tenguTickTimer = setInterval(() => {
+        if (qLocked || battleFinished) return;
+        const elapsedMs = Date.now() - questionStartTime;
+        const remainingMs = Math.max(0, DURATION_MS - elapsedMs);
+        const remainingSec = remainingMs / 1000;
+        const pct = (remainingMs / DURATION_MS) * 100;
+
+        if (timerSecEl) timerSecEl.textContent = `${remainingSec.toFixed(1)}s`;
+        if (timerBar) timerBar.style.width = `${pct}%`;
+        const isUrgent = remainingSec <= 3.5;
+        if (timerPill) timerPill.classList.toggle('urgent', isUrgent);
+        if (timerBar) timerBar.classList.toggle('urgent', isUrgent);
+
+        if (remainingMs <= 0) {
+          finishQuestion(false, assignee ? assignee.playerName : q.assignedName, '', 10);
+        }
+      }, 80);
+
+      // Cross-server ally behavior on non-human bot slots (auto-strikes around ~4s if player doesn't assist faster)
+      if (!isMyTurn && !isOtherHumanTurn && assignee) {
+        const delayMs = 3400 + Math.floor(Math.random() * 1400);
+        this.tenguAllyTimer = setTimeout(() => {
+          if (qLocked || battleFinished) return;
+          const elapsedSec = (Date.now() - questionStartTime) / 1000;
+          finishQuestion(true, assignee.playerName, q.answer, elapsedSec);
+        }, delayMs);
+      }
+    };
+
+    const renderResultScreen = () => {
+      battleFinished = true;
+      this.cleanup();
+      showPhase('result');
+
+      const finalBlowOk = battleHistory[4] && battleHistory[4].ok;
+      const defeated = (tenguHp <= 0) && !!finalBlowOk;
+
+      const rBadge = document.getElementById('tengu-result-badge');
+      const rTitle = document.getElementById('tengu-result-title');
+      const rDesc = document.getElementById('tengu-result-desc');
+      const rLog = document.getElementById('tengu-result-log');
+      const winBtn = document.getElementById('btn-tengu-victory-continue');
+      const retryBtn = document.getElementById('btn-tengu-retry');
+
+      if (rBadge) {
+        rBadge.className = `tengu-result-badge ${defeated ? '' : 'fail'}`;
+        rBadge.textContent = defeated
+          ? '🎉 ĐẠI THẮNG PHÁ PHONG · TENGU 0% HP!'
+          : `⚠️ TENGU VẪN CÒN ${tenguHp}% HP!`;
+      }
+      if (rTitle) {
+        rTitle.textContent = defeated
+          ? 'TỔ ĐỘI 5 BAN ĐÃ ĐÁNH BẠI HOÀN TOÀN TENGU!'
+          : 'PHONG ẤN CHƯA VỠ HOÀN TOÀN!';
+      }
+      if (rDesc) {
+        rDesc.textContent = defeated
+          ? 'Nhờ sự phối hợp liên máy chủ ăn ý giữa 5 Ban JPC và đòn mấu chốt Câu 5 chuẩn xác, Tengu Bão Tố đã bị phong ấn hoàn toàn tại Nhà Thể Chất FTU!'
+          : 'Tengu chỉ bị khuất phục khi cả 5 câu Nhân Sư (100% HP) đều được giải đúng trong 10s và Câu 5 Mấu Chốt thành công. Hãy tái đấu cùng tổ đội ngay nhé!';
+      }
+
+      if (rLog) {
+        rLog.innerHTML = battleHistory.map(h => `
+          <div class="tengu-log-row ${h.ok ? 'ok' : 'miss'}">
+            <span>${h.ok ? '✅' : '❌'} <b>Câu ${h.qNum}${h.isFinal ? ' (Mấu Chốt)' : ''}</b> · ${h.sourceName} ➔ ${h.solverName}</span>
+            <span>Đáp án: <b>${h.answer}</b> (${h.elapsedSec.toFixed(1)}s)</span>
+          </div>
+        `).join('');
+      }
+
+      if (winBtn) winBtn.classList.toggle('hidden', !defeated);
+      if (retryBtn) retryBtn.classList.toggle('hidden', defeated);
+
+      if (defeated && window.audioManager) window.audioManager.playFanfare();
+      else if (window.audioManager) window.audioManager.playHit(false);
+
+      // Record Stage 3.1 battle telemetry
+      if (game && game.stageProgress && game.stageProgress.stage3_1) {
+        game.stageProgress.stage3_1.tenguDefeated = defeated;
+        game.stageProgress.stage3_1.teamworkDone = defeated;
+        game.stageProgress.stage3_1.lastHpLeft = tenguHp;
+        if (window.firebaseSync) window.firebaseSync.syncGameProgress(game, true);
+      }
+    };
+
+    const startBossBattle = () => {
+      if (this.tenguMatchTimer) {
+        clearInterval(this.tenguMatchTimer);
+        this.tenguMatchTimer = null;
+      }
+      resolvedSlots = buildFullSlots(roomState ? roomState.slots : {
+        [myDept]: {
+          playerId: myPlayerId,
+          playerName: myName,
+          dept: myDept,
+          deptName: myDeptObj.name,
+          serverLabel: myServerLabel,
+          isHuman: true
+        }
+      });
+      questionsList = generateCrossBanQuestions(resolvedSlots);
+      currentQIdx = 0;
+      tenguHp = 100;
+      battleHistory = [];
+      battleFinished = false;
+      updateHPUI();
+      showPhase('fight');
+
+      if (roomState && sync && (roomMode === 'firebase' || roomMode === 'master')) {
+        sync.pushRoomUpdate(roomState, roomMode, 'start_battle', {
+          slots: resolvedSlots,
+          questions: questionsList
+        });
+      }
+      renderActiveQuestion();
+    };
+
+    // Bind Form Submit
+    const answerForm = document.getElementById('tengu-answer-form');
+    if (answerForm) {
+      answerForm.onsubmit = (e) => {
+        e.preventDefault();
+        if (qLocked || battleFinished) return;
+        const inputEl = document.getElementById('tengu-answer-input');
+        const feedbackEl = document.getElementById('tengu-combat-feedback');
+        const q = questionsList[currentQIdx];
+        if (!inputEl || !q) return;
+
+        const userNorm = normalizeAnswer(inputEl.value);
+        const accepted = q.accept.map(normalizeAnswer);
+        const isMatch = userNorm.length > 0 && (accepted.includes(userNorm) || userNorm === normalizeAnswer(q.answer));
+
+        if (isMatch) {
+          const elapsedSec = Math.max(0.2, (Date.now() - questionStartTime) / 1000);
+          finishQuestion(true, myName, inputEl.value.trim(), elapsedSec);
+        } else {
+          if (window.audioManager) window.audioManager.playHit(false);
+          if (feedbackEl) {
+            feedbackEl.style.color = '#ffb74d';
+            feedbackEl.textContent = '❌ Chưa khớp từ khóa! Hãy thử gõ lại nhanh khi đồng hồ 10s còn chạy!';
+          }
+          inputEl.select();
+        }
+      };
+    }
+
+    if (startNowBtn) startNowBtn.onclick = () => startBossBattle();
+
+    const winBtn = document.getElementById('btn-tengu-victory-continue');
+    if (winBtn) {
+      winBtn.onclick = () => {
+        tenguModal.classList.add('hidden');
         this.finish(true);
+      };
+    }
+
+    const retryBtn = document.getElementById('btn-tengu-retry');
+    if (retryBtn) {
+      retryBtn.onclick = () => {
+        showPhase('lobby');
+        startMatchmaking();
+      };
+    }
+
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        battleFinished = true;
+        this.cleanup();
+        tenguModal.classList.add('hidden');
+      };
+    }
+
+    const startMatchmaking = async () => {
+      showPhase('lobby');
+      const initialSlots = {
+        [myDept]: {
+          playerId: myPlayerId,
+          playerName: myName,
+          dept: myDept,
+          deptName: myDeptObj.name,
+          serverLabel: myServerLabel,
+          isHuman: true
+        }
+      };
+      renderLobbySlots(initialSlots);
+
+      if (sync) {
+        try {
+          const joined = await sync.joinStage31Room({
+            playerName: myName,
+            dept: myDept,
+            deptName: myDeptObj.name
+          });
+          roomMode = joined.mode;
+          roomState = joined.room;
+          if (syncBadgeEl) {
+            syncBadgeEl.textContent = roomMode === 'firebase'
+              ? '🔥 Phòng Liên Máy Chủ (Firebase)'
+              : (roomMode === 'master' ? '👑 Phòng Máy Chủ Mẹ' : '🌐 Tổ Đội Liên Máy Chủ');
+          }
+          renderLobbySlots(buildFullSlotsPreview(roomState.slots));
+
+          this.tenguUnsubscribe = sync.subscribeBossRoom(roomState.roomId, roomMode, (updatedRoom) => {
+            roomState = updatedRoom;
+            if (updatedRoom.status === 'matching') {
+              renderLobbySlots(buildFullSlotsPreview(updatedRoom.slots));
+              return;
+            }
+            if (updatedRoom.status === 'fighting' && Array.isArray(updatedRoom.questions)) {
+              const inLobby = lobbyScreen && !lobbyScreen.classList.contains('hidden');
+              if (inLobby) {
+                if (this.tenguMatchTimer) {
+                  clearInterval(this.tenguMatchTimer);
+                  this.tenguMatchTimer = null;
+                }
+                resolvedSlots = updatedRoom.slots || buildFullSlots(initialSlots);
+                questionsList = updatedRoom.questions;
+                tenguHp = typeof updatedRoom.tenguHp === 'number' ? updatedRoom.tenguHp : 100;
+                currentQIdx = updatedRoom.currentQIdx || 0;
+                battleHistory = Array.isArray(updatedRoom.history) ? updatedRoom.history : [];
+                battleFinished = false;
+                updateHPUI();
+                showPhase('fight');
+                renderActiveQuestion();
+              } else if (updatedRoom.currentQIdx > currentQIdx && !qLocked && !battleFinished) {
+                if (this.tenguTickTimer) clearInterval(this.tenguTickTimer);
+                if (this.tenguAllyTimer) clearTimeout(this.tenguAllyTimer);
+                tenguHp = updatedRoom.tenguHp;
+                currentQIdx = updatedRoom.currentQIdx;
+                if (Array.isArray(updatedRoom.history)) battleHistory = updatedRoom.history;
+                updateHPUI();
+                showHitVfx('-20% HP!');
+                renderActiveQuestion();
+              }
+            } else if ((updatedRoom.status === 'victory' || updatedRoom.status === 'failed') && !battleFinished) {
+              tenguHp = typeof updatedRoom.tenguHp === 'number' ? updatedRoom.tenguHp : tenguHp;
+              if (Array.isArray(updatedRoom.history)) battleHistory = updatedRoom.history;
+              updateHPUI();
+              renderResultScreen();
+            }
+          });
+        } catch (_) {}
       }
-    }, 1000);
+
+      // Countdown auto-matchmaking (4 seconds -> fills open slots with random cross-server allies & enters battle)
+      let countdown = 4;
+      if (matchStatusEl) {
+        matchStatusEl.textContent = `🔍 Đang ghép ngẫu nhiên đủ 5 Ban liên máy chủ (${countdown}s)...`;
+      }
+      if (this.tenguMatchTimer) clearInterval(this.tenguMatchTimer);
+      this.tenguMatchTimer = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          if (matchStatusEl) {
+            matchStatusEl.textContent = `🔍 Đang ghép ngẫu nhiên đủ 5 Ban liên máy chủ (${countdown}s)...`;
+          }
+        } else {
+          clearInterval(this.tenguMatchTimer);
+          this.tenguMatchTimer = null;
+          const preview = buildFullSlots(roomState ? roomState.slots : initialSlots);
+          renderLobbySlots(preview);
+          if (matchStatusEl) {
+            matchStatusEl.textContent = '✅ Tổ đội 5 Ban đã sẵn sàng! Chuẩn bị tiến công Tengu!';
+          }
+          setTimeout(() => {
+            if (!tenguModal.classList.contains('hidden')) startBossBattle();
+          }, 500);
+        }
+      }, 1000);
+    };
+
+    const buildFullSlotsPreview = (slots = {}) => {
+      const merged = {};
+      DEPTS.forEach(d => {
+        if (slots[d.key]) merged[d.key] = slots[d.key];
+      });
+      return merged;
+    };
+
+    startMatchmaking();
   }
 
   // MINIGAME 3.2: CHÂN DIỆN - GƯƠNG SOI NỘI TÂM (Soul Dialogue)

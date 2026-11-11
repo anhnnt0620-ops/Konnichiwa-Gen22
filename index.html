@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&subset=vietnamese&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="Image/Logo.png">
-  <link rel="stylesheet" href="css/style.css?v=3.5">
+  <link rel="stylesheet" href="css/style.css?v=4.0">
 </head>
 <body>
 
@@ -38,6 +38,7 @@
         <span class="hud-player-tag" id="hud-player-tag">🌸 Kouhai Gen 22</span>
       </div>
       <div class="hud-right">
+        <button class="hud-server-pill" id="hud-server-pill" title="Xem liên kết Firebase & Máy Chủ Mẹ">🌐 Máy Chủ</button>
         <button class="icon-btn" id="btn-sound" title="Âm thanh">🔊</button>
         <button class="icon-btn" id="btn-memory" title="Sổ Kỷ Niệm">📖 Sổ Kỷ Niệm</button>
         <button class="icon-btn" id="btn-fullscreen" title="Toàn màn hình">⛶</button>
@@ -394,6 +395,153 @@
       </div>
     </div>
 
+    <!-- HỘI TRÁT 3.1: PHÁ PHONG — ĐẤU TRƯỜNG TỔ ĐỘI 5 BAN VS. TENGU -->
+    <div id="tengu-battle-modal" class="modal-overlay hidden">
+      <div class="tengu-arena-card">
+        <div class="tengu-arena-header">
+          <div class="tengu-title-group">
+            <span class="title-badge">NHÀ THỂ CHẤT FTU · HỘI TRÁT 3.1: PHÁ PHONG</span>
+            <h2>👹 ĐẤU TRƯỜNG NHÂN SƯ · PHÁ PHONG TENGU</h2>
+          </div>
+          <div class="tengu-server-chip" id="tengu-sync-badge">🌐 Liên kết 5 Ban</div>
+          <button class="modal-close-icon-btn" id="btn-close-tengu-modal" title="Rời đấu trường">✕</button>
+        </div>
+
+        <!-- PHASE 1: MATCHMAKING LOBBY (GHÉP NGẪU NHIÊN 5 BAN LIÊN MÁY CHỦ) -->
+        <div id="tengu-lobby-screen" class="tengu-lobby-screen">
+          <div class="tengu-lobby-intro">
+            <img src="Image/Tengu.png" alt="Tengu Boss" class="tengu-lobby-boss-preview">
+            <div>
+              <h3>GHÉP TỔ ĐỘI 5 BAN LIÊN MÁY CHỦ</h3>
+              <p>Hệ thống đang ghép ngẫu nhiên 5 thành viên đại diện đủ 5 Ban JPC (gắn với Kokeshi Main của bạn & đồng đội cross-server). Mỗi câu hỏi chéo ban kéo dài <b>10 giây</b> = <b>20% HP</b> của Tengu!</p>
+            </div>
+          </div>
+
+          <div class="tengu-party-lobby-grid" id="tengu-party-lobby-grid">
+            <!-- 5 Ban cards rendered dynamically -->
+          </div>
+
+          <div class="tengu-lobby-footer">
+            <div class="tengu-match-status" id="tengu-match-status">🔍 Đang tìm kiếm người chơi ở các ban khác trên Firebase & Máy Chủ Mẹ...</div>
+            <div class="tengu-lobby-actions">
+              <button type="button" class="gold-btn" id="btn-tengu-start-now">⚔️ BẮT ĐẦU ĐÁNH TENGU NGAY ▶</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PHASE 2: ACTIVE 5-QUESTION CROSS-BAN BOSS BATTLE -->
+        <div id="tengu-fight-screen" class="tengu-fight-screen hidden">
+          <!-- Top Boss Status + HP Segments + Timer -->
+          <div class="tengu-boss-hud">
+            <div class="tengu-boss-visual-wrap" id="tengu-boss-visual-wrap">
+              <img src="Image/Tengu.png" alt="Tengu" class="tengu-boss-img" id="tengu-boss-img">
+              <div class="tengu-dmg-float hidden" id="tengu-dmg-float">-20% HP!</div>
+            </div>
+
+            <div class="tengu-boss-stats">
+              <div class="tengu-hp-top-row">
+                <span class="tengu-boss-name">👹 BÃO TỐ YŌKAI: TENGU PHONG ẤN</span>
+                <span class="tengu-hp-value" id="tengu-hp-value">100% / 100% HP</span>
+              </div>
+              <div class="tengu-hp-segments" id="tengu-hp-segments">
+                <div class="hp-seg active" data-seg="0"></div>
+                <div class="hp-seg active" data-seg="1"></div>
+                <div class="hp-seg active" data-seg="2"></div>
+                <div class="hp-seg active" data-seg="3"></div>
+                <div class="hp-seg active final" data-seg="4"></div>
+              </div>
+              <div class="tengu-round-timer-row">
+                <span class="tengu-q-counter" id="tengu-q-counter">CÂU 1 / 5</span>
+                <div class="tengu-timer-pill" id="tengu-timer-pill">
+                  ⏱️ <span id="tengu-timer-sec">10.0s</span>
+                </div>
+              </div>
+              <div class="tengu-timer-bar-bg">
+                <div class="tengu-timer-bar-fill" id="tengu-timer-bar-fill"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5 Ban Party Strip -->
+          <div class="tengu-battle-party-strip" id="tengu-battle-party-strip">
+            <!-- 5 Ban mini chips rendered dynamically -->
+          </div>
+
+          <!-- Sphinx Cross-Department Riddle Box -->
+          <div class="tengu-riddle-box" id="tengu-riddle-box">
+            <div class="tengu-cross-assign-banner" id="tengu-cross-assign-banner">
+              📜 Câu hỏi của [Ban Nhân Sự] ➔ 🎯 Chỉ định [Ban Thông Tin] trả lời
+            </div>
+
+            <div class="tengu-riddle-question" id="tengu-riddle-question">
+              ...
+            </div>
+            <div class="tengu-riddle-clue" id="tengu-riddle-clue">
+              Gợi ý: _ _ _ _ _
+            </div>
+
+            <div class="tengu-ally-banner hidden" id="tengu-ally-banner">
+              ⏳ Đồng đội đang giải ấn chú...
+            </div>
+
+            <form id="tengu-answer-form" class="tengu-answer-form">
+              <input type="text" id="tengu-answer-input" class="tengu-answer-input" placeholder="Điền từ còn thiếu để tung đòn (-20% HP)..." autocomplete="off" maxlength="40">
+              <button type="submit" id="tengu-submit-btn" class="tengu-submit-btn">⚔️ TUNG ĐÒN</button>
+            </form>
+
+            <div class="tengu-combat-feedback" id="tengu-combat-feedback"></div>
+          </div>
+        </div>
+
+        <!-- PHASE 3: VICTORY / DEFEAT RESULT SCREEN -->
+        <div id="tengu-result-screen" class="tengu-result-screen hidden">
+          <div class="tengu-result-badge" id="tengu-result-badge">🎉 ĐẠI THẮNG PHÁ PHONG</div>
+          <h3 class="tengu-result-title" id="tengu-result-title">ĐÁNH BẠI HOÀN TOÀN TENGU!</h3>
+          <p class="tengu-result-desc" id="tengu-result-desc">...</p>
+          <div class="tengu-result-log" id="tengu-result-log"></div>
+          <div class="tengu-result-actions">
+            <button type="button" class="gold-btn hidden" id="btn-tengu-victory-continue">HOÀN THÀNH VÒNG 3.1 &amp; SANG VÒNG 3.2 ▶</button>
+            <button type="button" class="gold-btn btn-retry-quiz hidden" id="btn-tengu-retry">🔄 TÁI ĐẤU TENGU CÙNG TỔ ĐỘI 5 BAN</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIREBASE & MÁY CHỦ MẸ MONITOR MODAL -->
+    <div id="server-monitor-modal" class="modal-overlay hidden">
+      <div class="interactive-modal-card server-monitor-card">
+        <div class="interactive-modal-header">
+          <div class="title-badge">ĐỒNG BỘ LIÊN MÁY CHỦ · FIREBASE</div>
+          <h2>🌐 TRẠNG THÁI MÁY CHỦ MẸ &amp; DỮ LIỆU CÁC VÒNG</h2>
+          <p class="interactive-modal-sub">Theo dõi kết nối Firebase Realtime Database, các máy chủ tham gia và tiến độ người chơi qua mọi Hội Trát.</p>
+          <button class="modal-close-icon-btn" id="btn-close-server-monitor" title="Đóng">✕</button>
+        </div>
+
+        <div class="server-status-summary" id="server-status-summary">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div class="server-link-row">
+          <label for="input-master-url">URL Máy Chủ Mẹ (tuỳ chọn cho máy khác):</label>
+          <div class="server-link-controls">
+            <input type="text" id="input-master-url" class="modern-input" placeholder="http://192.168.x.x:3000">
+            <button type="button" class="action-save-btn" id="btn-save-master-url">Kết nối</button>
+          </div>
+        </div>
+
+        <div class="server-lists-grid">
+          <div class="server-list-panel">
+            <h4>🖥️ Các Máy Chủ Đã Liên Kết</h4>
+            <div id="server-nodes-list" class="server-scroll-list"></div>
+          </div>
+          <div class="server-list-panel">
+            <h4>👥 Người Chơi &amp; Tiến Độ Các Vòng</h4>
+            <div id="server-players-list" class="server-scroll-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- MEMORY BOOK MODAL (SỔ KỶ NIỆM · LƯU TIẾN ĐỘ & CHƠI LẠI MÀN) -->
     <div id="memory-modal" class="modal-overlay hidden">
       <div class="memory-modal-card">
@@ -552,13 +700,16 @@
   <div id="game-toast" class="game-toast"></div>
 
   <!-- SCRIPTS -->
-  <script src="js/audio.js?v=3.4"></script>
-  <script src="js/sprites.js?v=3.4"></script>
-  <script src="js/worldMap.js?v=3.4"></script>
-  <script src="js/dialogue.js?v=3.4"></script>
-  <script src="js/minigames.js?v=3.4"></script>
-  <script src="js/stages.js?v=3.4"></script>
-  <script src="js/controls.js?v=3.4"></script>
-  <script src="js/game.js?v=3.4"></script>
+  <script src="env-config.js" onerror="this.remove()"></script>
+  <script src="js/audio.js?v=4.0"></script>
+  <script src="js/sprites.js?v=4.0"></script>
+  <script src="js/worldMap.js?v=4.0"></script>
+  <script src="js/dialogue.js?v=4.0"></script>
+  <script src="js/firebaseSync.js?v=4.0"></script>
+  <script src="js/minigames.js?v=4.0"></script>
+  <script src="js/stages.js?v=4.0"></script>
+  <script src="js/controls.js?v=4.0"></script>
+  <script src="js/game.js?v=4.0"></script>
+  <script type="module" src="./firebase.js"></script>
 </body>
 </html>

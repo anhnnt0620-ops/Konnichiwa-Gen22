@@ -25,10 +25,15 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment files (local configs)
+.env
+/.env
 /.env.*
+.master-state.json
+database.rules.json.bak
 
 # Large media files (exceeds GitHub 100MB limit)
 *.mov
 *.mp4
 Video/*.mov
 Video/*.mp4
+node_modules

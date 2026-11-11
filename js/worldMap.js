@@ -85,7 +85,17 @@ class WorldMap {
     this.fcdBoothsCanvas = null;
     this.miniMapCanvas = null;
 
+    // Interior Zone: Không gian bên trong Nhà Thể Chất FTU (Stage 3.1 Phá Phong)
+    this.interiorCols = 26;
+    this.interiorRows = 18;
+    this.interiorWidth = this.interiorCols * this.tileSize;
+    this.interiorHeight = this.interiorRows * this.tileSize;
+    this.interiorSolidGrid = [];
+    this.interiorCanvas = null;
+    this.interiorMiniMapCanvas = null;
+
     this.initMap();
+    this.initNhaTheChatInterior();
   }
 
   isInsideCampus(c, r) {
@@ -244,9 +254,221 @@ class WorldMap {
     this.buildMiniMap();
   }
 
-  isSolid(worldX, worldY, currentStageId = 'stage1') {
+  getDimensions(currentZone = 'campus') {
+    if (currentZone === 'nha_the_chat_interior') {
+      return { width: this.interiorWidth, height: this.interiorHeight };
+    }
+    return { width: this.width, height: this.height };
+  }
+
+  initNhaTheChatInterior() {
+    this.interiorSolidGrid = [];
+    for (let r = 0; r < this.interiorRows; r++) {
+      this.interiorSolidGrid.push([]);
+      for (let c = 0; c < this.interiorCols; c++) {
+        let solid = false;
+        // Walls & perimeter bleachers
+        if (r <= 2 || c <= 1 || c >= this.interiorCols - 2) solid = true;
+        if (r >= this.interiorRows - 2) {
+          // Bottom exit doorway open at col 11..14
+          if (c < 11 || c > 14) solid = true;
+        }
+        // Tengu Boss Dais solid core at (col 12..13, row 4)
+        if (r === 4 && (c === 12 || c === 13)) solid = true;
+        this.interiorSolidGrid[r].push(solid ? 1 : 0);
+      }
+    }
+    this.buildNhaTheChatInteriorCanvas();
+  }
+
+  buildNhaTheChatInteriorCanvas() {
+    const scale = 2;
+    const w = this.interiorWidth;
+    const h = this.interiorHeight;
+    const c = document.createElement('canvas');
+    c.width = w * scale;
+    c.height = h * scale;
+    const ctx = c.getContext('2d');
+    ctx.scale(scale, scale);
+
+    // 1. Dark auditorium surround & inner wooden court
+    ctx.fillStyle = '#1d090d';
+    ctx.fillRect(0, 0, w, h);
+
+    // Hardwood floor planks (col 2..23, row 3..15)
+    const floorX = 2 * this.tileSize;
+    const floorY = 3 * this.tileSize;
+    const floorW = (this.interiorCols - 4) * this.tileSize;
+    const floorH = (this.interiorRows - 5) * this.tileSize;
+
+    ctx.fillStyle = '#d7a26c';
+    ctx.fillRect(floorX, floorY, floorW, floorH);
+
+    // Subtle gym wood plank grain stripes
+    for (let y = floorY; y < floorY + floorH; y += 16) {
+      ctx.fillStyle = (Math.floor(y / 16) % 2 === 0) ? 'rgba(255, 240, 210, 0.14)' : 'rgba(130, 75, 28, 0.08)';
+      ctx.fillRect(floorX, y, floorW, 16);
+    }
+
+    // Court paint lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.72)';
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(floorX + 24, floorY + 24, floorW - 48, floorH - 48);
+
+    // Half-court dividing line
+    ctx.beginPath();
+    ctx.moveTo(floorX + 24, h / 2 + 12);
+    ctx.lineTo(floorX + floorW - 24, h / 2 + 12);
+    ctx.stroke();
+
+    // Central 5-Ban Summoning Battle Circle
+    const cx = w / 2;
+    const cy = 10.2 * this.tileSize;
+    ctx.save();
+    ctx.fillStyle = 'rgba(92, 18, 22, 0.14)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 88, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 88, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeStyle = '#b92b45';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 66, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 5 Kokeshi Department Pedestal Pads on Pentagon Ring
+    const deptSpots = [
+      { label: 'BCM', color: '#b92b45', angle: -Math.PI / 2 },
+      { label: 'BĐN', color: '#1e88e5', angle: -Math.PI / 2 + (2 * Math.PI) / 5 },
+      { label: 'BTC', color: '#f57c00', angle: -Math.PI / 2 + (4 * Math.PI) / 5 },
+      { label: 'BTT', color: '#8e24aa', angle: -Math.PI / 2 + (6 * Math.PI) / 5 },
+      { label: 'BNS', color: '#2e7d32', angle: -Math.PI / 2 + (8 * Math.PI) / 5 }
+    ];
+    deptSpots.forEach(d => {
+      const px = cx + Math.cos(d.angle) * 76;
+      const py = cy + Math.sin(d.angle) * 76;
+      ctx.fillStyle = '#fff8ee';
+      ctx.beginPath();
+      ctx.arc(px, py, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = d.color;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.fillStyle = d.color;
+      ctx.font = 'bold 8.5px "Montserrat", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(d.label, px, py + 0.5);
+    });
+    ctx.restore();
+
+    // North Wall (Gymnasium Backdrop & Windows)
+    const wallH = 3 * this.tileSize;
+    const wallGrad = ctx.createLinearGradient(0, 0, 0, wallH);
+    wallGrad.addColorStop(0, '#3a0e14');
+    wallGrad.addColorStop(1, '#682128');
+    ctx.fillStyle = wallGrad;
+    ctx.fillRect(0, 0, w, wallH);
+
+    // Tall gym skylight windows
+    for (let wx = 4 * this.tileSize; wx < w - 4 * this.tileSize; wx += 4 * this.tileSize) {
+      if (wx > w / 2 - 90 && wx < w / 2 + 50) continue; // Space for center banner
+      ctx.fillStyle = '#a8d8ea';
+      ctx.beginPath();
+      ctx.roundRect(wx, 18, 54, 44, 5);
+      ctx.fill();
+      ctx.strokeStyle = '#ffd778';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(wx + 27, 18);
+      ctx.lineTo(wx + 27, 62);
+      ctx.moveTo(wx, 40);
+      ctx.lineTo(wx + 54, 40);
+      ctx.stroke();
+    }
+
+    // Wall Trim Baseboard
+    ctx.fillStyle = '#ffd778';
+    ctx.fillRect(floorX, wallH - 4, floorW, 4);
+
+    // Crimson Tengu Boss Dais at North Center (around col 11.5..14.5, row 3.4..5.2)
+    const daisW = 148;
+    const daisH = 74;
+    const daisX = cx - daisW / 2;
+    const daisY = 3.3 * this.tileSize;
+    ctx.fillStyle = 'rgba(20, 4, 8, 0.35)';
+    ctx.beginPath();
+    ctx.roundRect(daisX - 4, daisY + 6, daisW + 8, daisH, 10);
+    ctx.fill();
+    ctx.fillStyle = '#5c1216';
+    ctx.beginPath();
+    ctx.roundRect(daisX, daisY, daisW, daisH, 8);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Inner Yokai Seal on Dais
+    ctx.fillStyle = 'rgba(230, 57, 70, 0.28)';
+    ctx.beginPath();
+    ctx.arc(cx, daisY + daisH / 2 + 4, 28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#ff85a1';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Left & Right Gym Bleachers (col 0..1 and col 24..25)
+    for (let side = 0; side < 2; side++) {
+      const bx = side === 0 ? 4 : w - 2 * this.tileSize + 4;
+      const bw = 2 * this.tileSize - 8;
+      for (let tier = 0; tier < 3; tier++) {
+        ctx.fillStyle = tier % 2 === 0 ? '#8d6e63' : '#6d4c41';
+        ctx.fillRect(bx + (side === 0 ? tier * 16 : (2 - tier) * 16), floorY, 16, floorH);
+      }
+      ctx.strokeStyle = '#ffd778';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(bx, floorY, bw, floorH);
+    }
+
+    // Bottom Wall + Open Exit Doorway (col 11..14)
+    const bWallY = (this.interiorRows - 2) * this.tileSize;
+    ctx.fillStyle = '#3a0e14';
+    ctx.fillRect(0, bWallY, 11 * this.tileSize, 2 * this.tileSize);
+    ctx.fillRect(15 * this.tileSize, bWallY, (this.interiorCols - 15) * this.tileSize, 2 * this.tileSize);
+    ctx.fillStyle = '#ffd778';
+    ctx.fillRect(0, bWallY, 11 * this.tileSize, 3);
+    ctx.fillRect(15 * this.tileSize, bWallY, (this.interiorCols - 15) * this.tileSize, 3);
+
+    // Exit Welcome Mat
+    const exitX = 11 * this.tileSize;
+    const exitW = 4 * this.tileSize;
+    ctx.fillStyle = '#b92b45';
+    ctx.beginPath();
+    ctx.roundRect(exitX + 6, bWallY + 2, exitW - 12, 2 * this.tileSize - 6, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    this.interiorCanvas = c;
+  }
+
+  isSolid(worldX, worldY, currentStageId = 'stage1', currentZone = 'campus') {
     const col = Math.floor(worldX / this.tileSize);
     const row = Math.floor(worldY / this.tileSize);
+
+    if (currentZone === 'nha_the_chat_interior') {
+      if (col < 0 || col >= this.interiorCols || row < 0 || row >= this.interiorRows) return true;
+      return this.interiorSolidGrid[row][col] === 1;
+    }
+
     if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) return true;
 
     // Các công trình tạm thời trong Vòng 1 (Stage 1 · FCD 18/10):
@@ -1196,7 +1418,9 @@ class WorldMap {
   }
 
   // Overhead Arches & Gate Signboards (Drawn OVER player and NPCs so they pass UNDER the arches)
-  drawOverheadSignboards(ctx, currentStageId = 'stage1') {
+  drawOverheadSignboards(ctx, currentStageId = 'stage1', currentZone = 'campus') {
+    if (currentZone === 'nha_the_chat_interior') return;
+
     // A. Cổng Trường ĐH Ngoại Thương
     this.renderEntranceArchSignboard(ctx);
 
@@ -1204,6 +1428,65 @@ class WorldMap {
     if (currentStageId === 'stage1') {
       this.renderFCDGateSignboard(ctx);
     }
+  }
+
+  renderNhaTheChatInteriorSignboards(ctx) {
+    const w = this.interiorWidth;
+    const cx = w / 2;
+
+    // Gymnasium North Wall Banner
+    ctx.save();
+    ctx.fillStyle = 'rgba(26, 5, 8, 0.94)';
+    ctx.beginPath();
+    ctx.roundRect(cx - 190, 20, 380, 34, 8);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 12px "Montserrat", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('★ NHÀ THỂ CHẤT FTU · ĐẤU TRƯỜNG PHÁ PHONG ★', cx, 37);
+
+    // Exit door pill
+    const exitY = (this.interiorRows - 2) * this.tileSize + 24;
+    ctx.fillStyle = 'rgba(20, 5, 8, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(cx - 64, exitY - 10, 128, 20, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 9.5px "Montserrat", sans-serif';
+    ctx.fillText('🚪 CỬA RA SÂN TRƯỜNG', cx, exitY);
+    ctx.restore();
+  }
+
+  renderCampusDoorPortal(ctx, currentStageId) {
+    // Glowing threshold in front of Nhà Thể Chất door (col 42.5, row 5)
+    const pulse = 0.55 + Math.sin(Date.now() / 260) * 0.25;
+    const doorX = 42.5 * this.tileSize;
+    const doorY = 5 * this.tileSize + 4;
+
+    ctx.save();
+    ctx.fillStyle = currentStageId === 'stage3_1'
+      ? `rgba(255, 215, 120, ${0.35 + pulse * 0.25})`
+      : 'rgba(255, 215, 120, 0.22)';
+    ctx.beginPath();
+    ctx.roundRect(doorX - 24, doorY - 4, 48, 18, 6);
+    ctx.fill();
+    ctx.strokeStyle = currentStageId === 'stage3_1' ? '#ffd778' : 'rgba(255, 215, 120, 0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.fillStyle = '#5c1216';
+    ctx.font = 'bold 7.5px "Montserrat", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('VÀO TRONG ▼', doorX, doorY + 8);
+    ctx.restore();
   }
 
   // Pre-render a sleek Radar Mini-map
@@ -1269,7 +1552,16 @@ class WorldMap {
     return c;
   }
 
-  render(ctx, camera, currentStageId = 'stage1') {
+  render(ctx, camera, currentStageId = 'stage1', currentZone = 'campus') {
+    if (currentZone === 'nha_the_chat_interior') {
+      if (!this.interiorCanvas) {
+        this.buildNhaTheChatInteriorCanvas();
+      }
+      ctx.drawImage(this.interiorCanvas, 0, 0, this.interiorWidth, this.interiorHeight);
+      this.renderNhaTheChatInteriorSignboards(ctx);
+      return;
+    }
+
     if (this.preRenderedCanvas) {
       // Draw 2x supersampled canvas with exact world dimensions for razor-sharp rendering
       ctx.drawImage(this.preRenderedCanvas, 0, 0, this.width, this.height);
@@ -1281,13 +1573,59 @@ class WorldMap {
 
     // Live Vector Text Pass for Razor-Sharp Typography (Never Blurry / Never Pixelated!)
     this.renderAllSignboards(ctx, currentStageId);
+    this.renderCampusDoorPortal(ctx, currentStageId);
   }
 
-  renderMiniMapToCanvas(targetCanvas, playerX, playerY, questSpot, currentStageId = 'stage1') {
+  renderMiniMapToCanvas(targetCanvas, playerX, playerY, questSpot, currentStageId = 'stage1', currentZone = 'campus') {
     if (!targetCanvas) return;
     const ctx = targetCanvas.getContext('2d');
     const w = targetCanvas.width;
     const h = targetCanvas.height;
+
+    if (currentZone === 'nha_the_chat_interior') {
+      ctx.fillStyle = '#22070a';
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.fillStyle = '#d7a26c';
+      ctx.fillRect(8, 14, w - 16, h - 24);
+      ctx.strokeStyle = '#ffd778';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(8, 14, w - 16, h - 24);
+
+      const scaleX = w / this.interiorWidth;
+      const scaleY = h / this.interiorHeight;
+
+      // Center Summoning Circle
+      ctx.strokeStyle = '#b92b45';
+      ctx.beginPath();
+      ctx.arc(this.interiorWidth / 2 * scaleX, 10.2 * this.tileSize * scaleY, 12, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Quest / Boss marker
+      if (questSpot) {
+        const qx = questSpot.x * scaleX;
+        const qy = questSpot.y * scaleY;
+        ctx.fillStyle = '#e63946';
+        ctx.beginPath();
+        ctx.arc(qx, qy, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Player dot
+      const px = playerX * scaleX;
+      const py = playerY * scaleY;
+      ctx.fillStyle = '#ffd778';
+      ctx.beginPath();
+      ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#22070a';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      return;
+    }
 
     if (!this.miniMapCanvas || this.miniMapCanvas.width !== w || this.miniMapCanvas.height !== h) {
       this.buildMiniMap(w, h);

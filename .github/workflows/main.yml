@@ -24,7 +24,7 @@ jobs:
 
       - name: Validate JavaScript Syntax
         run: |
-          node -c js/game.js js/minigames.js js/worldMap.js js/dialogue.js js/stages.js js/controls.js js/sprites.js
+          node -c js/game.js js/minigames.js js/worldMap.js js/dialogue.js js/stages.js js/controls.js js/sprites.js js/firebaseSync.js
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5

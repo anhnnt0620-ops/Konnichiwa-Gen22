@@ -98,32 +98,40 @@ const STAGE_DATA = {
   stage3_1: {
     id: 'stage3_1',
     name: 'HỘI TRÁT 3.1: PHÁ PHONG (27/10 – 03/11)',
-    subtitle: 'Dốc Nhà B FTU — Vòng Teamwork & Pitching (04-05/11)',
+    subtitle: 'Nhà Thể Chất FTU — Đấu Trường Tổ Đội 5 Ban vs. Tengu',
     bgm: 'stage3_1',
-    questSpot: { x: 12 * 32, y: 13 * 32 },
-    questText: 'Đến Dốc Nhà B huyền thoại (giữa NHÀ H và Tòa B), cùng Trưởng nhóm chạy deadline Teamwork (27/10 – 03/11) & Pitching (04 – 05/11)!',
+    questSpot: { x: 42.5 * 32, y: 5.2 * 32 },
+    interiorQuestSpot: { x: 13 * 32, y: 6.2 * 32 },
+    questText: 'Di chuyển lên Nhà Thể Chất FTU (phía Bắc sân trường), bước vào đấu trường bên trong để ghép ngẫu nhiên tổ đội 5 ban và đánh bại Tengu!',
     questTitle: 'Hội Trát 3.1: Phá Phong',
     timeline: '27/10 – 03/11/2026 · Pitching: 04 – 05/11',
-    objective: 'Cùng nhóm giải quyết thử thách dự án thực tế tại Dốc Nhà B và tự tin thuyết trình bài Pitching trước Hội đồng đánh giá.',
-    location: 'Dốc Nhà B (giữa Nhà H và Tòa B)',
-    tip: 'Tập trung nhịp điệu và phối hợp ăn ý cùng đồng đội để hoàn thành bài thi trước deadline!',
+    objective: 'Bước vào không gian Nhà Thể Chất FTU, ghép tổ đội 5 ban liên máy chủ và hợp lực giải 5 câu hỏi Nhân Sư chéo ban (10s/câu, câu cuối mấu chốt) để đánh bại Tengu!',
+    location: 'Bên trong Nhà Thể Chất FTU (Khuôn viên phía Bắc)',
+    tip: 'Câu hỏi của ban này sẽ do thành viên ban khác trả lời trong 10 giây — mỗi câu rút 20% HP của Tengu!',
     props: [
-      { type: 'prop_boba', x: 12, y: 14, label: 'Trà sữa Chùa Láng' },
-      { type: 'prop_desk', x: 12, y: 12, label: 'Bàn họp Dốc Nhà B' },
-      { type: 'prop_lantern', x: 11, y: 12, label: 'Đèn brainstorm' }
+      { type: 'prop_lantern', x: 40, y: 5, label: 'Đèn lồng Nhà Thể Chất' },
+      { type: 'prop_lantern', x: 44, y: 5, label: 'Đèn lồng Nhà Thể Chất' },
+      { type: 'prop_boba', x: 39, y: 6, label: 'Trà sữa tiếp sức' }
+    ],
+    interiorProps: [
+      { type: 'prop_lantern', x: 9, y: 4, label: 'Đèn Phá Phong' },
+      { type: 'prop_lantern', x: 16, y: 4, label: 'Đèn Phá Phong' },
+      { type: 'prop_desk', x: 6, y: 12, label: 'Bàn tiếp sức 5 Ban' },
+      { type: 'prop_boba', x: 7, y: 12, label: 'Nước tăng lực FCD' }
     ],
     items: [],
-    npcs: [
+    npcs: [],
+    interiorNpcs: [
       {
         id: 'npc_leader',
-        name: 'Trưởng Nhóm Teamwork',
+        name: 'Trưởng Nhóm Phá Phong',
         sprite: 'npc_leader',
-        x: 12,
-        y: 13,
+        x: 10,
+        y: 6.5,
         avatarIcon: '⚡',
         dialogues: [
-          { speaker: 'Trưởng Nhóm', text: 'Ngồi ở Dốc Nhà B quen thuộc này, tụi mình cùng nhau chạy deadline dự án giao lưu Gen 22 nhé!' },
-          { speaker: 'Trưởng Nhóm', text: 'Vòng Teamwork diễn ra từ 27/10 đến 03/11, sau đó chúng ta sẽ bước vào ngày Pitching quyết định (04 – 05/11)! Sinh viên Ngoại Thương chưa bao giờ lùi bước, cùng bứt phá nào!' }
+          { speaker: 'Trưởng Nhóm', text: 'Chào mừng em đã bước vào Đấu Trường Phá Phong bên trong Nhà Thể Chất FTU!' },
+          { speaker: 'Trưởng Nhóm', text: 'Tengu Bão Tố đang phong ấn Nhà Thể Chất! Chúng ta sẽ ghép ngẫu nhiên tổ đội đủ 5 Ban liên máy chủ và dùng trí tuệ Nhân Sư chéo ban (5 câu · 10s/câu) để phá tan phong ấn!' }
         ]
       }
     ]

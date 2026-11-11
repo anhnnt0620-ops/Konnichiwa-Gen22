@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "jpc_gen22": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}

@@ -7,6 +7,7 @@ class Game {
 
     this.playerName = 'Kouhai Gen 22';
     this.currentStageId = 'stage1';
+    this.currentZone = 'campus'; // 'campus' | 'nha_the_chat_interior'
     this.stage = STAGE_DATA['stage1'];
 
     // Player State (Starts at Chùa Láng Gate)
@@ -41,6 +42,10 @@ class Game {
     // Preload Kokeshi Senpai Doll Image
     this.senpaiImage = new Image();
     this.senpaiImage.src = 'Image/kokeshi-senpai.png';
+
+    // Preload Tengu Boss Image (Nhà Thể Chất Arena)
+    this.tenguImage = new Image();
+    this.tenguImage.src = 'Image/Tengu.png';
 
     // Camera & Zoom
     this.camera = { x: 0, y: 0 };
@@ -84,6 +89,7 @@ class Game {
     this.setupCanteenModal();
     this.setupBiaDaModal();
     this.setupVideoModal();
+    this.setupServerMonitorModal();
     this.setupStartScreen();
     this.setupCanvasInteraction();
     this.setupApplicationForm();
@@ -115,17 +121,40 @@ class Game {
       const worldX = screenX + this.camera.x;
       const worldY = screenY + this.camera.y;
 
-      // Check click on NPCs
-      if (this.stage && this.stage.npcs) {
-        for (const npc of this.stage.npcs) {
-          const nx = npc.x * 32 + 16;
-          const ny = npc.y * 32 + 16;
-          if (Math.hypot(worldX - nx, worldY - ny) < 65) {
-            this.nearbyInteractable = { type: 'npc', data: npc };
-            this.handleAction();
-            return;
-          }
+      // Check click on active zone NPCs
+      const activeNpcs = this.getActiveStageNPCs();
+      for (const npc of activeNpcs) {
+        const nx = npc.x * 32 + 16;
+        const ny = npc.y * 32 + 16;
+        if (Math.hypot(worldX - nx, worldY - ny) < 65) {
+          this.nearbyInteractable = { type: 'npc', data: npc };
+          this.handleAction();
+          return;
         }
+      }
+
+      if (this.currentZone === 'nha_the_chat_interior') {
+        // Click Tengu Boss Dais inside Nhà Thể Chất (col 13, row 4.5)
+        if (Math.hypot(worldX - 13 * 32, worldY - 4.8 * 32) < 75) {
+          this.nearbyInteractable = { type: 'tengu_boss', data: { name: 'Tengu Phá Phong' } };
+          this.handleAction();
+          return;
+        }
+        // Click Exit Doorway inside Nhà Thể Chất (col 11..15, row 15..18)
+        if (worldX >= 11 * 32 && worldX <= 15 * 32 && worldY >= 15 * 32) {
+          this.nearbyInteractable = { type: 'exit_nha_the_chat', data: { name: 'Cửa Ra Sân Trường FTU' } };
+          this.handleAction();
+          return;
+        }
+        if (this.nearbyInteractable) this.handleAction();
+        return;
+      }
+
+      // Click Nhà Thể Chất Front Door on Campus (col 42.5, row 5)
+      if (Math.abs(worldX - 42.5 * 32) < 65 && worldY >= 2.5 * 32 && worldY <= 6.2 * 32) {
+        this.nearbyInteractable = { type: 'enter_nha_the_chat', data: { name: 'Nhà Thể Chất FTU' } };
+        this.handleAction();
+        return;
       }
 
       // Check click on Booth JPC (Sân Trung Tâm x: 15*32, y: 22*32)
@@ -267,11 +296,12 @@ class Game {
   saveGameState(isManual = false) {
     try {
       const saveData = {
-        version: '1.1',
+        version: '1.2',
         playerName: this.playerName,
         selectedDept: this.player.selectedDept,
         selectedDeptName: this.player.selectedDeptName,
         currentStageId: this.currentStageId,
+        currentZone: this.currentZone || 'campus',
         playerX: Math.round(this.player.x),
         playerY: Math.round(this.player.y),
         playerDirection: this.player.direction || 'up',
@@ -284,8 +314,11 @@ class Game {
         lastSaved: new Date().toISOString()
       };
       localStorage.setItem(this.SAVE_KEY, JSON.stringify(saveData));
+      if (window.firebaseSync) {
+        window.firebaseSync.syncGameProgress(this, isManual);
+      }
       if (isManual && window.showToast) {
-        window.showToast('💾 Đã lưu tiến độ & vị trí nhân vật thành công!');
+        window.showToast('💾 Đã lưu tiến độ & đồng bộ Máy Chủ / Firebase thành công!');
       }
     } catch (err) {
       console.warn('Could not save game state to localStorage:', err);
@@ -325,9 +358,10 @@ class Game {
       this.memories = saved.memories;
     }
 
-    // Restore Stage 1 progress flags
+    // Restore Stage 1 progress flags & zone
     this.stage1CheckedIn = !!saved.stage1CheckedIn;
     this.stage1MetSenpai = !!saved.stage1MetSenpai;
+    this.currentZone = saved.currentZone === 'nha_the_chat_interior' ? 'nha_the_chat_interior' : 'campus';
 
     const titleScreen = document.getElementById('title-screen');
     if (titleScreen) titleScreen.classList.add('hidden');
@@ -342,14 +376,16 @@ class Game {
     const hasSavedPos = (typeof saved.playerX === 'number' && typeof saved.playerY === 'number');
     if (hasSavedPos) {
       const world = window.worldMap;
-      const maxX = (world ? world.width : 1920) - 32;
-      const maxY = (world ? world.height : 1280) - 32;
+      const dims = world ? world.getDimensions(this.currentZone) : { width: 1920, height: 1280 };
+      const maxX = dims.width - 32;
+      const maxY = dims.height - 32;
       this.player.x = Math.max(16, Math.min(maxX, saved.playerX));
       this.player.y = Math.max(16, Math.min(maxY, saved.playerY));
       if (saved.playerDirection) {
         this.player.direction = saved.playerDirection;
       }
     } else if (this.stage?.playerStart) {
+      this.currentZone = 'campus';
       this.player.x = this.stage.playerStart.x * 32;
       this.player.y = this.stage.playerStart.y * 32;
       this.player.direction = 'up';
@@ -671,10 +707,84 @@ class Game {
     if (appModal) appModal.classList.remove('hidden');
   }
 
+  getActiveStageProps() {
+    if (!this.stage) return [];
+    if (this.currentZone === 'nha_the_chat_interior') {
+      return this.stage.interiorProps || [];
+    }
+    return this.stage.props || [];
+  }
+
+  getActiveStageNPCs() {
+    if (!this.stage) return [];
+    if (this.currentZone === 'nha_the_chat_interior') {
+      return this.stage.interiorNpcs || [];
+    }
+    return this.stage.npcs || [];
+  }
+
+  getActiveQuestSpot() {
+    if (!this.stage) return null;
+    if (this.currentZone === 'nha_the_chat_interior') {
+      if (this.currentStageId === 'stage3_1' && this.stage.interiorQuestSpot) {
+        return this.stage.interiorQuestSpot;
+      }
+      return { x: 13 * 32, y: 16 * 32 }; // Point back to exit door if exploring outside Stage 3.1
+    }
+    return this.stage.questSpot || null;
+  }
+
+  enterNhaTheChat() {
+    this.currentZone = 'nha_the_chat_interior';
+    this.player.x = 12.5 * 32;
+    this.player.y = 14.2 * 32;
+    this.player.direction = 'up';
+    this.nearbyInteractable = null;
+    this.updateCamera();
+    this.updateHUD();
+    this.saveGameState(false);
+    if (window.audioManager) window.audioManager.playBlip();
+    if (window.showToast) {
+      window.showToast('🏛️ Đã bước vào bên trong Nhà Thể Chất FTU — Đấu Trường Phá Phong!');
+    }
+    if (this.currentStageId === 'stage3_1' && !this.shownInteriorIntro) {
+      this.shownInteriorIntro = true;
+      window.dialogueManager.startDialogue([
+        {
+          speaker: 'Không Gian Nhà Thể Chất FTU',
+          text: 'Luồng khí Phá Phong đang cuộn xoáy quanh Đài Phong Ấn Tengu ở trung tâm sân đấu!'
+        },
+        {
+          speaker: 'Trưởng Nhóm Phá Phong',
+          text: 'Mau tiến lại gần Tengu hoặc nói chuyện với anh để ghép ngẫu nhiên Tổ Đội 5 Ban liên máy chủ và đánh bại Tengu bằng 5 câu hỏi Nhân Sư chéo ban nhé!'
+        }
+      ]);
+    }
+  }
+
+  exitNhaTheChat() {
+    this.currentZone = 'campus';
+    this.player.x = 42 * 32;
+    this.player.y = 5.4 * 32;
+    this.player.direction = 'down';
+    this.nearbyInteractable = null;
+    this.updateCamera();
+    this.updateHUD();
+    this.saveGameState(false);
+    if (window.audioManager) window.audioManager.playBlip();
+    if (window.showToast) {
+      window.showToast('🌳 Đã trở ra Sân Trường Đại học Ngoại Thương!');
+    }
+  }
+
   loadStage(stageId, isInitial = false, preserveState = false) {
     this.currentStageId = stageId;
     this.stage = STAGE_DATA[stageId];
     if (!this.stage) return;
+
+    if (!preserveState) {
+      this.currentZone = 'campus';
+    }
 
     if (!this.unlockedStages.includes(stageId)) {
       this.unlockedStages.push(stageId);
@@ -725,7 +835,7 @@ class Game {
         },
         {
           speaker: 'Người Dẫn Chuyện',
-          text: 'Hãy đi theo vệt hoa anh đào đến Dốc Nhà B huyền thoại, gặp Trưởng Nhóm để cùng bứt phá giới hạn deadline và chuẩn bị Pitching (04-05/11)!'
+          text: 'Hãy đi theo vệt hoa anh đào lên Nhà Thể Chất FTU (phía Bắc sân trường), bước vào không gian đấu trường bên trong để ghép tổ đội 5 ban và đánh bại Tengu!'
         }
       ]);
     } else if (stageId === 'stage3_2') {
@@ -879,12 +989,20 @@ class Game {
   update(delta) {
     // If dialogue or modal is open, pause movement
     if (window.dialogueManager && window.dialogueManager.active) return;
-    const appModal = document.getElementById('application-modal');
-    if (appModal && !appModal.classList.contains('hidden')) return;
-    const rewardModal = document.getElementById('reward-modal');
-    if (rewardModal && !rewardModal.classList.contains('hidden')) return;
-    const minigameModal = document.getElementById('minigame-modal');
-    if (minigameModal && !minigameModal.classList.contains('hidden')) return;
+    const modalIdsToBlock = [
+      'application-modal',
+      'reward-modal',
+      'minigame-modal',
+      'tengu-battle-modal',
+      'computer-interview-modal',
+      'server-monitor-modal',
+      'canteen-modal',
+      'biada-modal'
+    ];
+    for (const id of modalIdsToBlock) {
+      const el = document.getElementById(id);
+      if (el && !el.classList.contains('hidden')) return;
+    }
 
     this.handleMovement();
     this.updateCamera();
@@ -913,12 +1031,13 @@ class Game {
       const newY = this.player.y + dy * this.player.speed;
 
       const world = window.worldMap;
+      const dims = world ? world.getDimensions(this.currentZone) : { width: 1920, height: 1280 };
       const minX = 16;
-      const maxX = (world ? world.width : 1920) - 32;
+      const maxX = dims.width - 32;
       const minY = 16;
-      const maxY = (world ? world.height : 1280) - 32;
+      const maxY = dims.height - 32;
 
-      const isSolid = (x, y) => world ? world.isSolid(x, y, this.currentStageId) : false;
+      const isSolid = (x, y) => world ? world.isSolid(x, y, this.currentStageId, this.currentZone) : false;
 
       const canMoveX = !isSolid(newX + 6, this.player.y + 20) &&
                        !isSolid(newX + 22, this.player.y + 20) &&
@@ -960,8 +1079,9 @@ class Game {
 
   updateCamera() {
     const world = window.worldMap;
-    const worldW = world ? world.width : 1920;
-    const worldH = world ? world.height : 1280;
+    const dims = world ? world.getDimensions(this.currentZone) : { width: 1920, height: 1280 };
+    const worldW = dims.width;
+    const worldH = dims.height;
 
     const cssW = this.canvas.width / (this.dpr || 1);
     const cssH = this.canvas.height / (this.dpr || 1);
@@ -969,14 +1089,19 @@ class Game {
     const viewW = cssW / this.zoom;
     const viewH = cssH / this.zoom;
 
-    const targetX = (this.player.x + 12) - viewW / 2;
-    const targetY = (this.player.y + 14) - viewH / 2;
+    if (worldW <= viewW) {
+      this.camera.x = -(viewW - worldW) / 2;
+    } else {
+      const targetX = (this.player.x + 12) - viewW / 2;
+      this.camera.x = Math.max(0, Math.min(worldW - viewW, targetX));
+    }
 
-    const maxCamX = Math.max(0, worldW - viewW);
-    const maxCamY = Math.max(0, worldH - viewH);
-
-    this.camera.x = Math.max(0, Math.min(maxCamX, targetX));
-    this.camera.y = Math.max(0, Math.min(maxCamY, targetY));
+    if (worldH <= viewH) {
+      this.camera.y = -(viewH - worldH) / 2;
+    } else {
+      const targetY = (this.player.y + 14) - viewH / 2;
+      this.camera.y = Math.max(0, Math.min(worldH - viewH, targetY));
+    }
   }
 
   // Check nearby items, NPCs, or props
@@ -986,17 +1111,44 @@ class Game {
     const py = this.player.y;
     const interactRadius = 75;
 
-    // Check NPCs
-    if (this.stage && this.stage.npcs) {
-      for (const npc of this.stage.npcs) {
-        const nx = npc.x * 32;
-        const ny = npc.y * 32;
-        const dist = Math.hypot(px - nx, py - ny);
-        if (dist < interactRadius) {
-          this.nearbyInteractable = { type: 'npc', data: npc };
+    // Check Active Zone NPCs
+    const activeNpcs = this.getActiveStageNPCs();
+    for (const npc of activeNpcs) {
+      const nx = npc.x * 32;
+      const ny = npc.y * 32;
+      const dist = Math.hypot(px - nx, py - ny);
+      if (dist < interactRadius) {
+        this.nearbyInteractable = { type: 'npc', data: npc };
+        return;
+      }
+    }
+
+    if (this.currentZone === 'nha_the_chat_interior') {
+      // Boss Tengu Altar at col 13, row 4.8..6.2 inside Nhà Thể Chất
+      if (this.currentStageId === 'stage3_1' && Math.hypot(px - 12.5 * 32, py - 5.2 * 32) < 92) {
+        this.nearbyInteractable = { type: 'tengu_boss', data: { name: 'Tengu Phá Phong' } };
+        return;
+      }
+      // Exit Door at bottom center (col 11..15, row 15..17.5)
+      if (px >= 10.5 * 32 && px <= 15 * 32 && py >= 14.8 * 32) {
+        this.nearbyInteractable = { type: 'exit_nha_the_chat', data: { name: 'Cửa Ra Sân Trường FTU' } };
+        return;
+      }
+      // Interior Props
+      const intProps = this.getActiveStageProps();
+      for (const prop of intProps) {
+        if (Math.hypot(px - prop.x * 32, py - prop.y * 32) < 65) {
+          this.nearbyInteractable = { type: 'prop', data: prop };
           return;
         }
       }
+      return;
+    }
+
+    // Check Nhà Thể Chất Front Door Entrance on Campus (col 42.5, row 5.0)
+    if (Math.abs(px - 42 * 32) < 58 && py >= 4 * 32 && py <= 6.2 * 32) {
+      this.nearbyInteractable = { type: 'enter_nha_the_chat', data: { name: 'Nhà Thể Chất FTU' } };
+      return;
     }
 
     // Check Booth JPC at Sân Trung Tâm (Dãy booth dọc phía Tây — Màu đỏ JPC)
@@ -1013,15 +1165,14 @@ class Game {
     }
 
     // Check Props
-    if (this.stage && this.stage.props) {
-      for (const prop of this.stage.props) {
-        const prx = prop.x * 32;
-        const pry = prop.y * 32;
-        const dist = Math.hypot(px - prx, py - pry);
-        if (dist < 65) {
-          this.nearbyInteractable = { type: 'prop', data: prop };
-          return;
-        }
+    const campusProps = this.getActiveStageProps();
+    for (const prop of campusProps) {
+      const prx = prop.x * 32;
+      const pry = prop.y * 32;
+      const dist = Math.hypot(px - prx, py - pry);
+      if (dist < 65) {
+        this.nearbyInteractable = { type: 'prop', data: prop };
+        return;
       }
     }
 
@@ -1055,6 +1206,21 @@ class Game {
 
     if (!this.nearbyInteractable) return;
     const { type, data } = this.nearbyInteractable;
+
+    if (type === 'enter_nha_the_chat') {
+      this.enterNhaTheChat();
+      return;
+    }
+
+    if (type === 'exit_nha_the_chat') {
+      this.exitNhaTheChat();
+      return;
+    }
+
+    if (type === 'tengu_boss') {
+      this.startStage31TenguBattle();
+      return;
+    }
 
     if (type === 'canteen') {
       this.openCanteenModal();
@@ -1180,14 +1346,7 @@ class Game {
             this.loadStage('stage3_1');
           });
         } else if (this.currentStageId === 'stage3_1' && data.id === 'npc_leader') {
-          window.minigameManager.start('stage3_1', (success) => {
-            this.stageProgress.stage3_1.completed = true;
-            if (!this.completedStages.includes('stage3_1')) this.completedStages.push('stage3_1');
-            if (!this.unlockedStages.includes('stage3_2')) this.unlockedStages.push('stage3_2');
-            this.addMemory('Hội trát 3.1: Phá Phong', 'Cháy hết mình vượt qua deadline tại Dốc Nhà B FTU!', 'Image/Color/Vòng 3.1 - Color.png');
-            this.saveGameState(false);
-            this.loadStage('stage3_2');
-          });
+          this.startStage31TenguBattle();
         } else if (this.currentStageId === 'stage3_2' && data.id === 'npc_mentor_heart') {
           window.minigameManager.start('stage3_2', (success) => {
             this.stageProgress.stage3_2.completed = true;
@@ -1221,6 +1380,26 @@ class Game {
         ]);
       }
     }
+  }
+
+  startStage31TenguBattle() {
+    window.minigameManager.start('stage3_1', (success) => {
+      if (!success) return;
+      this.stageProgress.stage3_1.completed = true;
+      this.stageProgress.stage3_1.teamworkDone = true;
+      if (!this.completedStages.includes('stage3_1')) this.completedStages.push('stage3_1');
+      if (!this.unlockedStages.includes('stage3_2')) this.unlockedStages.push('stage3_2');
+      this.addMemory(
+        'Hội trát 3.1: Phá Phong',
+        'Ghép tổ đội 5 Ban liên máy chủ, giải 5 câu Nhân Sư đánh bại hoàn toàn Tengu tại Nhà Thể Chất FTU!',
+        'Image/Tengu.png'
+      );
+      this.currentZone = 'campus';
+      this.player.x = 42 * 32;
+      this.player.y = 6 * 32;
+      this.saveGameState(false);
+      this.loadStage('stage3_2');
+    });
   }
 
   addMemory(title, desc, image = null) {
@@ -1276,9 +1455,9 @@ class Game {
         id: 'stage3_1',
         title: 'Hội Trát 3.1: Phá Phong',
         timeline: '29/10/2026',
-        desc: 'Dốc Nhà B FTU — Hoạt động Teamwork cùng đồng đội ghép mô hình búp bê Kokeshi mang bản sắc ban.',
-        thumb: 'Image/Color/Vòng 3.1 - Color.png',
-        fallbackIcon: '🎎'
+        desc: 'Nhà Thể Chất FTU — Ghép tổ đội 5 Ban liên máy chủ, trả lời 5 câu hỏi Nhân Sư chéo ban đánh bại Tengu.',
+        thumb: 'Image/Tengu.png',
+        fallbackIcon: '👹'
       },
       {
         id: 'stage3_2',
@@ -1366,6 +1545,107 @@ class Game {
         const modal = document.getElementById('memory-modal');
         if (modal) modal.classList.add('hidden');
       };
+    }
+  }
+
+  /* ==========================================================================
+     FIREBASE & MÁY CHỦ MẸ MONITOR MODAL
+     ========================================================================== */
+  setupServerMonitorModal() {
+    const pill = document.getElementById('hud-server-pill');
+    const modal = document.getElementById('server-monitor-modal');
+    const closeBtn = document.getElementById('btn-close-server-monitor');
+    const saveUrlBtn = document.getElementById('btn-save-master-url');
+    const urlInput = document.getElementById('input-master-url');
+
+    if (pill) {
+      pill.onclick = () => this.openServerMonitorModal();
+    }
+    if (closeBtn && modal) {
+      closeBtn.onclick = () => modal.classList.add('hidden');
+    }
+    if (modal) {
+      modal.onclick = (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+      };
+    }
+    if (saveUrlBtn && urlInput) {
+      saveUrlBtn.onclick = () => {
+        if (window.firebaseSync) {
+          window.firebaseSync.setCustomMasterServerUrl(urlInput.value);
+          this.saveGameState(false);
+          setTimeout(() => this.openServerMonitorModal(), 400);
+        }
+      };
+    }
+    if (window.firebaseSync) {
+      window.firebaseSync.updateHudPill();
+    }
+  }
+
+  async openServerMonitorModal() {
+    const modal = document.getElementById('server-monitor-modal');
+    const summaryEl = document.getElementById('server-status-summary');
+    const serversEl = document.getElementById('server-nodes-list');
+    const playersEl = document.getElementById('server-players-list');
+    const urlInput = document.getElementById('input-master-url');
+    if (!modal) return;
+
+    modal.classList.remove('hidden');
+    const sync = window.firebaseSync;
+    if (!sync) return;
+
+    if (urlInput && !urlInput.value) {
+      urlInput.value = sync.masterServerUrl || '';
+    }
+
+    sync.syncGameProgress(this, false);
+    const data = await sync.fetchGlobalTelemetry();
+    const fb = window.JPCFirebase;
+
+    const servers = Object.values(data.servers || {});
+    const players = Object.values(data.players || {});
+
+    if (summaryEl) {
+      summaryEl.innerHTML = `
+        <div class="server-stat-box">
+          <div class="server-stat-label">Vai Trò Máy Hiện Tại</div>
+          <div class="server-stat-val">${sync.serverInfo.isMaster ? '👑 Máy Chủ Mẹ' : '🌐 Máy Khách / Phụ'}</div>
+        </div>
+        <div class="server-stat-box">
+          <div class="server-stat-label">Firebase RTDB</div>
+          <div class="server-stat-val">${fb && fb.rtdbReady ? '🔥 Đã Kết Nối' : '⏳ Dự Phòng Cục Bộ'}</div>
+        </div>
+        <div class="server-stat-box">
+          <div class="server-stat-label">Tổng Quy Mô</div>
+          <div class="server-stat-val">${servers.length} Máy Chủ · ${players.length} Người Chơi</div>
+        </div>
+      `;
+    }
+
+    if (serversEl) {
+      serversEl.innerHTML = servers.length === 0
+        ? '<div class="server-node-item">Chưa có máy chủ nào được ghi nhận.</div>'
+        : servers.map(sv => `
+            <div class="server-node-item">
+              <div><strong>${sv.isMaster ? '👑 ' : '🌐 '}${sv.serverLabel || sv.serverKey}</strong></div>
+              <div class="server-node-meta">${sv.origin || 'local'} · Hoạt động: ${sv.lastSeen ? new Date(sv.lastSeen).toLocaleTimeString() : 'Vừa xong'}</div>
+            </div>
+          `).join('');
+    }
+
+    if (playersEl) {
+      playersEl.innerHTML = players.length === 0
+        ? '<div class="server-node-item">Chưa có dữ liệu người chơi.</div>'
+        : players.map(p => {
+            const doneCount = Array.isArray(p.completedStages) ? p.completedStages.length : 0;
+            return `
+              <div class="server-node-item">
+                <div><strong>${p.playerName}</strong> (${p.selectedDeptName || p.selectedDept})</div>
+                <div class="server-node-meta">Vòng: <b>${p.currentStageId}</b> · Xong: ${doneCount}/5 · ${p.serverLabel || p.serverKey}</div>
+              </div>
+            `;
+          }).join('');
     }
   }
 
@@ -1733,8 +2013,8 @@ class Game {
     // High-DPI scale so all canvas coordinates use CSS pixels while rendering at native device resolution
     this.ctx.scale(dpr, dpr);
 
-    // Fill canvas with soothing water blue matching river surrounding campus
-    this.ctx.fillStyle = '#6ec1e4';
+    // Fill background matching current zone
+    this.ctx.fillStyle = this.currentZone === 'nha_the_chat_interior' ? '#160609' : '#6ec1e4';
     this.ctx.fillRect(0, 0, cssW, cssH);
 
     this.ctx.save();
@@ -1742,17 +2022,20 @@ class Game {
     this.ctx.scale(this.zoom, this.zoom);
     this.ctx.translate(-Math.round(this.camera.x), -Math.round(this.camera.y));
 
-    // 1. Render Big Open FTU World Map (Terrain, Roads, Buildings, FCD Plaza)
+    // 1. Render Active World Map (Campus or Nhà Thể Chất Interior)
     if (window.worldMap) {
-      window.worldMap.render(this.ctx, this.camera, this.currentStageId);
+      window.worldMap.render(this.ctx, this.camera, this.currentStageId, this.currentZone);
     }
 
     // 2. Render Quest Beacon on the ground
     this.renderQuestBeacon();
 
-    // 3. Render Props, Items, NPCs
+    // 3. Render Props, Items, NPCs & Tengu Interior Boss
     this.renderProps();
     this.renderItems();
+    if (this.currentZone === 'nha_the_chat_interior') {
+      this.renderTenguBoss();
+    }
     this.renderNPCs();
 
     // 4. Render Equipped Directional Guide attached directly to Main Kokeshi
@@ -1763,7 +2046,7 @@ class Game {
 
     // 6. Overhead Map Elements (Arches & Gate Signboards so player passes UNDER them!)
     if (window.worldMap && window.worldMap.drawOverheadSignboards) {
-      window.worldMap.drawOverheadSignboards(this.ctx, this.currentStageId);
+      window.worldMap.drawOverheadSignboards(this.ctx, this.currentStageId, this.currentZone);
     }
 
     // 7. Render Interaction Prompt [A] (Rendered in world space above target)
@@ -1780,7 +2063,14 @@ class Game {
     // 8. Render Mini-Map Radar in HUD Panel (DOM canvas)
     const domMiniMap = document.getElementById('minimap-canvas');
     if (domMiniMap && window.worldMap) {
-      window.worldMap.renderMiniMapToCanvas(domMiniMap, this.player.x, this.player.y, this.stage ? this.stage.questSpot : null, this.currentStageId);
+      window.worldMap.renderMiniMapToCanvas(
+        domMiniMap,
+        this.player.x,
+        this.player.y,
+        this.getActiveQuestSpot(),
+        this.currentStageId,
+        this.currentZone
+      );
     }
 
     // 9. Render Quest Compass Arrow pointing to destination (when offscreen)
@@ -1789,12 +2079,13 @@ class Game {
 
   // Equipped Navigation Guide attached directly to Main Kokeshi's movement/heading
   renderEquippedGuide() {
-    if (!this.stage || !this.stage.questSpot) return;
+    const questSpot = this.getActiveQuestSpot();
+    if (!questSpot) return;
 
     const px = this.player.x + 16;
     const py = this.player.y + 26;
-    const qx = this.stage.questSpot.x;
-    const qy = this.stage.questSpot.y;
+    const qx = questSpot.x;
+    const qy = questSpot.y;
 
     const dist = Math.hypot(qx - px, qy - py);
     if (dist < 45) return; // Arrived at destination: cleanly hide pointer so no screen clutter!
@@ -1864,9 +2155,10 @@ class Game {
   }
 
   renderQuestBeacon() {
-    if (!this.stage || !this.stage.questSpot) return;
-    const qx = this.stage.questSpot.x;
-    const qy = this.stage.questSpot.y;
+    const questSpot = this.getActiveQuestSpot();
+    if (!questSpot) return;
+    const qx = questSpot.x;
+    const qy = questSpot.y;
 
     // Hide beacon when player is already close (< 70px) to prevent visual clutter
     const dist = Math.hypot(qx - (this.player.x + 12), qy - (this.player.y + 20));
@@ -1889,9 +2181,10 @@ class Game {
   }
 
   renderQuestCompass() {
-    if (!this.stage || !this.stage.questSpot) return;
-    const qx = this.stage.questSpot.x;
-    const qy = this.stage.questSpot.y;
+    const questSpot = this.getActiveQuestSpot();
+    if (!questSpot) return;
+    const qx = questSpot.x;
+    const qy = questSpot.y;
 
     const screenX = (qx - this.camera.x) * this.zoom;
     const screenY = (qy - this.camera.y) * this.zoom;
@@ -1932,15 +2225,58 @@ class Game {
   }
 
   renderProps() {
-    if (!this.stage.props) return;
-    this.stage.props.forEach(p => {
+    const props = this.getActiveStageProps();
+    if (!props.length) return;
+    props.forEach(p => {
       const x = p.x * 32;
       const y = p.y * 32;
       window.spriteManager.draw(this.ctx, p.type, x, y);
     });
   }
 
+  renderTenguBoss() {
+    const cx = 13 * 32;
+    const cy = 4.6 * 32;
+    const hover = Math.sin(Date.now() / 320) * 4;
+    const defeated = this.stageProgress?.stage3_1?.completed;
+
+    this.ctx.save();
+    // Glowing yokai spirit aura on Dais
+    const auraR = 34 + Math.sin(Date.now() / 250) * 4;
+    const grad = this.ctx.createRadialGradient(cx, cy, 4, cx, cy, auraR);
+    grad.addColorStop(0, defeated ? 'rgba(255, 215, 120, 0.45)' : 'rgba(230, 57, 70, 0.55)');
+    grad.addColorStop(1, 'rgba(230, 57, 70, 0)');
+    this.ctx.fillStyle = grad;
+    this.ctx.beginPath();
+    this.ctx.arc(cx, cy, auraR, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    if (this.tenguImage && this.tenguImage.complete && this.tenguImage.naturalWidth > 0) {
+      const size = 64;
+      if (defeated) this.ctx.globalAlpha = 0.45;
+      this.ctx.drawImage(this.tenguImage, cx - size / 2, cy - size / 2 + hover - 8, size, size);
+      this.ctx.globalAlpha = 1;
+    }
+
+    // Label pill above Tengu
+    const label = defeated ? '✅ TENGU ĐÃ BỊ PHONG ẤN' : '👹 TENGU BÃO TỐ · PHÁ PHONG';
+    this.ctx.font = 'bold 8.5px "Montserrat", sans-serif';
+    const tw = Math.max(80, Math.round(this.ctx.measureText(label).width + 14));
+    this.ctx.fillStyle = 'rgba(24, 5, 8, 0.92)';
+    this.ctx.beginPath();
+    this.ctx.roundRect(cx - tw / 2, cy - 48, tw, 15, 5);
+    this.ctx.fill();
+    this.ctx.strokeStyle = defeated ? '#81c784' : '#ff8a80';
+    this.ctx.lineWidth = 1;
+    this.ctx.stroke();
+    this.ctx.fillStyle = defeated ? '#b9f6ca' : '#ffd778';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText(label, cx, cy - 37.5);
+    this.ctx.restore();
+  }
+
   renderItems() {
+    if (this.currentZone === 'nha_the_chat_interior') return;
     if (!this.stage.items) return;
     const time = Date.now() / 300;
     this.stage.items.forEach(it => {
@@ -1957,8 +2293,9 @@ class Game {
   }
 
   renderNPCs() {
-    if (!this.stage.npcs) return;
-    this.stage.npcs.forEach(npc => {
+    const npcs = this.getActiveStageNPCs();
+    if (!npcs.length) return;
+    npcs.forEach(npc => {
       const x = npc.x * 32;
       const y = npc.y * 32;
 
@@ -2114,6 +2451,15 @@ class Game {
     } else if (this.nearbyInteractable.type === 'stage_fcd') {
       targetX = 50.5 * 32;
       targetY = 20 * 32;
+    } else if (this.nearbyInteractable.type === 'enter_nha_the_chat') {
+      targetX = 42.5 * 32;
+      targetY = 4.2 * 32;
+    } else if (this.nearbyInteractable.type === 'exit_nha_the_chat') {
+      targetX = 13 * 32;
+      targetY = 15.6 * 32;
+    } else if (this.nearbyInteractable.type === 'tengu_boss') {
+      targetX = 13 * 32;
+      targetY = 3.2 * 32;
     }
 
     // Determine concise action verb
@@ -2128,6 +2474,12 @@ class Game {
       actionLabel = 'Khấn Bia Đá';
     } else if (this.nearbyInteractable.type === 'stage_fcd') {
       actionLabel = 'Xem Stage JPC';
+    } else if (this.nearbyInteractable.type === 'enter_nha_the_chat') {
+      actionLabel = 'Vào Nhà Thể Chất';
+    } else if (this.nearbyInteractable.type === 'exit_nha_the_chat') {
+      actionLabel = 'Ra Sân Trường';
+    } else if (this.nearbyInteractable.type === 'tengu_boss') {
+      actionLabel = 'Đánh Tengu (5 Ban)';
     } else if (this.nearbyInteractable.type === 'prop') {
       actionLabel = 'Kiểm tra';
     }

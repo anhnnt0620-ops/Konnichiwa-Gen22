@@ -1,6 +1,6 @@
 name: Deploy JPC Web Game
 
-'on':
+on:
   push:
     branches:
       - main
@@ -16,27 +16,57 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Validate JavaScript Syntax
         run: |
-          node -c js/game.js js/minigames.js js/worldMap.js js/dialogue.js js/stages.js js/controls.js js/sprites.js js/firebaseSync.js
+          for file in server.js firebase.js js/*.js; do
+            node -c "$file"
+          done
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Verify GitHub Pages Configuration
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status=$(curl -sS -o /tmp/pages-check.json -w "%{http_code}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/pages")
+          if [ "$status" = "404" ]; then
+            echo "::error::GitHub Pages is not enabled on ${{ github.repository }}. Open https://github.com/${{ github.repository }}/settings/pages -> Source: GitHub Actions (repo must be Public on GitHub Free)."
+            exit 1
+          fi
 
       - name: Setup GitHub Pages
-        uses: actions/configure-pages@v5
-        continue-on-error: true
+        uses: actions/configure-pages@v6
+
+      - name: Build static bundle
+        run: |
+          mkdir -p _site
+          cp index.html firebase.js _site/
+          cp -r css js Font Image _site/
+          rm -rf "_site/Image/Kokeshi 5 Ban/backup_original_6000px"
+          if [ -d Video ]; then cp -r Video _site/; fi
 
       - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
-          path: '.'
-        continue-on-error: true
+          path: '_site'
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
-        continue-on-error: true
+        uses: actions/deploy-pages@v5

@@ -2,10 +2,23 @@ const fs = require('fs');
 const path = require('path');
 const { buildStaticSealedLoaderScript } = require('./crypto-seal');
 
-function resolveConfigFromEnv(env = process.env) {
-  if (env.VITE_FIREBASE_CONFIG_JSON) {
+function resolveConfigFromEnv(rawEnv = process.env) {
+  const env = { ...rawEnv };
+  if (rawEnv.SECRETS_CONTEXT) {
     try {
-      const parsed = JSON.parse(env.VITE_FIREBASE_CONFIG_JSON);
+      const parsed = typeof rawEnv.SECRETS_CONTEXT === 'string'
+        ? JSON.parse(rawEnv.SECRETS_CONTEXT)
+        : rawEnv.SECRETS_CONTEXT;
+      if (parsed && typeof parsed === 'object') {
+        Object.assign(env, parsed);
+      }
+    } catch (_) {}
+  }
+
+  const jsonStr = env.VITE_FIREBASE_CONFIG_JSON || env.FIREBASE_CONFIG_JSON || env.FIREBASE_CONFIG;
+  if (jsonStr) {
+    try {
+      const parsed = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
       if (parsed && parsed.apiKey && parsed.projectId) {
         return {
           apiKey: parsed.apiKey || '',
@@ -19,7 +32,7 @@ function resolveConfigFromEnv(env = process.env) {
         };
       }
     } catch (err) {
-      throw new Error('VITE_FIREBASE_CONFIG_JSON is not valid JSON: ' + err.message);
+      throw new Error('Firebase config JSON is not valid JSON: ' + err.message);
     }
   }
 

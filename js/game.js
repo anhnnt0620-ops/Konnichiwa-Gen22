@@ -364,7 +364,9 @@ class Game {
     // Restore Stage 1 progress flags & zone
     this.stage1CheckedIn = !!saved.stage1CheckedIn;
     this.stage1MetSenpai = !!saved.stage1MetSenpai;
-    this.currentZone = saved.currentZone === 'nha_the_chat_interior' ? 'nha_the_chat_interior' : 'campus';
+    this.currentZone = (saved.currentZone === 'nha_the_chat_interior')
+      ? 'nha_the_chat_interior'
+      : ((saved.currentZone === 'van_phong_clb_interior') ? 'van_phong_clb_interior' : 'campus');
 
     const titleScreen = document.getElementById('title-screen');
     if (titleScreen) titleScreen.classList.add('hidden');
@@ -392,6 +394,19 @@ class Game {
       this.player.x = this.stage.playerStart.x * 32;
       this.player.y = this.stage.playerStart.y * 32;
       this.player.direction = 'up';
+    }
+
+    // Migration for stage_final if player was saved at old Tòa B location or if questSpot was cached
+    if (stageToLoad === 'stage_final' && this.stage) {
+      this.stage.questSpot = { x: 50 * 32, y: 17 * 32 };
+      this.stage.questText = 'Bước vào Văn Phòng các CLB (phía Đông Sân Trung Tâm) để diện kiến Ban Lãnh Đạo và đón nhận Giấy Chứng Nhận Thành Viên Chính Thức!';
+      this.stage.location = 'Văn Phòng CLB Tiếng Nhật JPC (Nhà VP các CLB FTU)';
+      // If player is on campus and was saved near old Tòa B location (col < 36), migrate them directly to VP các CLB (col 50)
+      if (this.currentZone === 'campus' && this.player.x < 36 * 32) {
+        this.player.x = 50 * 32;
+        this.player.y = 18.2 * 32;
+        this.player.direction = 'up';
+      }
     }
 
     // Restore quest tracker objective accordingly
@@ -739,7 +754,7 @@ class Game {
           Chúc mừng <b>${this.playerName}</b> đã xuất sắc vượt qua trọn vẹn hành trình tuyển sinh!<br>
           Cánh cửa <b>Văn Phòng các CLB FTU</b> đã trang trọng mở ra để đón chào bạn bước vào diện kiến <b>Ban Lãnh Đạo JPC</b> và đón nhận <b>Giấy Chứng Nhận Thành Viên Chính Thức</b>!
         `,
-        btn: 'TIẾN VÀO VĂN PHÒNG CÁC CLB (KẾT NẠP) ▶'
+        btn: 'TIẾN TỚI VĂN PHÒNG CÁC CLB (KẾT NẠP) ▶'
       }
     };
 
@@ -974,18 +989,20 @@ class Game {
         }
       ]);
     } else if (stageId === 'stage_final') {
-      if (!preserveState) {
-        // Automatically enter Văn Phòng CLB for the official ceremony
-        this.enterVanPhongCLB();
-      } else {
-        window.dialogueManager.startDialogue([
-          {
-            speaker: 'JPC FTU',
-            text: `Chào mừng tân thành viên Gen 22 ${this.playerName}! Bước vào Văn Phòng các CLB FTU để diện kiến Ban Lãnh Đạo và đón nhận Giấy Chứng Nhận Thành Viên Chính Thức nhé!`
-          }
-        ]);
-        this.triggerConfetti();
-      }
+      this.currentZone = 'campus';
+      this.player.x = 50 * 32;
+      this.player.y = 18.2 * 32;
+      this.player.direction = 'up';
+      this.updateCamera();
+      this.saveGameState(false);
+
+      window.dialogueManager.startDialogue([
+        {
+          speaker: 'Senpai Đón Tiếp JPC',
+          text: `Chào mừng tân thành viên Gen 22 ${this.playerName}! Cánh cửa Văn Phòng các CLB FTU đang trang trọng mở ra đón bạn. Hãy gặp Senpai Đón Tiếp và bước qua cánh cửa để diện kiến Ban Lãnh Đạo JPC nhé!`
+        }
+      ]);
+      this.triggerConfetti();
     }
   }
 
@@ -1204,6 +1221,16 @@ class Game {
         this.player.y = newY;
         this.hasMovedSinceSave = true;
         this.lastMoveTime = Date.now();
+      }
+
+      // Seamless doorway walking trigger for Văn Phòng các CLB
+      if (this.currentZone === 'campus' && Math.abs(this.player.x - 50 * 32) < 28 && this.player.y <= 16.8 * 32 && this.player.y >= 15.5 * 32) {
+        this.enterVanPhongCLB();
+        return;
+      }
+      if (this.currentZone === 'van_phong_clb_interior' && Math.abs(this.player.x - 12 * 32) < 40 && this.player.y >= 14.8 * 32) {
+        this.exitVanPhongCLB();
+        return;
       }
 
       this.player.animTimer++;

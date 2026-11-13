@@ -94,7 +94,7 @@ class WorldMap {
     this.interiorCanvas = null;
     this.interiorMiniMapCanvas = null;
 
-    // Interior Zone 2: Văn Phòng CLB Tiếng Nhật JPC tại Tòa B (Lễ Kết Nạp: Hòa Sắc)
+    // Interior Zone 2: Văn Phòng CLB Tiếng Nhật JPC tại Nhà VP các CLB (Lễ Kết Nạp: Hòa Sắc)
     this.vpCols = 24;
     this.vpRows = 16;
     this.vpWidth = this.vpCols * this.tileSize;

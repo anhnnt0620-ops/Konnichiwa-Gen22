@@ -191,11 +191,11 @@ const STAGE_DATA = {
     location: 'Văn Phòng CLB Tiếng Nhật JPC (Nhà VP các CLB FTU)',
     tip: 'Văn Phòng các CLB nằm cạnh VP Đoàn và Sân khấu FCD. Tiến lên đài danh dự diện kiến Ban Lãnh Đạo để nhận Giấy Chứng Nhận!',
     props: [
-      { type: 'prop_torii', x: 50, y: 16.2, label: 'Cổng Vinh Quang VP CLB' },
+      { type: 'prop_torii', x: 49, y: 15.2, label: 'Cổng Vinh Quang VP CLB' },
       { type: 'prop_sakura_tree', x: 46.5, y: 17.5, label: 'Cây Anh Đào' },
       { type: 'prop_sakura_tree', x: 53.5, y: 17.5, label: 'Cây Anh Đào' },
-      { type: 'prop_lantern', x: 48.5, y: 17, label: 'Đèn hội VP CLB' },
-      { type: 'prop_lantern', x: 51.5, y: 17, label: 'Đèn hội VP CLB' }
+      { type: 'prop_lantern', x: 48, y: 17, label: 'Đèn hội VP CLB' },
+      { type: 'prop_lantern', x: 52, y: 17, label: 'Đèn hội VP CLB' }
     ],
     vpQuestSpot: { x: 12 * 32, y: 5.5 * 32 },
     vpProps: [
@@ -285,7 +285,7 @@ const STAGE_DATA = {
         id: 'npc_senpai_vanphong',
         name: 'Senpai Đón Tiếp JPC',
         sprite: 'npc_senpai',
-        x: 48.8,
+        x: 48.2,
         y: 18,
         dialogues: [
           { speaker: 'Senpai Đón Tiếp JPC', text: 'Chào em! Cánh cửa Văn Phòng các CLB đang mở rộng đón em vào tham dự Lễ Kết Nạp: Hòa Sắc. Em hãy bước qua cánh cửa để diện kiến Ban Lãnh Đạo nhé!' }

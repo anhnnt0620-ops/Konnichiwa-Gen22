@@ -622,6 +622,9 @@ class Game {
 
     const openModal = () => {
       if (!this.stage) return;
+      if (window.dialogueManager && window.dialogueManager.active) {
+        window.dialogueManager.pause();
+      }
       const bElem = document.getElementById('modal-quest-badge');
       const tElem = document.getElementById('modal-quest-title');
       const tlElem = document.getElementById('modal-quest-timeline');
@@ -640,7 +643,19 @@ class Game {
       if (window.audioManager) window.audioManager.playBlip();
     };
 
-    if (questCard) questCard.addEventListener('click', openModal);
+    const closeModal = () => {
+      if (modal) modal.classList.add('hidden');
+      if (window.dialogueManager && window.dialogueManager.active) {
+        window.dialogueManager.resume();
+      }
+    };
+
+    if (questCard) {
+      questCard.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openModal();
+      });
+    }
     if (openBtn) {
       openBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -649,8 +664,14 @@ class Game {
     }
 
     if (closeBtn && modal) {
-      closeBtn.addEventListener('click', () => {
-        modal.classList.add('hidden');
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeModal();
+      });
+    }
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
       });
     }
   }
@@ -706,18 +727,19 @@ class Game {
         title: 'CHẶNG ĐƯỜNG MỚI...',
         sub: 'Ngày 08 tháng 11 năm 2026 · Hội Trát 3.2',
         desc: `
-          Phong ấn Tengu đã bị phá tan! <b>${this.playerName}</b> tiếp tục bước vào <b>Hội Trát 3.2: Chân Diện (08/11 – 09/11)</b>.<br>
-          Hãy di chuyển tới không gian trà đạo <b>Trường VJCBI</b> để trải lòng cùng Ban Điều Hành JPC!
+          Phong ấn Tengu đã được giải phóng thành công! <b>${this.playerName}</b> tiếp tục bước vào <b>Hội Trát 3.2: Chân Diện (08/11 – 09/11)</b>.<br>
+          Hãy di chuyển sang <b>Tòa H FTU</b> (cạnh dốc Tòa B) để tham gia phỏng vấn tự luận cá nhân sâu lắng cùng <b>Ban Lãnh Đạo JPC</b>!
         `,
-        btn: 'CHUYỂN CẢNH TỚI TRƯỜNG VJCBI (VÒNG 3.2) ▶'
+        btn: 'CHUYỂN CẢNH TỚI TÒA H FTU (VÒNG 3.2) ▶'
       },
       stage_final: {
-        title: 'KHOẢNH KHẮC VINH QUANG!',
-        sub: 'Tháng 11 năm 2026 · Kết Nạp Thành Viên Gen 22',
+        title: 'LỄ KẾT NẠP THÀNH VIÊN: HÒA SẮC',
+        sub: 'Tháng 11 năm 2026 · Kết Nạp Chính Thức Gen 22',
         desc: `
-          Chúc mừng <b>${this.playerName}</b> đã chinh phục trọn vẹn 4 Hội Trát! Sân Nhà D FTU đang rợp bóng hoa anh đào đón em chính thức về nhà cùng đại gia đình <b>JPC FTU</b>!
+          Chúc mừng <b>${this.playerName}</b> đã xuất sắc vượt qua trọn vẹn hành trình tuyển sinh!<br>
+          Cánh cửa <b>Văn Phòng CLB Tiếng Nhật JPC tại Tòa B</b> đã trang trọng mở ra để đón chào bạn bước vào diện kiến <b>Ban Lãnh Đạo JPC</b> và đón nhận <b>Giấy Chứng Nhận Thành Viên Chính Thức</b>!
         `,
-        btn: 'TIẾN VÀO SÂN KHẤU KẾT NẠP JPC ▶'
+        btn: 'TIẾN VÀO VĂN PHÒNG CLB JPC (TÒA B) ▶'
       }
     };
 
@@ -749,6 +771,9 @@ class Game {
     if (this.currentZone === 'nha_the_chat_interior') {
       return this.stage.interiorProps || [];
     }
+    if (this.currentZone === 'van_phong_clb_interior') {
+      return this.stage.vpProps || this.stage.interiorProps || [];
+    }
     return this.stage.props || [];
   }
 
@@ -756,6 +781,9 @@ class Game {
     if (!this.stage) return [];
     if (this.currentZone === 'nha_the_chat_interior') {
       return this.stage.interiorNpcs || [];
+    }
+    if (this.currentZone === 'van_phong_clb_interior') {
+      return this.stage.vpNpcs || this.stage.interiorNpcs || [];
     }
     return this.stage.npcs || [];
   }
@@ -767,6 +795,12 @@ class Game {
         return this.stage.interiorQuestSpot;
       }
       return { x: 13 * 32, y: 16 * 32 }; // Point back to exit door if exploring outside Stage 3.1
+    }
+    if (this.currentZone === 'van_phong_clb_interior') {
+      if (this.currentStageId === 'stage_final' && this.stage.vpQuestSpot) {
+        return this.stage.vpQuestSpot;
+      }
+      return { x: 12 * 32, y: 14.5 * 32 }; // Point to exit door
     }
     return this.stage.questSpot || null;
   }
@@ -814,6 +848,49 @@ class Game {
     }
   }
 
+  enterVanPhongCLB() {
+    this.currentZone = 'van_phong_clb_interior';
+    this.player.x = 12 * 32;
+    this.player.y = 13.5 * 32;
+    this.player.direction = 'up';
+    this.nearbyInteractable = null;
+    this.updateCamera();
+    this.updateHUD();
+    this.saveGameState(false);
+    if (window.audioManager) window.audioManager.playFanfare();
+    if (window.showToast) {
+      window.showToast('🌸 Đã bước vào Văn Phòng CLB Tiếng Nhật JPC — Lễ Kết Nạp Hòa Sắc!');
+    }
+    if (this.currentStageId === 'stage_final' && !this.shownVPCLBIntro) {
+      this.shownVPCLBIntro = true;
+      window.dialogueManager.startDialogue([
+        {
+          speaker: 'Văn Phòng CLB Tiếng Nhật JPC',
+          text: 'Không gian Văn Phòng CLB rực rỡ cờ hoa, ánh đèn ấm áp cùng sự hiện diện trang trọng của Ban Lãnh Đạo JPC FTU!'
+        },
+        {
+          speaker: 'Ban Lãnh Đạo JPC',
+          text: `Chào mừng ${this.playerName}! Em hãy bước lên đài danh dự diện kiến Chủ Tịch, Phó Chủ Tịch và các Trưởng Ban để đón nhận Giấy Chứng Nhận Thành Viên Chính Thức nhé!`
+        }
+      ]);
+    }
+  }
+
+  exitVanPhongCLB() {
+    this.currentZone = 'campus';
+    this.player.x = 27.5 * 32;
+    this.player.y = 17.5 * 32;
+    this.player.direction = 'down';
+    this.nearbyInteractable = null;
+    this.updateCamera();
+    this.updateHUD();
+    this.saveGameState(false);
+    if (window.audioManager) window.audioManager.playBlip();
+    if (window.showToast) {
+      window.showToast('🌳 Đã trở ra Sân Trường FTU trước Tòa B!');
+    }
+  }
+
   loadStage(stageId, isInitial = false, preserveState = false) {
     this.currentStageId = stageId;
     this.stage = STAGE_DATA[stageId];
@@ -822,6 +899,7 @@ class Game {
     if (!preserveState) {
       this.currentZone = 'campus';
       this.shownInteriorIntro = false;
+      this.shownVPCLBIntro = false;
       this.nearbyInteractable = null;
     }
 
@@ -883,30 +961,31 @@ class Game {
       ]);
     } else if (stageId === 'stage3_2') {
       if (!preserveState && window.showToast) {
-        window.showToast('🍵 Chuyển cảnh Hội Trát 3.2: Chân Diện! Tiến vào Trường VJCBI gặp Ban Điều Hành!');
+        window.showToast('🍵 Chuyển cảnh Hội Trát 3.2: Chân Diện! Tiến sang Tòa H FTU để gặp gỡ Ban Lãnh Đạo JPC!');
       }
       window.dialogueManager.startDialogue([
         {
           speaker: 'Hội Trát 3.2: Chân Diện',
-          text: 'Chào mừng bạn đến với Trường VJCBI — Vòng Phỏng Vấn Cá Nhân: Chân Diện (08/11 – 09/11).'
+          text: 'Chào mừng bạn đến với Tòa H FTU — Vòng Phỏng Vấn Cá Nhân & Tự Luận: Chân Diện (08/11 – 09/11).'
         },
         {
-          speaker: 'Người Dẫn Chuyện',
-          text: 'Ánh hoàng hôn buông xuống ấm áp qua rèm Shoji. Hãy bước vào Viện VJCBI và mở lòng đối thoại cùng Ban Điều Hành.'
+          speaker: 'Ban Lãnh Đạo JPC',
+          text: 'Hãy bước vào Tòa H FTU và trải lòng qua những dòng tâm sự tự luận sâu lắng cùng Ban Lãnh Đạo.'
         }
       ]);
     } else if (stageId === 'stage_final') {
-      window.dialogueManager.startDialogue([
-        {
-          speaker: 'JPC FTU',
-          text: `Khoảnh khắc vinh quang đã tới! Chào mừng tân FTUer ${this.playerName} đến với Sân khấu FCD rợp bóng hoa anh đào!`
-        },
-        {
-          speaker: 'Người Dẫn Chuyện',
-          text: 'Hãy bước tới Sân khấu FCD cạnh Nhà D để đón nhận sự chúc mừng từ 5 Ban và Chủ Nhiệm JPC!'
-        }
-      ]);
-      this.triggerConfetti();
+      if (!preserveState) {
+        // Automatically enter Văn Phòng CLB for the official ceremony
+        this.enterVanPhongCLB();
+      } else {
+        window.dialogueManager.startDialogue([
+          {
+            speaker: 'JPC FTU',
+            text: `Chào mừng tân thành viên Gen 22 ${this.playerName}! Bước vào Văn Phòng CLB Tiếng Nhật JPC tại Tòa B để diện kiến Ban Lãnh Đạo và đón nhận Giấy Chứng Nhận Thành Viên Chính Thức nhé!`
+          }
+        ]);
+        this.triggerConfetti();
+      }
     }
   }
 
@@ -923,7 +1002,7 @@ class Game {
       stage2: { badge: 'PHỎNG VẤN ONLINE', qBadge: 'VÒNG 2', date: '23/10 – 25/10' },
       stage3_1: { badge: 'TEAMWORK & PITCHING', qBadge: 'VÒNG 3.1', date: '27/10 – 03/11' },
       stage3_2: { badge: 'PHỎNG VẤN CÁ NHÂN', qBadge: 'VÒNG 3.2', date: '08/11 – 09/11' },
-      stage_final: { badge: 'CHÍNH THỨC GEN 22', qBadge: 'KẾT NẠP', date: 'THÀNH VIÊN' }
+      stage_final: { badge: 'LỄ KẾT NẠP HÒA SẮC', qBadge: 'KẾT NẠP', date: 'THÀNH VIÊN' }
     };
 
     const cur = stageMap[this.currentStageId] || { badge: 'JPC FTU', qBadge: 'NHIỆM VỤ', date: 'GEN 22' };
@@ -938,6 +1017,8 @@ class Game {
     if (questHudHint) {
       const interiorHint = (this.currentZone === 'nha_the_chat_interior' && this.currentStageId === 'stage3_1')
         ? 'Nói chuyện với Trưởng Nhóm hoặc chạm Đài Tengu giữa sân để ghép 5 Ban!'
+        : (this.currentZone === 'van_phong_clb_interior' && this.currentStageId === 'stage_final')
+        ? 'Tiến lên đài danh dự diện kiến Ban Lãnh Đạo JPC để đón nhận Giấy Chứng Nhận Thành Viên Chính Thức!'
         : '';
       questHudHint.textContent = interiorHint || (this.stage && this.stage.questText) || 'Nhấn Chi tiết nhiệm vụ để xem hướng dẫn.';
     }
@@ -1210,9 +1291,32 @@ class Game {
       return;
     }
 
+    if (this.currentZone === 'van_phong_clb_interior') {
+      // Exit Door at bottom center (col 10..14, row 13.8..16)
+      if (px >= 9.5 * 32 && px <= 14.5 * 32 && py >= 13.5 * 32) {
+        this.nearbyInteractable = { type: 'exit_van_phong_clb', data: { name: 'Cửa Ra Sân Trường FTU (Tòa B)' } };
+        return;
+      }
+      // Interior Props in Văn Phòng CLB
+      const vpProps = this.getActiveStageProps();
+      for (const prop of vpProps) {
+        if (Math.hypot(px - prop.x * 32, py - prop.y * 32) < 65) {
+          this.nearbyInteractable = { type: 'prop', data: prop };
+          return;
+        }
+      }
+      return;
+    }
+
     // Check Nhà Thể Chất Front Door Entrance on Campus (col 42.5, row 5.0)
     if (Math.abs(px - 42 * 32) < 58 && py >= 4 * 32 && py <= 6.2 * 32) {
       this.nearbyInteractable = { type: 'enter_nha_the_chat', data: { name: 'Nhà Thể Chất FTU' } };
+      return;
+    }
+
+    // Check Văn Phòng CLB JPC Front Door Entrance at Tòa B (col 27.5, row 16.5)
+    if (Math.abs(px - 27.5 * 32) < 58 && Math.abs(py - 16.5 * 32) < 50) {
+      this.nearbyInteractable = { type: 'enter_van_phong_clb', data: { name: 'Văn Phòng CLB Tiếng Nhật JPC' } };
       return;
     }
 
@@ -1280,6 +1384,16 @@ class Game {
 
     if (type === 'exit_nha_the_chat') {
       this.exitNhaTheChat();
+      return;
+    }
+
+    if (type === 'enter_van_phong_clb') {
+      this.enterVanPhongCLB();
+      return;
+    }
+
+    if (type === 'exit_van_phong_clb') {
+      this.exitVanPhongCLB();
       return;
     }
 
@@ -1421,13 +1535,14 @@ class Game {
             this.stageProgress.stage3_2.completed = true;
             if (!this.completedStages.includes('stage3_2')) this.completedStages.push('stage3_2');
             if (!this.unlockedStages.includes('stage_final')) this.unlockedStages.push('stage_final');
-            this.addMemory('Hội trát 3.2: Chân Diện', 'Tỏa sáng chân diện tại không gian văn hóa VJCC Ngoại Thương!', 'Image/Color/Vòng 3.2 - Color.png');
+            this.addMemory('Hội trát 3.2: Chân Diện', 'Tỏa sáng chân diện tự luận cùng Ban Lãnh Đạo tại Tòa H FTU!', 'Image/Color/Vòng 3.2 - Color.png');
             this.saveGameState(false);
             this.triggerConfetti();
             this.showTransitionScreen('stage_final');
           });
-        } else if (this.currentStageId === 'stage_final' && data.id === 'npc_final_president') {
+        } else if (this.currentStageId === 'stage_final' && (data.id === 'npc_president' || data.id === 'npc_vice_president' || data.id === 'npc_bcm' || data.id === 'npc_bdn' || data.id === 'npc_btc' || data.id === 'npc_btt' || data.id === 'npc_bns' || data.id === 'npc_final_president')) {
           if (!this.completedStages.includes('stage_final')) this.completedStages.push('stage_final');
+          this.addMemory('Kết nạp thành viên JPC: Hòa Sắc', 'Chính thức trở thành thành viên Gen 22 tại Văn Phòng CLB JPC FTU!', 'Image/Logo.png');
           this.saveGameState(false);
           this.showCelebrationModal();
         }
@@ -1534,16 +1649,16 @@ class Game {
       {
         id: 'stage3_2',
         title: 'Hội Trát 3.2: Chân Diện',
-        timeline: '30/10 – 01/11/2026',
-        desc: 'Viện VJCBI FTU — Phỏng vấn chuyên sâu trực tiếp cùng Ban Chủ nhiệm & các Senpai JPC.',
+        timeline: '08/11 – 09/11/2026',
+        desc: 'Tòa H FTU — Phỏng vấn tự luận cá nhân trực tiếp cùng Ban Lãnh Đạo JPC.',
         thumb: 'Image/Color/Vòng 3.2 - Color.png',
         fallbackIcon: '🏛️'
       },
       {
         id: 'stage_final',
-        title: 'Hội Trát Chung Kết: Hòa Sắc',
-        timeline: '03/11/2026',
-        desc: 'Sân Khấu FCD — Vinh danh tân thành viên Gen 22 và nhận Giấy chứng nhận chính thức của JPC FTU!',
+        title: 'Kết nạp thành viên JPC: Hòa Sắc',
+        timeline: 'Tháng 11/2026',
+        desc: 'Văn Phòng CLB Tiếng Nhật JPC (Tòa B) — Vinh danh và đón nhận Giấy chứng nhận chính thức từ Ban Lãnh Đạo JPC FTU!',
         thumb: 'Image/Logo.png',
         fallbackIcon: '🏆'
       }
@@ -2190,7 +2305,7 @@ class Game {
     this.ctx.scale(dpr, dpr);
 
     // Fill background matching current zone
-    this.ctx.fillStyle = this.currentZone === 'nha_the_chat_interior' ? '#160609' : '#6ec1e4';
+    this.ctx.fillStyle = (this.currentZone === 'nha_the_chat_interior' || this.currentZone === 'van_phong_clb_interior') ? '#160609' : '#6ec1e4';
     this.ctx.fillRect(0, 0, cssW, cssH);
 
     this.ctx.save();
@@ -2417,21 +2532,11 @@ class Game {
     const defeated = this.stageProgress?.stage3_1?.completed;
 
     this.ctx.save();
-    // Glowing yokai spirit aura on Dais
-    const auraR = 34 + Math.sin(Date.now() / 250) * 4;
-    const grad = this.ctx.createRadialGradient(cx, cy, 4, cx, cy, auraR);
-    grad.addColorStop(0, defeated ? 'rgba(255, 215, 120, 0.45)' : 'rgba(230, 57, 70, 0.55)');
-    grad.addColorStop(1, 'rgba(230, 57, 70, 0)');
-    this.ctx.fillStyle = grad;
-    this.ctx.beginPath();
-    this.ctx.arc(cx, cy, auraR, 0, Math.PI * 2);
-    this.ctx.fill();
 
+    // Render Tengu boss sprite directly on Dais without any circular ring
     if (this.tenguImage && this.tenguImage.complete && this.tenguImage.naturalWidth > 0) {
-      const size = 64;
-      if (defeated) this.ctx.globalAlpha = 0.45;
+      const size = 68;
       this.ctx.drawImage(this.tenguImage, cx - size / 2, cy - size / 2 + hover - 8, size, size);
-      this.ctx.globalAlpha = 1;
     }
 
     // Label pill above Tengu
@@ -2452,7 +2557,7 @@ class Game {
   }
 
   renderItems() {
-    if (this.currentZone === 'nha_the_chat_interior') return;
+    if (this.currentZone === 'nha_the_chat_interior' || this.currentZone === 'van_phong_clb_interior') return;
     if (!this.stage.items) return;
     const time = Date.now() / 300;
     this.stage.items.forEach(it => {

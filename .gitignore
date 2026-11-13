@@ -30,6 +30,7 @@ yarn-error.log*
 /.env.*
 /env-config.js
 /_site/
+/dist/
 .master-state.json
 database.rules.json.bak
 

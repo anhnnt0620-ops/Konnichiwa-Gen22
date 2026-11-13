@@ -1240,83 +1240,170 @@ class MinigameManager {
     startMatchmaking();
   }
 
-  // MINIGAME 3.2: CHÂN DIỆN - GƯƠNG SOI NỘI TÂM (Soul Dialogue)
+  // MINIGAME 3.2: CHÂN DIỆN - TỰ LUẬN TÂM TƯ TẠI TÒA H FTU (Soul Essay Dialogue)
   runStage32Game() {
+    const game = window.game;
+    const pName = (game && game.playerName) ? game.playerName : 'Kouhai';
+
     this.container.innerHTML = `
       <div class="mg-header">
-        <h3>HỘI TRÁT 3.2: CHÂN DIỆN</h3>
-        <p>Lắng đọng tâm tư - Hãy chọn tiếng nói chân thật nhất từ trái tim bạn.</p>
+        <h3>HỘI TRÁT 3.2: CHÂN DIỆN · TÒA H FTU</h3>
+        <p>Vòng Phỏng Vấn Cá Nhân & Tự Luận Tâm Tư cùng Ban Lãnh Đạo JPC (08/11 – 09/11)</p>
       </div>
-      <div class="mg-stage4-arena">
+      <div class="stage32-essay-container">
         <div class="mirror-frame">
           <div class="mirror-glass" id="mirror-glass">
-            <div class="mirror-reflection">🌸 KOUHAI GEN 22 🌸</div>
+            <div class="mirror-reflection">🌸 ${pName.toUpperCase()} · CHÂN DIỆN GEN 22 🌸</div>
           </div>
         </div>
-        <div class="soul-question" id="soul-q">...</div>
-        <div class="soul-choices" id="soul-c"></div>
+        <div class="soul-q-card" id="soul-card">
+          <div class="soul-q-badge" id="soul-badge">CÂU 1 / 3 · TỰ LUẬN TÂM TƯ</div>
+          <div class="soul-q-text" id="soul-q">...</div>
+          <span class="soul-tag-label">💡 Gợi ý cảm xúc & từ khóa (Bấm để chèn nhanh):</span>
+          <div class="soul-tag-chips" id="soul-chips"></div>
+          <textarea class="soul-textarea" id="soul-input" rows="4" maxlength="500" placeholder="Hãy viết bằng tất cả tiếng lòng và sự chân thành của bạn gửi gắm tới Ban Lãnh Đạo JPC..."></textarea>
+          <div class="soul-status-row">
+            <span id="soul-hint-msg" style="color:#ffd778;">✍️ Chia sẻ tối thiểu 10 ký tự</span>
+            <span class="soul-char-counter" id="soul-counter">0 / 500 ký tự</span>
+          </div>
+          <div style="margin-top: 14px; text-align: right;">
+            <button class="soul-submit-btn" id="soul-submit-btn">GỬI LỜI BỘC BẠCH TỚI BAN LÃNH ĐẠO ➔</button>
+          </div>
+        </div>
       </div>
     `;
 
     const questions = [
       {
-        q: "Điều gì thôi thúc bạn chọn bước vào cánh cửa JPC giữa muôn vàn CLB tại Ngoại Thương?",
-        choices: [
-          "Đam mê vẻ đẹp văn hóa và con người xứ sở mặt trời mọc.",
-          "Muốn tìm một mái nhà ấm áp để cùng cười, cùng trưởng thành tại FTU.",
-          "Muốn thử thách bản thân và bứt phá khỏi vùng an toàn."
+        q: "Điều gì thôi thúc bạn chọn bước vào cánh cửa JPC giữa muôn vàn CLB tại Trường Đại học Ngoại Thương?",
+        hintTags: [
+          "🌸 Đam mê tiếng Nhật & văn hóa",
+          "🏡 Muốn tìm một mái nhà ấm áp tại FTU",
+          "🔥 Muốn bứt phá khỏi vùng an toàn",
+          "🤝 Tìm kiếm những người đồng đội tri kỷ"
         ]
       },
       {
-        q: "Khi gặp khó khăn trước áp lực học tập và deadline sự kiện tại FTU, bạn sẽ làm gì?",
-        choices: [
-          "Chủ động sẻ chia, cùng lắng nghe và tìm tiếng nói chung với đồng đội.",
-          "Giữ tinh thần lạc quan, trở thành điểm tựa vững chãi cho cả nhóm.",
-          "Không ngần ngại học hỏi từ các anh chị tiền bối JPC."
+        q: "Khi gặp áp lực giữa việc học trên giảng đường và các đầu việc/deadline sự kiện tại FTU, bạn sẽ cùng đồng đội giải quyết như thế nào?",
+        hintTags: [
+          "💬 Chủ động sẻ chia & đối thoại thẳng thắn",
+          "💪 Giữ tinh thần lạc quan và trách nhiệm",
+          "🤝 Luôn sẵn sàng hỗ trợ khi đồng đội cần",
+          "📚 Cân bằng thời gian khoa học"
         ]
       },
       {
-        q: "Với bạn, JPC trong những năm tháng tại Trường Đại học Ngoại Thương sẽ là...?",
-        choices: [
-          "Nơi lưu giữ thanh xuân rực rỡ nhất thời sinh viên FTU.",
-          "Cầu nối đưa đam mê tiếng Nhật và văn hóa của tôi vươn xa hơn nữa.",
-          "Gia đình thứ hai luôn dang rộng vòng tay đón tôi về."
+        q: "Với bạn, JPC trong những năm tháng thanh xuân tại Trường Đại học Ngoại Thương sẽ là gì?",
+        hintTags: [
+          "✨ Nơi lưu giữ thanh xuân rực rỡ nhất",
+          "🚀 Bệ phóng đưa ước mơ vươn xa",
+          "❤️ Mái nhà thứ hai ấm áp",
+          "🌟 Cơ hội để tỏa sáng bản lĩnh FTUer"
         ]
       }
     ];
 
     let currentQ = 0;
+    const reflections = [];
+    const badgeElem = document.getElementById('soul-badge');
     const qElem = document.getElementById('soul-q');
-    const cElem = document.getElementById('soul-c');
+    const chipsElem = document.getElementById('soul-chips');
+    const inputElem = document.getElementById('soul-input');
+    const counterElem = document.getElementById('soul-counter');
+    const hintMsg = document.getElementById('soul-hint-msg');
+    const submitBtn = document.getElementById('soul-submit-btn');
     const glass = document.getElementById('mirror-glass');
+    const card = document.getElementById('soul-card');
+
+    const updateCounter = () => {
+      const len = inputElem.value.trim().length;
+      counterElem.textContent = `${len} / 500 ký tự`;
+      if (len >= 10) {
+        hintMsg.textContent = '✨ Sẵn sàng gửi gắm tới Ban Lãnh Đạo!';
+        hintMsg.style.color = '#81c784';
+      } else {
+        hintMsg.textContent = `✍️ Cần thêm ${10 - len} ký tự nữa`;
+        hintMsg.style.color = '#ffd778';
+      }
+    };
+
+    inputElem.addEventListener('input', updateCounter);
 
     const showQuestion = () => {
       if (currentQ >= questions.length) {
-        qElem.innerHTML = '<span style="color:#ffd166; font-size:15px;">"Chân Diện sáng tỏ – Bạn chính là mảnh ghép trọn vẹn mà JPC hằng tìm kiếm!"</span>';
-        cElem.innerHTML = '';
+        // All 3 questions submitted!
+        card.innerHTML = `
+          <div style="text-align: center; padding: 20px 10px;">
+            <div style="font-size: 38px; margin-bottom: 12px;">🌟🍵✨</div>
+            <h4 style="color:#ffd778; font-size:16px; font-family:var(--font-title); margin-bottom:10px;">CHÂN DIỆN SÁNG TỎ · TIẾNG LÒNG ĐÃ CHẠM TỚI BAN LÃNH ĐẠO</h4>
+            <p style="color:#fffdf8; font-size:13px; line-height:1.6; max-width:520px; margin:0 auto 16px;">
+              Từng con chữ, từng lời tâm sự chân thành và nhiệt huyết của bạn đã được <b>Ban Lãnh Đạo JPC</b> lắng nghe và trân trọng sâu sắc.<br>
+              Bạn chính là mảnh ghép trọn vẹn mà JPC hằng tìm kiếm!
+            </p>
+            <button class="gold-btn" id="soul-finish-btn" style="padding: 10px 28px; font-size: 13px;">HOÀN THÀNH HỘI TRÁT 3.2 ➔</button>
+          </div>
+        `;
         glass.classList.add('glow-golden');
-        this.finish(true);
+        if (game) {
+          game.stage32Reflections = reflections;
+        }
+        const finishBtn = document.getElementById('soul-finish-btn');
+        if (finishBtn) {
+          finishBtn.addEventListener('click', () => {
+            if (window.audioManager) window.audioManager.playFanfare();
+            this.finish(true);
+          });
+        }
         return;
       }
 
       const q = questions[currentQ];
-      qElem.textContent = `Câu ${currentQ + 1}: ${q.q}`;
-      cElem.innerHTML = '';
+      badgeElem.textContent = `CÂU ${currentQ + 1} / 3 · TỰ LUẬN TÂM TƯ TÒA H`;
+      qElem.textContent = q.q;
+      inputElem.value = '';
+      updateCounter();
 
-      q.choices.forEach(ch => {
-        const btn = document.createElement('button');
-        btn.className = 'choice-btn soul-btn';
-        btn.textContent = ch;
-        btn.addEventListener('click', () => {
+      chipsElem.innerHTML = '';
+      q.hintTags.forEach(tag => {
+        const chip = document.createElement('span');
+        chip.className = 'soul-chip';
+        chip.textContent = tag;
+        chip.addEventListener('click', () => {
           if (window.audioManager) window.audioManager.playCollect();
-          glass.classList.add('shimmer');
-          setTimeout(() => glass.classList.remove('shimmer'), 500);
-          currentQ++;
-          showQuestion();
+          const cleanTag = tag.replace(/^[^\s]+\s/, ''); // strip emoji for natural insertion
+          if (!inputElem.value.trim()) {
+            inputElem.value = cleanTag + ', ';
+          } else {
+            inputElem.value = inputElem.value.trim() + '; ' + cleanTag;
+          }
+          inputElem.focus();
+          updateCounter();
         });
-        cElem.appendChild(btn);
+        chipsElem.appendChild(chip);
       });
     };
+
+    submitBtn.addEventListener('click', () => {
+      const text = inputElem.value.trim();
+      if (text.length < 10) {
+        hintMsg.textContent = '⚠️ Hãy viết ít nhất 10 ký tự hoặc bấm vào các gợi ý phía trên nhé!';
+        hintMsg.style.color = '#ff8a80';
+        inputElem.focus();
+        return;
+      }
+
+      if (window.audioManager) window.audioManager.playCollect();
+      glass.classList.add('shimmer');
+      setTimeout(() => glass.classList.remove('shimmer'), 500);
+
+      reflections.push({
+        question: questions[currentQ].q,
+        answer: text
+      });
+
+      currentQ++;
+      showQuestion();
+    });
 
     showQuestion();
   }

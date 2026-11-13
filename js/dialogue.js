@@ -9,6 +9,7 @@ class DialogueManager {
     this.continuePrompt = null;
 
     this.active = false;
+    this.isPaused = false;
     this.dialogueQueue = [];
     this.currentDialogue = null;
     this.currentCharIndex = 0;
@@ -19,6 +20,37 @@ class DialogueManager {
     this.init();
   }
 
+  pause() {
+    this.isPaused = true;
+    if (this.typingTimer) {
+      clearInterval(this.typingTimer);
+      this.typingTimer = null;
+    }
+  }
+
+  resume() {
+    if (!this.isPaused) return;
+    this.isPaused = false;
+    if (this.active && this.isTyping && this.currentDialogue) {
+      const fullText = this.currentDialogue.text;
+      if (this.currentCharIndex < fullText.length) {
+        this.typingTimer = setInterval(() => {
+          if (this.currentCharIndex < fullText.length) {
+            this.textElem.textContent += fullText[this.currentCharIndex];
+            if (this.currentCharIndex % 2 === 0 && window.audioManager) {
+              window.audioManager.playBlip();
+            }
+            this.currentCharIndex++;
+          } else {
+            this.finishTyping();
+          }
+        }, 28);
+      } else {
+        this.finishTyping();
+      }
+    }
+  }
+
   init() {
     this.container = document.getElementById('dialogue-box');
     this.nameElem = document.getElementById('dialogue-speaker');
@@ -27,20 +59,23 @@ class DialogueManager {
     this.choicesElem = document.getElementById('dialogue-choices');
     this.continuePrompt = document.getElementById('dialogue-continue');
 
-    // Tap/Click on dialogue box or screen advances it
+    // Tap/Click on dialogue box advances it
     if (this.container) {
       this.container.addEventListener('click', (e) => {
-        // Do not advance if clicking inside choices
-        if (e.target.closest('#dialogue-choices')) return;
+        if (this.isPaused) return;
+        // Do not advance if clicking inside choices, buttons, inputs or links
+        if (e.target.closest('#dialogue-choices, button, a, input, select')) return;
         this.advance();
       });
     }
 
     // Tap anywhere on the game screen when dialogue is open
     document.addEventListener('pointerdown', (e) => {
-      if (!this.active) return;
-      if (e.target.closest('#dialogue-choices')) return;
-      if (e.target.closest('.modal-overlay')) return;
+      if (!this.active || this.isPaused) return;
+      // Do not advance dialogue when interacting with Quest Card, Quest Modal, Top HUD, or Overlays
+      if (e.target.closest('#quest-hud-card, #quest-hud-hint, #btn-open-quest-detail, #quest-detail-modal, #hud-top-bar, .modal-overlay, #dialogue-choices, .hud-btn, .hud-pill, .control-btn-circle, .btn-action-diamond, button, input, textarea, select')) {
+        return;
+      }
       if (e.target.closest('#touch-controls')) {
         // If user taps action button [A], it already advances; if user taps D-pad, advance too!
         this.advance();
@@ -139,6 +174,7 @@ class DialogueManager {
   }
 
   advance() {
+    if (this.isPaused) return;
     if (!this.active) return;
 
     if (this.isTyping) {

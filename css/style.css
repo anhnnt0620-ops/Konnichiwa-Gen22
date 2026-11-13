@@ -3586,3 +3586,169 @@ html, body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   STAGE 3.2: CHÂN DIỆN · TỰ LUẬN TÂM TƯ TẠI TÒA H FTU
+   ========================================================================== */
+.stage32-essay-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.mirror-frame {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.mirror-glass {
+  background: radial-gradient(circle, rgba(255, 240, 200, 0.25) 0%, rgba(30, 8, 12, 0.9) 80%);
+  border: 2px solid #ffd778;
+  border-radius: 20px;
+  padding: 8px 18px;
+  box-shadow: 0 0 16px rgba(255, 215, 120, 0.4), inset 0 0 12px rgba(255, 215, 120, 0.25);
+  transition: all 0.4s ease;
+}
+
+.mirror-glass.shimmer {
+  transform: scale(1.03);
+  box-shadow: 0 0 28px rgba(255, 215, 120, 0.8), inset 0 0 20px rgba(255, 215, 120, 0.5);
+}
+
+.mirror-glass.glow-golden {
+  border-color: #ffe082;
+  box-shadow: 0 0 32px #ffd54f, inset 0 0 24px #ffd54f;
+}
+
+.mirror-reflection {
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #ffe082;
+  text-shadow: 0 0 8px rgba(255, 215, 120, 0.6);
+}
+
+.soul-q-card {
+  background: rgba(30, 8, 12, 0.92);
+  border: 1.5px solid rgba(255, 215, 120, 0.4);
+  border-radius: 14px;
+  padding: 14px 18px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  text-align: left;
+}
+
+.soul-q-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #b92b45, #d8434f);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.soul-q-text {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #fffdf8;
+  margin-bottom: 12px;
+}
+
+.soul-tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.soul-tag-label {
+  font-size: 11px;
+  color: #f7c59f;
+  margin-bottom: 4px;
+  font-weight: 600;
+  display: block;
+}
+
+.soul-chip {
+  background: rgba(255, 215, 120, 0.12);
+  border: 1px solid rgba(255, 215, 120, 0.35);
+  color: #ffd778;
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.soul-chip:hover {
+  background: rgba(255, 215, 120, 0.28);
+  border-color: #ffd778;
+  transform: translateY(-1px);
+}
+
+.soul-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(18, 4, 6, 0.95);
+  border: 1.5px solid rgba(255, 215, 120, 0.4);
+  border-radius: 10px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 10px 12px;
+  resize: vertical;
+  min-height: 90px;
+  transition: border-color 0.2s ease;
+}
+
+.soul-textarea:focus {
+  outline: none;
+  border-color: #ffd778;
+  box-shadow: 0 0 10px rgba(255, 215, 120, 0.3);
+}
+
+.soul-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #f7c59f;
+  margin-top: 6px;
+}
+
+.soul-char-counter {
+  font-weight: 600;
+}
+
+.soul-submit-btn {
+  background: linear-gradient(135deg, #d8434f 0%, #b92b45 100%);
+  color: #fff;
+  border: 1.5px solid #ffd778;
+  border-radius: 12px;
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(185, 43, 69, 0.4);
+  transition: all 0.25s ease;
+}
+
+.soul-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(185, 43, 69, 0.6);
+  border-color: #fff;
+}

@@ -38,21 +38,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Verify GitHub Pages Configuration
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          status=$(curl -sS -o /tmp/pages-check.json -w "%{http_code}" \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            "${{ github.api_url }}/repos/${{ github.repository }}/pages")
-          if [ "$status" = "404" ]; then
-            echo "::error::GitHub Pages is not enabled on ${{ github.repository }}. Open https://github.com/${{ github.repository }}/settings/pages -> Source: GitHub Actions (repo must be Public on GitHub Free)."
-            exit 1
-          fi
-
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v6
+        with:
+          enablement: true
 
       - name: Build static bundle
         env:

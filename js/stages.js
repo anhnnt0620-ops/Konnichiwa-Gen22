@@ -142,35 +142,35 @@ const STAGE_DATA = {
   stage3_2: {
     id: 'stage3_2',
     name: 'HỘI TRÁT 3.2: CHÂN DIỆN (08/11 – 09/11)',
-    subtitle: 'Trường VJCBI — Vòng Phỏng Vấn Cá Nhân',
+    subtitle: 'Tòa H FTU — Vòng Phỏng Vấn Cá Nhân & Tự Luận Tâm Tư',
     bgm: 'stage3_2',
-    playerStart: { x: 27, y: 31.5, direction: 'down' },
+    playerStart: { x: 9.5, y: 15.5, direction: 'left' },
     repositionOnTransition: true,
-    questSpot: { x: 27 * 32, y: 32 * 32 },
-    questText: 'Di chuyển sang Trường VJCBI ngay dưới Nhà A, bước vào phòng trà đạo đối thoại cùng Ban Điều Hành (08/11 – 09/11)!',
+    questSpot: { x: 8.5 * 32, y: 15 * 32 },
+    questText: 'Di chuyển sang Tòa H FTU (cạnh dốc Tòa B), bước vào phòng phỏng vấn tự luận cùng Ban Lãnh Đạo (08/11 – 09/11)!',
     questTitle: 'Hội Trát 3.2: Chân Diện',
     timeline: '08/11 – 09/11/2026',
-    objective: 'Gặp gỡ và trò chuyện chân thành, sâu lắng 1-on-1 cùng Ban Điều Hành JPC trong không gian văn hóa trà đạo Nhật Bản tại VJCBI.',
-    location: 'Trường VJCBI (phía Nam Nhà A, trên KTX 7 tầng)',
-    tip: 'Hãy lắng nghe trái tim mình và thể hiện bản sắc chân thật nhất của bạn.',
+    objective: 'Gặp gỡ và trải lòng tự luận 1-on-1 cùng Ban Lãnh Đạo JPC trong không gian phỏng vấn Chân Diện tại Tòa H FTU.',
+    location: 'Tòa H FTU (Khu vực phỏng vấn cá nhân tầng 1)',
+    tip: 'Hãy viết bằng tất cả sự chân thành từ trái tim bạn — mỗi con chữ đều là mảnh ghép quý giá.',
     props: [
-      { type: 'prop_lantern', x: 25, y: 32, label: 'Đèn trà đạo hoàng hôn' },
-      { type: 'prop_lantern', x: 29, y: 32, label: 'Đèn trà đạo hoàng hôn' },
-      { type: 'prop_desk', x: 27, y: 32, label: 'Bàn trà đạo VJCBI' }
+      { type: 'prop_lantern', x: 7.5, y: 13.5, label: 'Đèn lồng Tòa H' },
+      { type: 'prop_lantern', x: 7.5, y: 16.5, label: 'Đèn lồng Tòa H' },
+      { type: 'prop_desk', x: 7.5, y: 15, label: 'Bàn Phỏng Vấn Chân Diện - Tòa H' }
     ],
     items: [],
     npcs: [
       {
         id: 'npc_mentor_heart',
-        name: 'Ban Điều Hành JPC',
+        name: 'Ban Lãnh Đạo JPC',
         sprite: 'npc_president',
-        x: 27,
-        y: 32,
-        avatarIcon: '🍵',
+        x: 7.5,
+        y: 15,
+        avatarIcon: '🏛️',
         dialogues: [
-          { speaker: 'Ban Điều Hành', text: 'Chào em đến với không gian trà đạo Trường VJCBI — góc Nhật Bản tĩnh lặng ngay trong lòng Ngoại Thương.' },
-          { speaker: 'Ban Điều Hành', text: 'Vòng 3.2 Chân Diện (08/11 – 09/11) là nơi chúng mình lắng nghe tiếng lòng chân thành nhất của em sau chặng đường dài.' },
-          { speaker: 'Ban Điều Hành', text: 'Hãy soi rọi vào tấm gương nội tâm và chia sẻ ước mơ cùng đại gia đình JPC nhé.' }
+          { speaker: 'Ban Lãnh Đạo JPC', text: 'Chào mừng em đến với khu vực phỏng vấn Tòa H FTU — nơi diễn ra Vòng 3.2: Chân Diện (08/11 – 09/11).' },
+          { speaker: 'Ban Lãnh Đạo JPC', text: 'Đây là không gian tự luận riêng tư và sâu lắng nhất, nơi chúng mình mong muốn được lắng nghe tiếng lòng và tâm tư chân thành nhất của em.' },
+          { speaker: 'Ban Lãnh Đạo JPC', text: 'Hãy soi rọi vào tấm gương nội tâm và chia sẻ ước mơ, khát vọng của em cùng Ban Lãnh Đạo nhé!' }
         ]
       }
     ]
@@ -178,86 +178,117 @@ const STAGE_DATA = {
 
   stage_final: {
     id: 'stage_final',
-    name: 'CÔNG BỐ THÀNH VIÊN CHÍNH THỨC',
-    subtitle: 'Sân Nhà D FTU — Chào mừng em về nhà!',
+    name: 'KẾT NẠP THÀNH VIÊN JPC: HÒA SẮC',
+    subtitle: 'Văn Phòng CLB Tiếng Nhật JPC — Lễ Kết Nạp Hòa Sắc',
     bgm: 'stage_final',
-    playerStart: { x: 40, y: 21, direction: 'right' },
+    playerStart: { x: 27.5, y: 18.5, direction: 'up' },
     repositionOnTransition: true,
-    questSpot: { x: 46 * 32, y: 21 * 32 },
-    questText: 'Bước đến Sân Nhà D FTU để gặp gỡ các Ban và nhận Thẻ Thành Viên Chính Thức JPC!',
-    questTitle: 'Vinh Quang: Chào Mừng Về Nhà',
+    questSpot: { x: 27.5 * 32, y: 17 * 32 },
+    questText: 'Bước vào Văn Phòng CLB Tiếng Nhật JPC tại Tòa B để diện kiến Ban Lãnh Đạo và đón nhận Giấy Chứng Nhận Thành Viên Chính Thức!',
+    questTitle: 'Kết Nạp: Hòa Sắc',
     timeline: 'Tháng 11/2026',
-    objective: 'Tiến tới Sân Nhà D FTU đón nhận trọn vẹn tình cảm chúc mừng từ 5 Ban và Chủ Nhiệm JPC FTU!',
-    location: 'Sân Nhà D FTU',
-    tip: 'Tận hưởng khoảnh khắc thanh xuân rực rỡ nhất cùng đại gia đình JPC!',
+    objective: 'Bước vào Văn Phòng CLB JPC tại Tòa B, diện kiến Ban Lãnh Đạo (Chủ Tịch, Phó Chủ Tịch và các Trưởng Ban) để tham dự Lễ Kết Nạp: Hòa Sắc và đón nhận Giấy Chứng Nhận Thành Viên Chính Thức!',
+    location: 'Văn Phòng CLB Tiếng Nhật JPC (Tòa B FTU)',
+    tip: 'Văn Phòng CLB nằm tại Tòa B. Tiến lên đài danh dự diện kiến Ban Lãnh Đạo để nhận Giấy Chứng Nhận!',
     props: [
-      { type: 'prop_torii', x: 46, y: 20, label: 'Cổng Torii Vinh Quang' },
-      { type: 'prop_sakura_tree', x: 40, y: 18, label: 'Cây Anh Đào' },
-      { type: 'prop_sakura_tree', x: 40, y: 24, label: 'Cây Anh Đào' },
-      { type: 'prop_lantern', x: 44, y: 19, label: 'Đèn hội' },
-      { type: 'prop_lantern', x: 44, y: 23, label: 'Đèn hội' }
+      { type: 'prop_torii', x: 27.5, y: 16, label: 'Cổng Vinh Quang Tòa B' },
+      { type: 'prop_sakura_tree', x: 23, y: 16.5, label: 'Cây Anh Đào' },
+      { type: 'prop_sakura_tree', x: 32, y: 16.5, label: 'Cây Anh Đào' },
+      { type: 'prop_lantern', x: 25.5, y: 16.5, label: 'Đèn hội Tòa B' },
+      { type: 'prop_lantern', x: 29.5, y: 16.5, label: 'Đèn hội Tòa B' }
     ],
-    items: [],
-    npcs: [
+    vpQuestSpot: { x: 12 * 32, y: 5.5 * 32 },
+    vpProps: [
+      { type: 'prop_desk', x: 11, y: 5, label: 'Bàn Nghi Lễ Ban Lãnh Đạo' },
+      { type: 'prop_desk', x: 13, y: 5, label: 'Bàn Nghi Lễ Ban Lãnh Đạo' },
+      { type: 'prop_lantern', x: 8, y: 4.5, label: 'Đèn Lồng Danh Dự' },
+      { type: 'prop_lantern', x: 16, y: 4.5, label: 'Đèn Lồng Danh Dự' },
+      { type: 'prop_lantern', x: 5, y: 8, label: 'Đèn Văn Phòng' },
+      { type: 'prop_lantern', x: 19, y: 8, label: 'Đèn Văn Phòng' }
+    ],
+    vpNpcs: [
+      {
+        id: 'npc_president',
+        name: 'Chủ Tịch JPC',
+        sprite: 'npc_president',
+        x: 11,
+        y: 4,
+        dialogues: [
+          { speaker: 'Chủ Tịch JPC', text: 'Chào mừng em! Kể từ giây phút này, em đã chính thức là một phần máu thịt của JPC - Câu lạc bộ Tiếng Nhật Trường Đại học Ngoại Thương!' },
+          { speaker: 'Chủ Tịch JPC', text: 'Cảm ơn em vì đã dám ước mơ, kiên trì nỗ lực và trọn vẹn với từng chặng đường... Thay mặt Ban Lãnh Đạo JPC FTU, chào mừng em về nhà!' }
+        ]
+      },
+      {
+        id: 'npc_vice_president',
+        name: 'Phó Chủ Tịch JPC',
+        sprite: 'npc_senpai',
+        x: 13.5,
+        y: 4,
+        dialogues: [
+          { speaker: 'Phó Chủ Tịch JPC', text: 'Chào mừng tân binh Gen 22! Tụi mình vô cùng tự hào khi được đồng hành cùng em trong nhiệm kỳ rực rỡ sắp tới!' }
+        ]
+      },
       {
         id: 'npc_bcm',
-        name: 'Ban Chuyên Môn',
+        name: 'Trưởng Ban Chuyên Môn',
         sprite: 'kokeshi_bcm',
-        x: 44,
-        y: 20,
+        x: 4.5,
+        y: 6.5,
         dialogues: [
-          { speaker: 'Ban Chuyên Môn', text: 'Konnichiwa! Chào mừng em gia nhập đại gia đình JPC - FTU! Cùng Ban Chuyên Môn chinh phục tiếng Nhật và văn hóa rực rỡ nhé!' }
-        ]
-      },
-      {
-        id: 'npc_bns',
-        name: 'Ban Nhân Sự',
-        sprite: 'kokeshi_bns',
-        x: 44,
-        y: 22,
-        dialogues: [
-          { speaker: 'Ban Nhân Sự', text: 'Chào mừng em về nhà! Nhân Sự sẽ luôn là chỗ dựa ấm áp nhất để em thỏa sức bung tỏa thanh xuân tại Ngoại Thương!' }
-        ]
-      },
-      {
-        id: 'npc_btt',
-        name: 'Ban Thông Tin',
-        sprite: 'kokeshi_btt',
-        x: 42,
-        y: 19,
-        dialogues: [
-          { speaker: 'Ban Thông Tin', text: 'Chào mừng tân binh Gen 22! Cùng Thông Tin vẽ nên những ấn phẩm truyền thông triệu view mang đậm bản sắc Ngoại Thương nha!' }
-        ]
-      },
-      {
-        id: 'npc_btc',
-        name: 'Ban Tổ Chức',
-        sprite: 'kokeshi_btc',
-        x: 42,
-        y: 21,
-        dialogues: [
-          { speaker: 'Ban Tổ Chức', text: 'Nhiệt liệt chào đón Gen 22! Những sự kiện bùng nổ nhất FTU đang chờ tụi mình cùng nhau thực hiện đó!' }
+          { speaker: 'Trưởng Ban Chuyên Môn', text: 'Konnichiwa! Chào mừng em về với ngôi nhà JPC - FTU! Cùng Ban Chuyên Môn chinh phục tiếng Nhật và văn hóa rực rỡ nhé!' }
         ]
       },
       {
         id: 'npc_bdn',
-        name: 'Ban Đối Ngoại',
+        name: 'Trưởng Ban Đối Ngoại',
         sprite: 'kokeshi_bdn',
-        x: 42,
-        y: 23,
+        x: 4.5,
+        y: 10,
         dialogues: [
-          { speaker: 'Ban Đối Ngoại', text: 'Chào mừng em! Cùng Đối Ngoại kết nối doanh nghiệp Nhật Bản và đưa hình ảnh sinh viên FTU vươn thật xa nhé!' }
+          { speaker: 'Trưởng Ban Đối Ngoại', text: 'Chào mừng em! Cùng Đối Ngoại kết nối doanh nghiệp Nhật Bản và đưa hình ảnh sinh viên FTU vươn thật xa nhé!' }
         ]
       },
       {
-        id: 'npc_final_president',
-        name: 'Chủ Nhiệm JPC',
-        sprite: 'npc_president',
-        x: 46,
-        y: 21,
+        id: 'npc_btc',
+        name: 'Trưởng Ban Tổ Chức',
+        sprite: 'kokeshi_btc',
+        x: 19.5,
+        y: 6.5,
         dialogues: [
-          { speaker: 'Chủ Nhiệm JPC', text: 'Chào mừng em! Kể từ giây phút này, em đã chính thức là một phần máu thịt của JPC - Câu lạc bộ Tiếng Nhật Trường Đại học Ngoại Thương!' },
-          { speaker: 'Chủ Nhiệm JPC', text: 'Cảm ơn em vì đã dám ước mơ, dám nỗ lực và trọn vẹn với từng chặng đường... Chào mừng em về nhà!' }
+          { speaker: 'Trưởng Ban Tổ Chức', text: 'Nhiệt liệt chào đón Gen 22! Những sự kiện bùng nổ nhất FTU đang chờ tụi mình cùng nhau thực hiện đó!' }
+        ]
+      },
+      {
+        id: 'npc_btt',
+        name: 'Trưởng Ban Thông Tin',
+        sprite: 'kokeshi_btt',
+        x: 19.5,
+        y: 10,
+        dialogues: [
+          { speaker: 'Trưởng Ban Thông Tin', text: 'Chào mừng tân binh Gen 22! Cùng Thông Tin vẽ nên những ấn phẩm truyền thông triệu view mang đậm bản sắc Ngoại Thương nha!' }
+        ]
+      },
+      {
+        id: 'npc_bns',
+        name: 'Trưởng Ban Nhân Sự',
+        sprite: 'kokeshi_bns',
+        x: 12,
+        y: 9.5,
+        dialogues: [
+          { speaker: 'Trưởng Ban Nhân Sự', text: 'Chào mừng em về nhà! Nhân Sự sẽ luôn là chỗ dựa ấm áp nhất để em thỏa sức bung tỏa thanh xuân tại Ngoại Thương!' }
+        ]
+      }
+    ],
+    items: [],
+    npcs: [
+      {
+        id: 'npc_senpai_vanphong',
+        name: 'Senpai Đón Tiếp JPC',
+        sprite: 'npc_senpai',
+        x: 27.5,
+        y: 16.5,
+        dialogues: [
+          { speaker: 'Senpai Đón Tiếp JPC', text: 'Chào em! Cánh cửa Văn Phòng CLB Tiếng Nhật JPC đang mở rộng đón em vào tham dự Lễ Kết Nạp Thành Viên: Hòa Sắc. Em hãy bước vào trong diện kiến Ban Lãnh Đạo nhé!' }
         ]
       }
     ]

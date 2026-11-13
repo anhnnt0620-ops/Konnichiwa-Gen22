@@ -94,8 +94,17 @@ class WorldMap {
     this.interiorCanvas = null;
     this.interiorMiniMapCanvas = null;
 
+    // Interior Zone 2: Văn Phòng CLB Tiếng Nhật JPC tại Tòa B (Lễ Kết Nạp: Hòa Sắc)
+    this.vpCols = 24;
+    this.vpRows = 16;
+    this.vpWidth = this.vpCols * this.tileSize;
+    this.vpHeight = this.vpRows * this.tileSize;
+    this.vpSolidGrid = [];
+    this.vpCanvas = null;
+
     this.initMap();
     this.initNhaTheChatInterior();
+    this.initVanPhongCLBInterior();
   }
 
   isInsideCampus(c, r) {
@@ -258,6 +267,9 @@ class WorldMap {
     if (currentZone === 'nha_the_chat_interior') {
       return { width: this.interiorWidth, height: this.interiorHeight };
     }
+    if (currentZone === 'van_phong_clb_interior') {
+      return { width: this.vpWidth, height: this.vpHeight };
+    }
     return { width: this.width, height: this.height };
   }
 
@@ -415,15 +427,6 @@ class WorldMap {
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    // Inner Yokai Seal on Dais
-    ctx.fillStyle = 'rgba(230, 57, 70, 0.28)';
-    ctx.beginPath();
-    ctx.arc(cx, daisY + daisH / 2 + 4, 28, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#ff85a1';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
     // Left & Right Gym Bleachers (col 0..1 and col 24..25)
     for (let side = 0; side < 2; side++) {
       const bx = side === 0 ? 4 : w - 2 * this.tileSize + 4;
@@ -460,6 +463,271 @@ class WorldMap {
     this.interiorCanvas = c;
   }
 
+  initVanPhongCLBInterior() {
+    this.vpSolidGrid = [];
+    for (let r = 0; r < this.vpRows; r++) {
+      this.vpSolidGrid.push([]);
+      for (let c = 0; c < this.vpCols; c++) {
+        let solid = false;
+        // Perimeter walls
+        if (r <= 2 || c <= 1 || c >= this.vpCols - 2) solid = true;
+        if (r >= this.vpRows - 2) {
+          // Bottom exit doorway open at col 10..13
+          if (c < 10 || c > 13) solid = true;
+        }
+        // Ban Lãnh Đạo dais core solid block (col 10..14, row 3..4)
+        if (r === 4 && (c >= 10 && c <= 14)) solid = true;
+        // Left conference table (col 3..5, row 7..8)
+        if ((r === 7 || r === 8) && (c >= 3 && c <= 5)) solid = true;
+        // Right awards display (col 18..20, row 7..8)
+        if ((r === 7 || r === 8) && (c >= 18 && c <= 20)) solid = true;
+        this.vpSolidGrid[r].push(solid ? 1 : 0);
+      }
+    }
+    this.buildVanPhongCLBInteriorCanvas();
+  }
+
+  buildVanPhongCLBInteriorCanvas() {
+    const scale = 2;
+    const w = this.vpWidth;
+    const h = this.vpHeight;
+    const c = document.createElement('canvas');
+    c.width = w * scale;
+    c.height = h * scale;
+    const ctx = c.getContext('2d');
+    ctx.scale(scale, scale);
+
+    // 1. Base Flooring: Polished Honey Oak Parquet
+    ctx.fillStyle = '#e8c99b';
+    ctx.fillRect(0, 0, w, h);
+
+    // Parquet plank lines
+    ctx.strokeStyle = '#d4aa74';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < w; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+    for (let y = 0; y < h; y += 16) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+
+    // 2. Tatami Accent Wings (West & East)
+    const drawTatami = (x, y, tw, th) => {
+      ctx.fillStyle = '#c5d8ad';
+      ctx.fillRect(x, y, tw, th);
+      // Tatami green silk ribbon borders
+      ctx.fillStyle = '#2f5135';
+      ctx.fillRect(x, y, 4, th);
+      ctx.fillRect(x + tw - 4, y, 4, th);
+      ctx.strokeStyle = '#2f5135';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x, y, tw, th);
+    };
+    drawTatami(2 * this.tileSize, 3.5 * this.tileSize, 5 * this.tileSize, 10 * this.tileSize);
+    drawTatami((this.vpCols - 7) * this.tileSize, 3.5 * this.tileSize, 5 * this.tileSize, 10 * this.tileSize);
+
+    // 3. Central Ceremonial Red Carpet (Cols 9.5..14.5, Rows 4.5..15.5)
+    const carpetX = 9.5 * this.tileSize;
+    const carpetW = 5 * this.tileSize;
+    const carpetY = 4.5 * this.tileSize;
+    const carpetH = 11 * this.tileSize;
+
+    // Carpet shadow
+    ctx.fillStyle = 'rgba(20, 4, 8, 0.28)';
+    ctx.fillRect(carpetX - 2, carpetY + 2, carpetW + 4, carpetH);
+
+    // Deep Ceremonial Crimson Velvet
+    ctx.fillStyle = '#941829';
+    ctx.fillRect(carpetX, carpetY, carpetW, carpetH);
+
+    // Gold embroidered ribbon border
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(carpetX + 3, carpetY + 3, carpetW - 6, carpetH - 6);
+
+    // Golden Fleur / Sakura watermark motifs on carpet
+    ctx.fillStyle = 'rgba(255, 215, 120, 0.25)';
+    for (let y = carpetY + 28; y < carpetY + carpetH - 20; y += 42) {
+      ctx.beginPath();
+      ctx.arc(w / 2, y, 9, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 4. North Ceremonial Dais / Stage (Ban Lãnh Đạo Podium)
+    const daisX = 8.5 * this.tileSize;
+    const daisW = 7 * this.tileSize;
+    const daisY = 2.4 * this.tileSize;
+    const daisH = 2.8 * this.tileSize;
+
+    ctx.fillStyle = 'rgba(20, 4, 8, 0.4)';
+    ctx.beginPath();
+    ctx.roundRect(daisX - 4, daisY + 6, daisW + 8, daisH, 10);
+    ctx.fill();
+
+    // Dark mahogany elevated stage
+    ctx.fillStyle = '#420e15';
+    ctx.beginPath();
+    ctx.roundRect(daisX, daisY, daisW, daisH, 8);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Dais Step / Apron
+    ctx.fillStyle = '#631822';
+    ctx.fillRect(daisX + 16, daisY + daisH - 6, daisW - 32, 8);
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(daisX + 16, daisY + daisH - 6, daisW - 32, 8);
+
+    // 5. North Wall: Lacquered Japanese Cedar Panels & Gold Silk Hanging Scroll
+    ctx.fillStyle = '#28080d';
+    ctx.fillRect(0, 0, w, 2.4 * this.tileSize);
+    ctx.fillStyle = '#ffd778';
+    ctx.fillRect(0, 2.4 * this.tileSize - 3, w, 3);
+
+    // Hanging Gold Silk Banner
+    const bannerW = 420;
+    const bannerH = 46;
+    const bannerX = (w - bannerW) / 2;
+    const bannerY = 12;
+    ctx.fillStyle = 'rgba(15, 3, 5, 0.95)';
+    ctx.beginPath();
+    ctx.roundRect(bannerX, bannerY, bannerW, bannerH, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 11.5px "Montserrat", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('★ CÂU LẠC BỘ TIẾNG NHẬT JPC — TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG ★', w / 2, bannerY + 18);
+    ctx.fillStyle = '#fffdf8';
+    ctx.font = 'bold 10px "Montserrat", sans-serif';
+    ctx.fillText('🌸 LỄ KẾT NẠP THÀNH VIÊN GEN 22 · HÒA SẮC (和色) 🌸', w / 2, bannerY + 34);
+
+    // 6. Left Furniture: Conference Table & Glass Trophy Showcase
+    ctx.fillStyle = 'rgba(20, 30, 40, 0.9)';
+    ctx.fillRect(2.2 * this.tileSize, 2.5 * this.tileSize, 4.6 * this.tileSize, 1.2 * this.tileSize);
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(2.2 * this.tileSize, 2.5 * this.tileSize, 4.6 * this.tileSize, 1.2 * this.tileSize);
+    ctx.fillStyle = '#ffe082';
+    ctx.font = 'bold 8.5px "Montserrat", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🏆 CÚP & KỶ NIỆM CHƯƠNG CLB XUẤT SẮC FTU', 4.5 * this.tileSize, 3.2 * this.tileSize);
+
+    // Left Conference Table
+    ctx.fillStyle = '#6d4c41';
+    ctx.beginPath();
+    ctx.roundRect(3.2 * this.tileSize, 6.8 * this.tileSize, 2.6 * this.tileSize, 2.4 * this.tileSize, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // 7. Right Furniture: Taiko Drum & Event Welcome Standee
+    ctx.fillStyle = '#7a1c1c';
+    ctx.beginPath();
+    ctx.ellipse((this.vpCols - 4.5) * this.tileSize, 7.8 * this.tileSize, 26, 26, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.fillStyle = '#ffe082';
+    ctx.font = 'bold 8.5px "Montserrat", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🥁 TAIKO JPC', (this.vpCols - 4.5) * this.tileSize, 8.1 * this.tileSize);
+
+    // Event Welcome Standee at top right
+    ctx.fillStyle = 'rgba(40, 10, 16, 0.95)';
+    ctx.fillRect((this.vpCols - 6.8) * this.tileSize, 2.5 * this.tileSize, 4.6 * this.tileSize, 1.2 * this.tileSize);
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect((this.vpCols - 6.8) * this.tileSize, 2.5 * this.tileSize, 4.6 * this.tileSize, 1.2 * this.tileSize);
+    ctx.fillStyle = '#ffe082';
+    ctx.font = 'bold 8.5px "Montserrat", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('⛩️ JPC FTU · GEN 22 HÒA SẮC', (this.vpCols - 4.5) * this.tileSize, 3.2 * this.tileSize);
+
+    // 8. Perimeter Walls (West, East, South)
+    // West Wall
+    ctx.fillStyle = '#3a0e14';
+    ctx.fillRect(0, 0, 2 * this.tileSize, h);
+    ctx.fillStyle = '#ffd778';
+    ctx.fillRect(2 * this.tileSize - 3, 0, 3, h);
+
+    // East Wall
+    ctx.fillStyle = '#3a0e14';
+    ctx.fillRect((this.vpCols - 2) * this.tileSize, 0, 2 * this.tileSize, h);
+    ctx.fillStyle = '#ffd778';
+    ctx.fillRect((this.vpCols - 2) * this.tileSize, 0, 3, h);
+
+    // South Wall + Open Exit Doorway (col 10..13)
+    const bWallY = (this.vpRows - 2) * this.tileSize;
+    ctx.fillStyle = '#3a0e14';
+    ctx.fillRect(0, bWallY, 10 * this.tileSize, 2 * this.tileSize);
+    ctx.fillRect(14 * this.tileSize, bWallY, (this.vpCols - 14) * this.tileSize, 2 * this.tileSize);
+    ctx.fillStyle = '#ffd778';
+    ctx.fillRect(0, bWallY, 10 * this.tileSize, 3);
+    ctx.fillRect(14 * this.tileSize, bWallY, (this.vpCols - 14) * this.tileSize, 3);
+
+    // South Exit Welcome Mat
+    const exitX = 10 * this.tileSize;
+    const exitW = 4 * this.tileSize;
+    ctx.fillStyle = '#941829';
+    ctx.beginPath();
+    ctx.roundRect(exitX + 6, bWallY + 2, exitW - 12, 2 * this.tileSize - 6, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    this.vpCanvas = c;
+  }
+
+  renderVanPhongCLBInteriorSignboards(ctx) {
+    const w = this.vpWidth;
+    const cx = w / 2;
+
+    ctx.save();
+    // Top Ban Lãnh Đạo dais badge
+    ctx.fillStyle = 'rgba(26, 5, 8, 0.94)';
+    ctx.beginPath();
+    ctx.roundRect(cx - 150, 4.4 * this.tileSize - 12, 300, 24, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffd778';
+    ctx.font = 'bold 10px "Montserrat", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🏛️ BAN LÃNH ĐẠO CLB TIẾNG NHẬT JPC FTU 🏛️', cx, 4.4 * this.tileSize);
+
+    // South Exit Door Pill
+    const exitY = (this.vpRows - 2) * this.tileSize + 24;
+    ctx.fillStyle = 'rgba(20, 5, 8, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(cx - 75, exitY - 10, 150, 20, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd778';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 9px "Montserrat", sans-serif';
+    ctx.fillText('🚪 CỬA RA SÂN TRƯỜNG (TÒA B)', cx, exitY);
+    ctx.restore();
+  }
+
   isSolid(worldX, worldY, currentStageId = 'stage1', currentZone = 'campus') {
     const col = Math.floor(worldX / this.tileSize);
     const row = Math.floor(worldY / this.tileSize);
@@ -467,6 +735,11 @@ class WorldMap {
     if (currentZone === 'nha_the_chat_interior') {
       if (col < 0 || col >= this.interiorCols || row < 0 || row >= this.interiorRows) return true;
       return this.interiorSolidGrid[row][col] === 1;
+    }
+
+    if (currentZone === 'van_phong_clb_interior') {
+      if (col < 0 || col >= this.vpCols || row < 0 || row >= this.vpRows) return true;
+      return this.vpSolidGrid[row] && this.vpSolidGrid[row][col] === 1;
     }
 
     if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) return true;
@@ -1466,8 +1739,9 @@ class WorldMap {
   }
 
   renderCampusDoorPortal(ctx, currentStageId) {
-    // Glowing threshold in front of Nhà Thể Chất door (col 42.5, row 5)
     const pulse = 0.55 + Math.sin(Date.now() / 260) * 0.25;
+
+    // 1. Glowing threshold in front of Nhà Thể Chất door (col 42.5, row 5)
     const doorX = 42.5 * this.tileSize;
     const doorY = 5 * this.tileSize + 4;
 
@@ -1486,6 +1760,27 @@ class WorldMap {
     ctx.font = 'bold 7.5px "Montserrat", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('VÀO TRONG ▼', doorX, doorY + 8);
+
+    // 2. Glowing Portal to Văn Phòng CLB Tiếng Nhật JPC at Tòa B (col 27.5, row 16.5)
+    const vpDoorX = 27.5 * this.tileSize;
+    const vpDoorY = 16.5 * this.tileSize;
+    const isFinal = currentStageId === 'stage_final';
+
+    ctx.fillStyle = isFinal
+      ? `rgba(255, 215, 120, ${0.45 + pulse * 0.35})`
+      : 'rgba(255, 215, 120, 0.25)';
+    ctx.beginPath();
+    ctx.roundRect(vpDoorX - 36, vpDoorY - 4, 72, 18, 6);
+    ctx.fill();
+    ctx.strokeStyle = isFinal ? '#ffd778' : 'rgba(255, 215, 120, 0.6)';
+    ctx.lineWidth = isFinal ? 2 : 1.2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#5c1216';
+    ctx.font = 'bold 7.5px "Montserrat", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(isFinal ? '🚪 VĂN PHÒNG CLB (KẾT NẠP) ▼' : '🚪 VĂN PHÒNG CLB JPC ▼', vpDoorX, vpDoorY + 8);
+
     ctx.restore();
   }
 
@@ -1562,6 +1857,15 @@ class WorldMap {
       return;
     }
 
+    if (currentZone === 'van_phong_clb_interior') {
+      if (!this.vpCanvas) {
+        this.buildVanPhongCLBInteriorCanvas();
+      }
+      ctx.drawImage(this.vpCanvas, 0, 0, this.vpWidth, this.vpHeight);
+      this.renderVanPhongCLBInteriorSignboards(ctx);
+      return;
+    }
+
     if (this.preRenderedCanvas) {
       // Draw 2x supersampled canvas with exact world dimensions for razor-sharp rendering
       ctx.drawImage(this.preRenderedCanvas, 0, 0, this.width, this.height);
@@ -1622,6 +1926,56 @@ class WorldMap {
       ctx.arc(px, py, 3.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#22070a';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      return;
+    }
+
+    if (currentZone === 'van_phong_clb_interior') {
+      ctx.fillStyle = '#22070a';
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.fillStyle = '#e5c292';
+      ctx.fillRect(8, 12, w - 16, h - 22);
+      ctx.strokeStyle = '#ffd778';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(8, 12, w - 16, h - 22);
+
+      const scaleX = w / this.vpWidth;
+      const scaleY = h / this.vpHeight;
+
+      // Ceremonial Red Carpet
+      ctx.fillStyle = '#941829';
+      ctx.fillRect(9.5 * this.tileSize * scaleX, 4.5 * this.tileSize * scaleY, 5 * this.tileSize * scaleX, 11 * this.tileSize * scaleY);
+
+      // Ban Lãnh Đạo Dais
+      ctx.fillStyle = '#420e15';
+      ctx.fillRect(8.5 * this.tileSize * scaleX, 2.4 * this.tileSize * scaleY, 7 * this.tileSize * scaleX, 2.8 * this.tileSize * scaleY);
+      ctx.strokeStyle = '#ffd778';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(8.5 * this.tileSize * scaleX, 2.4 * this.tileSize * scaleY, 7 * this.tileSize * scaleX, 2.8 * this.tileSize * scaleY);
+
+      // Quest Spot
+      if (questSpot) {
+        const qx = questSpot.x * scaleX;
+        const qy = questSpot.y * scaleY;
+        ctx.fillStyle = '#ffd778';
+        ctx.beginPath();
+        ctx.arc(qx, qy, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#941829';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Player dot
+      const px = playerX * scaleX;
+      const py = playerY * scaleY;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#941829';
       ctx.lineWidth = 1.2;
       ctx.stroke();
       return;

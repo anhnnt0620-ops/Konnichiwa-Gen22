@@ -724,7 +724,7 @@ class WorldMap {
     ctx.stroke();
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 9px "Montserrat", sans-serif';
-    ctx.fillText('🚪 CỬA RA SÂN TRƯỜNG (TÒA B)', cx, exitY);
+    ctx.fillText('🚪 CỬA RA SÂN TRƯỜNG (VP CÁC CLB)', cx, exitY);
     ctx.restore();
   }
 
@@ -1761,9 +1761,9 @@ class WorldMap {
     ctx.textAlign = 'center';
     ctx.fillText('VÀO TRONG ▼', doorX, doorY + 8);
 
-    // 2. Glowing Portal to Văn Phòng CLB Tiếng Nhật JPC at Tòa B (col 27.5, row 16.5)
-    const vpDoorX = 27.5 * this.tileSize;
-    const vpDoorY = 16.5 * this.tileSize;
+    // 2. Glowing Portal to Văn Phòng CLB Tiếng Nhật JPC at VP các CLB (col 50, row 17)
+    const vpDoorX = 50 * this.tileSize;
+    const vpDoorY = 17 * this.tileSize;
     const isFinal = currentStageId === 'stage_final';
 
     ctx.fillStyle = isFinal

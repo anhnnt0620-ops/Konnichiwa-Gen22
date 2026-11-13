@@ -737,9 +737,9 @@ class Game {
         sub: 'Tháng 11 năm 2026 · Kết Nạp Chính Thức Gen 22',
         desc: `
           Chúc mừng <b>${this.playerName}</b> đã xuất sắc vượt qua trọn vẹn hành trình tuyển sinh!<br>
-          Cánh cửa <b>Văn Phòng CLB Tiếng Nhật JPC tại Tòa B</b> đã trang trọng mở ra để đón chào bạn bước vào diện kiến <b>Ban Lãnh Đạo JPC</b> và đón nhận <b>Giấy Chứng Nhận Thành Viên Chính Thức</b>!
+          Cánh cửa <b>Văn Phòng các CLB FTU</b> đã trang trọng mở ra để đón chào bạn bước vào diện kiến <b>Ban Lãnh Đạo JPC</b> và đón nhận <b>Giấy Chứng Nhận Thành Viên Chính Thức</b>!
         `,
-        btn: 'TIẾN VÀO VĂN PHÒNG CLB JPC (TÒA B) ▶'
+        btn: 'TIẾN VÀO VĂN PHÒNG CÁC CLB (KẾT NẠP) ▶'
       }
     };
 
@@ -878,8 +878,8 @@ class Game {
 
   exitVanPhongCLB() {
     this.currentZone = 'campus';
-    this.player.x = 27.5 * 32;
-    this.player.y = 17.5 * 32;
+    this.player.x = 50 * 32;
+    this.player.y = 18.2 * 32;
     this.player.direction = 'down';
     this.nearbyInteractable = null;
     this.updateCamera();
@@ -887,7 +887,7 @@ class Game {
     this.saveGameState(false);
     if (window.audioManager) window.audioManager.playBlip();
     if (window.showToast) {
-      window.showToast('🌳 Đã trở ra Sân Trường FTU trước Tòa B!');
+      window.showToast('🌳 Đã trở ra Sân Trường FTU trước Văn Phòng các CLB!');
     }
   }
 
@@ -981,7 +981,7 @@ class Game {
         window.dialogueManager.startDialogue([
           {
             speaker: 'JPC FTU',
-            text: `Chào mừng tân thành viên Gen 22 ${this.playerName}! Bước vào Văn Phòng CLB Tiếng Nhật JPC tại Tòa B để diện kiến Ban Lãnh Đạo và đón nhận Giấy Chứng Nhận Thành Viên Chính Thức nhé!`
+            text: `Chào mừng tân thành viên Gen 22 ${this.playerName}! Bước vào Văn Phòng các CLB FTU để diện kiến Ban Lãnh Đạo và đón nhận Giấy Chứng Nhận Thành Viên Chính Thức nhé!`
           }
         ]);
         this.triggerConfetti();
@@ -1294,7 +1294,7 @@ class Game {
     if (this.currentZone === 'van_phong_clb_interior') {
       // Exit Door at bottom center (col 10..14, row 13.8..16)
       if (px >= 9.5 * 32 && px <= 14.5 * 32 && py >= 13.5 * 32) {
-        this.nearbyInteractable = { type: 'exit_van_phong_clb', data: { name: 'Cửa Ra Sân Trường FTU (Tòa B)' } };
+        this.nearbyInteractable = { type: 'exit_van_phong_clb', data: { name: 'Cửa Ra Sân Trường FTU (VP các CLB)' } };
         return;
       }
       // Interior Props in Văn Phòng CLB
@@ -1314,8 +1314,8 @@ class Game {
       return;
     }
 
-    // Check Văn Phòng CLB JPC Front Door Entrance at Tòa B (col 27.5, row 16.5)
-    if (Math.abs(px - 27.5 * 32) < 58 && Math.abs(py - 16.5 * 32) < 50) {
+    // Check Văn Phòng các CLB Front Door Entrance on Campus (col 50, row 17)
+    if (Math.abs(px - 50 * 32) < 58 && Math.abs(py - 17 * 32) < 50) {
       this.nearbyInteractable = { type: 'enter_van_phong_clb', data: { name: 'Văn Phòng CLB Tiếng Nhật JPC' } };
       return;
     }
@@ -1658,7 +1658,7 @@ class Game {
         id: 'stage_final',
         title: 'Kết nạp thành viên JPC: Hòa Sắc',
         timeline: 'Tháng 11/2026',
-        desc: 'Văn Phòng CLB Tiếng Nhật JPC (Tòa B) — Vinh danh và đón nhận Giấy chứng nhận chính thức từ Ban Lãnh Đạo JPC FTU!',
+        desc: 'Văn Phòng các CLB FTU — Vinh danh và đón nhận Giấy chứng nhận chính thức từ Ban Lãnh Đạo JPC FTU!',
         thumb: 'Image/Logo.png',
         fallbackIcon: '🏆'
       }

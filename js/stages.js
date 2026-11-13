@@ -181,21 +181,21 @@ const STAGE_DATA = {
     name: 'KẾT NẠP THÀNH VIÊN JPC: HÒA SẮC',
     subtitle: 'Văn Phòng CLB Tiếng Nhật JPC — Lễ Kết Nạp Hòa Sắc',
     bgm: 'stage_final',
-    playerStart: { x: 27.5, y: 18.5, direction: 'up' },
+    playerStart: { x: 50, y: 18.2, direction: 'up' },
     repositionOnTransition: true,
-    questSpot: { x: 27.5 * 32, y: 17 * 32 },
-    questText: 'Bước vào Văn Phòng CLB Tiếng Nhật JPC tại Tòa B để diện kiến Ban Lãnh Đạo và đón nhận Giấy Chứng Nhận Thành Viên Chính Thức!',
+    questSpot: { x: 50 * 32, y: 17 * 32 },
+    questText: 'Bước vào Văn Phòng các CLB (phía Đông Sân Trung Tâm) để diện kiến Ban Lãnh Đạo và đón nhận Giấy Chứng Nhận Thành Viên Chính Thức!',
     questTitle: 'Kết Nạp: Hòa Sắc',
     timeline: 'Tháng 11/2026',
-    objective: 'Bước vào Văn Phòng CLB JPC tại Tòa B, diện kiến Ban Lãnh Đạo (Chủ Tịch, Phó Chủ Tịch và các Trưởng Ban) để tham dự Lễ Kết Nạp: Hòa Sắc và đón nhận Giấy Chứng Nhận Thành Viên Chính Thức!',
-    location: 'Văn Phòng CLB Tiếng Nhật JPC (Tòa B FTU)',
-    tip: 'Văn Phòng CLB nằm tại Tòa B. Tiến lên đài danh dự diện kiến Ban Lãnh Đạo để nhận Giấy Chứng Nhận!',
+    objective: 'Bước vào Văn Phòng các CLB, diện kiến Ban Lãnh Đạo (Chủ Tịch, Phó Chủ Tịch và các Trưởng Ban) để tham dự Lễ Kết Nạp: Hòa Sắc và đón nhận Giấy Chứng Nhận Thành Viên Chính Thức!',
+    location: 'Văn Phòng CLB Tiếng Nhật JPC (Nhà VP các CLB FTU)',
+    tip: 'Văn Phòng các CLB nằm cạnh VP Đoàn và Sân khấu FCD. Tiến lên đài danh dự diện kiến Ban Lãnh Đạo để nhận Giấy Chứng Nhận!',
     props: [
-      { type: 'prop_torii', x: 27.5, y: 16, label: 'Cổng Vinh Quang Tòa B' },
-      { type: 'prop_sakura_tree', x: 23, y: 16.5, label: 'Cây Anh Đào' },
-      { type: 'prop_sakura_tree', x: 32, y: 16.5, label: 'Cây Anh Đào' },
-      { type: 'prop_lantern', x: 25.5, y: 16.5, label: 'Đèn hội Tòa B' },
-      { type: 'prop_lantern', x: 29.5, y: 16.5, label: 'Đèn hội Tòa B' }
+      { type: 'prop_torii', x: 50, y: 16.2, label: 'Cổng Vinh Quang VP CLB' },
+      { type: 'prop_sakura_tree', x: 46.5, y: 17.5, label: 'Cây Anh Đào' },
+      { type: 'prop_sakura_tree', x: 53.5, y: 17.5, label: 'Cây Anh Đào' },
+      { type: 'prop_lantern', x: 48.5, y: 17, label: 'Đèn hội VP CLB' },
+      { type: 'prop_lantern', x: 51.5, y: 17, label: 'Đèn hội VP CLB' }
     ],
     vpQuestSpot: { x: 12 * 32, y: 5.5 * 32 },
     vpProps: [
@@ -285,10 +285,10 @@ const STAGE_DATA = {
         id: 'npc_senpai_vanphong',
         name: 'Senpai Đón Tiếp JPC',
         sprite: 'npc_senpai',
-        x: 27.5,
-        y: 16.5,
+        x: 48.8,
+        y: 18,
         dialogues: [
-          { speaker: 'Senpai Đón Tiếp JPC', text: 'Chào em! Cánh cửa Văn Phòng CLB Tiếng Nhật JPC đang mở rộng đón em vào tham dự Lễ Kết Nạp Thành Viên: Hòa Sắc. Em hãy bước vào trong diện kiến Ban Lãnh Đạo nhé!' }
+          { speaker: 'Senpai Đón Tiếp JPC', text: 'Chào em! Cánh cửa Văn Phòng các CLB đang mở rộng đón em vào tham dự Lễ Kết Nạp: Hòa Sắc. Em hãy bước qua cánh cửa để diện kiến Ban Lãnh Đạo nhé!' }
         ]
       }
     ]
